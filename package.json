@@ -16,8 +16,5 @@
     "discord.js": "^13.6.0",
     "node-fetch": "^3.2.3"
   },
-  "devDependencies": {
-    "eslint": "^8.13.0"
-  },
   "type": "module"
 }

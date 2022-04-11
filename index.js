@@ -1,17 +1,28 @@
 import { Client, Intents } from "discord.js";
 import tokens from "./config.json" assert { type: "json" };
 import {
-  askHelpCategory,
+  chatAskHelpCategory,
+  chatAskIfCrashing,
   chatAskForFAQ,
+  chatAskLauncherInfo,
+  chatAskModInfo,
   chatFAQAnswer,
   chatIsFAQRelevant,
   chatNoRelevantFAQ,
   chatQuotaReached,
+  chatReferToGuides,
   chatWelcome,
   collectActions,
+  chatAskIfCrashpatch,
+  chatAskUseSolution,
+  chatAskForErrorCode,
+  chatAskForLogs,
+  chatAskWhenCrashing,
+  chatAskThanos,
 } from "./messages.js";
 import fs from "fs/promises";
 import fetch from "node-fetch";
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -32,11 +43,14 @@ client.on("channelCreate", async (channel) => {
       new Date().getTime() / (1000 * 60 * 60 * 24)
     ).toString();
     console.log(`Quota for ${todayKey} is ${quota[todayKey]}`);
-    if (quota[todayKey] > 5000 / 31) {
+    if (userQuestion.content.toLowerCase() == "skip") {
+      channel.send("Got it, let's go to the next steps.");
+    } else if (quota[todayKey] > 5000 / 31) {
       await chatQuotaReached(channel);
     } else {
       quota[todayKey] = (quota[todayKey] || 0) + 1;
       await fs.writeFile("quota.json", JSON.stringify(quota));
+      channel.send("Got it, checking...");
       const faqAnswer = await fetch(
         "https://centralus.api.cognitive.microsoft.com/language/:query-knowledgebases?" +
           new URLSearchParams({
@@ -100,23 +114,60 @@ client.on("channelCreate", async (channel) => {
         }
       }
     }
-    const helpCategoryMsg = askHelpCategory(channel);
+    const helpCategoryMsg = await chatAskHelpCategory(channel);
     const interactionHelpCategory = await collectActions(
       helpCategoryMsg,
       "SELECT_MENU"
     );
-    channel.send(`From here I would proceed with this chart:
-https://cdn.discordapp.com/attachments/780181693553704973/962766715798822983/procedure.dot.png
-However, I haven't implemented that yet lol`);
-    if (interactionHelpCategory.customId == "stopping") {
-      // TODO
-    } else if (interactionHelpCategory.customId == "setup") {
-      // TODO
-    } else if (interactionHelpCategory.customId == "modError") {
-      // TODO
-    } else if (interactionHelpCategory.customId == "modHelp") {
-      // TODO
+    const categorySelection = interactionHelpCategory.values[0];
+    if (categorySelection == "stopping") {
+      const isCrashingMsg = await chatAskIfCrashing(channel);
+      const interactionIsCrashing = await collectActions(isCrashingMsg, "BUTTON");
+      if (interactionIsCrashing.customId == "yes") {
+        const crashpatchMsg = await chatAskIfCrashpatch(channel);
+        const interactionCrashpatch = await collectActions(crashpatchMsg, "BUTTON");
+        if (interactionCrashpatch.customId == "yes") {
+          const useSolutionMsg = await chatAskUseSolution(channel);
+          const interactionUseSolution = await collectActions(useSolutionMsg, "BUTTON");
+          if (interactionUseSolution.customId == "yesDone") {
+            channel.send("Great! Consider closing this ticket now.");
+            return;
+          } else if (interactionUseSolution.customId == "yesNotDone") {
+            channel.send("It doesn't work? That's sad. Okay, let's proceed.");
+          } else if (interactionUseSolution.customId == "no") {
+            channel.send(
+              "There's no suggested solution? That's sad. Okay, let's proceed."
+            );
+          }
+        } else if (interactionIsCrashing.customId == "no") {
+          await chatAskForErrorCode(channel);
+          await delay(15000);
+        }
+        await chatAskForLogs(channel);
+        await delay(15000);
+        const whenCrashingMsg = await chatAskWhenCrashing(channel);
+        const interactionWhenCrashing = await collectActions(whenCrashingMsg, "BUTTON");
+        channel.send(
+          {
+            launch: "So you crashed when you launched Minecraft? Huh.",
+            login: "So you crashed when you joined Hypixel? Huh.",
+            other: "So you crashed when you did something else? Huh.",
+          }[interactionWhenCrashing.customId]
+        );
+        await chatAskThanos(channel);
+      }
+    } else if (categorySelection == "setup") {
+      await chatAskLauncherInfo(channel);
+    } else if (categorySelection == "modError") {
+      await chatAskModInfo(channel);
+    } else if (categorySelection == "modHelp") {
+      await chatReferToGuides(channel);
     }
+    channel.send(
+      "Anyway, I don't have anything else planned. " +
+        "Let's wait for a human to get here. " +
+        "Don't forget to state your problem clearly."
+    );
   } else {
     channel.send("Ok, bye!");
   }
