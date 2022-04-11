@@ -87,7 +87,7 @@ client.on("channelCreate", async (channel) => {
         ],
       };
       */
-      if (!faqAnswerJson.answers[0].questions) {
+      if (faqAnswerJson.answers[0].answer == "No idea ¯\\_(ツ)_/¯") {
         await chatNoRelevantFAQ(
           channel,
           "Sorry, we couldn't find any relevant FAQ for your question."
