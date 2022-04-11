@@ -6,11 +6,15 @@ export const collectActions = (message, componentFilter) => {
     time: 1000 * 60 * 10,
   });
   return new Promise((resolve) => {
+    let hasResponse = false;
     collector.on("collect", (interaction) => {
       interaction.deferUpdate();
+      hasResponse = true;
       resolve(interaction);
     });
     setTimeout(() => {
+      if (hasResponse) return;
+      if (!message.channel) return;
       message.reply("I didn't get any response in time.");
       resolve({ customId: "timeout" });
     }, 1000 * 60 * 10);
