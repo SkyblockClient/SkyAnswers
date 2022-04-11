@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton } from "discord.js";
+import { MessageActionRow, MessageButton, MessageSelectMenu } from "discord.js";
 
 export const collectActions = (message, componentFilter) => {
   const collector = message.createMessageComponentCollector({
@@ -10,7 +10,10 @@ export const collectActions = (message, componentFilter) => {
       interaction.deferUpdate();
       resolve(interaction);
     });
-    setTimeout(() => resolve(), 30000);
+    setTimeout(() => {
+      message.reply("I didn't get any response in time.");
+      resolve({ customId: "timeout" });
+    }, 1000 * 60 * 10);
   });
 };
 export const chatWelcome = async (ticket) => {
@@ -112,6 +115,29 @@ export const chatFAQAnswer = async (ticket, answer) => {
           "\n\nTry that out. Is it working? " +
           "(These buttons will deactivate in 10 minutes)",
         color: 0x8888ff,
+      },
+    ],
+    components: [choiceActions],
+  });
+};
+export const askHelpCategory = async (ticket) => {
+  const choiceActions = new MessageActionRow().addComponents(
+    new MessageSelectMenu({
+      options: [
+        { label: "Something's stopping me from playing", value: "stopping" },
+        { label: "I'm having trouble setting up Skyclient", value: "setup" },
+        { label: "Something in a mod isn't working", value: "modError" },
+        { label: "I want to know how to do something with a mod", value: "modHelp" },
+      ],
+    })
+  );
+  return await ticket.send({
+    embeds: [
+      {
+        title: "SkyAnswers > What category do you need help with?",
+        description:
+          "Click on the dropdown, and choose the category that best describes your issue.",
+        color: 0x88ff88,
       },
     ],
     components: [choiceActions],

@@ -1,6 +1,7 @@
 import { Client, Intents } from "discord.js";
 import tokens from "./config.json" assert { type: "json" };
 import {
+  askHelpCategory,
   chatAskForFAQ,
   chatFAQAnswer,
   chatIsFAQRelevant,
@@ -62,7 +63,7 @@ client.on("channelCreate", async (channel) => {
         answers: [
           {
             questions: ["How can I download SkyClient?", "Where do I get SkyClient?"],
-            answer: "View the downloads at https://ktibow.github.io/Skyclient/ or in .",
+            answer: "View the downloads at https://ktibow.github.io/Skyclient/ or in <#780940408175853609>.",
             confidenceScore: 0.5277000000000001,
             id: 194,
             source: "scfaq.txt",
@@ -99,9 +100,23 @@ client.on("channelCreate", async (channel) => {
         }
       }
     }
+    const helpCategoryMsg = askHelpCategory(channel);
+    const interactionHelpCategory = await collectActions(
+      helpCategoryMsg,
+      "SELECT_MENU"
+    );
     channel.send(`From here I would proceed with this chart:
 https://cdn.discordapp.com/attachments/780181693553704973/962766715798822983/procedure.dot.png
 However, I haven't implemented that yet lol`);
+    if (interactionHelpCategory.customId == "stopping") {
+      // TODO
+    } else if (interactionHelpCategory.customId == "setup") {
+      // TODO
+    } else if (interactionHelpCategory.customId == "modError") {
+      // TODO
+    } else if (interactionHelpCategory.customId == "modHelp") {
+      // TODO
+    }
   } else {
     channel.send("Ok, bye!");
   }
