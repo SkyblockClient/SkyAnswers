@@ -16,5 +16,8 @@
     "discord.js": "^13.6.0",
     "node-fetch": "^3.2.3"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "node": "^17.7.2"
+  }
 }
