@@ -68,14 +68,12 @@ export const chatQuotaReached = async (ticket) => {
     ],
   });
 };
-export const chatNoRelevantFAQ = async (ticket) => {
+export const chatNoRelevantFAQ = async (ticket, phrasing) => {
   return await ticket.send({
     embeds: [
       {
         title: "SkyAnswers > No relevant FAQ",
-        description:
-          "Sorry, we couldn't find any relevant FAQ for your question. " +
-          "Let's move on to the question solving process.",
+        description: phrasing + " Let's move on to the question solving process.",
         color: 0xff8888,
       },
     ],
@@ -173,7 +171,7 @@ export const chatAskIfCrashing = async (ticket) => {
         },
       },
       {
-        title: "SkyAnswers > Are you crashing?",
+        title: "SkyAnswers > Is crashing the thing that's stopping you?",
         description:
           "Is Skyclient crashing? This could mean seeing a box on your " +
           "Minecraft launcher that tells you the game has crashed, or having " +
@@ -313,7 +311,7 @@ export const chatAskLauncherInfo = async (ticket) => {
   return await ticket.send({
     embeds: [
       {
-        title: "SkyAnswers > Tell us more.",
+        title: "SkyAnswers > Tell us more so we can help you setup Skyclient.",
         description:
           "Say what OS you're on, what type of Skyclient installer you're using " +
           "(exe/jar/web), and what Minecraft launcher you're using.",
@@ -326,7 +324,7 @@ export const chatAskModInfo = async (ticket) => {
   return await ticket.send({
     embeds: [
       {
-        title: "SkyAnswers > Tell us more.",
+        title: "SkyAnswers > Tell us more about the mod that isn't working.",
         description:
           "Say the name of the mod you're having trouble with, " +
           "and what you wanted to do with it.",
@@ -339,7 +337,7 @@ export const chatReferToGuides = async (ticket) => {
   return await ticket.send({
     embeds: [
       {
-        title: "SkyAnswers > Guides",
+        title: "SkyAnswers > Guides to help you with your mods",
         description:
           "If you want to view some info about what different mods do, " +
           "[check out the guides](https://github.com/nacrt/SkyblockClient-REPO/tree/main/files/guides).",

@@ -87,8 +87,11 @@ client.on("channelCreate", async (channel) => {
         ],
       };
       */
-      if (faqAnswerJson.answers.length == 0) {
-        await chatNoRelevantFAQ(channel);
+      if (!faqAnswerJson.answers[0].questions) {
+        await chatNoRelevantFAQ(
+          channel,
+          "Sorry, we couldn't find any relevant FAQ for your question."
+        );
       } else {
         const suggestedQuestion = faqAnswerJson.answers[0].questions[0];
         const suggestedAnswer = faqAnswerJson.answers[0].answer;
@@ -107,10 +110,10 @@ client.on("channelCreate", async (channel) => {
             channel.send("Great! Consider closing this ticket now.");
             return;
           } else {
-            await chatNoRelevantFAQ(channel);
+            await chatNoRelevantFAQ(channel, "Sorry that didn't work.");
           }
         } else {
-          await chatNoRelevantFAQ(channel);
+          await chatNoRelevantFAQ(channel, "Sorry that FAQ wasn't relevant.");
         }
       }
     }
