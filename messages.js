@@ -30,10 +30,9 @@ export const chatWelcome = async (ticket) => {
       {
         title: "SkyAnswers Support",
         description:
-          ":wave: hey! i'm a support bot." +
-          "i'll try to find a solution, but if i can't, what you share will help us.\n" +
-          ":clock: 10 minutes to respond to each question.\n" +
-          "do you want to continue with me?",
+          ":wave: Hey! I'm a support bot. " +
+          "I'll try to find a solution, but if I can't, what you share will help us.\n" +
+          "Do you want to use me?",
         color: 0x88ff88,
       },
     ],
@@ -46,7 +45,7 @@ export const chatAskForFAQ = async (ticket) => {
       {
         title: "SkyAnswers > What's the problem?",
         description:
-          "say your problem in a short single message, " +
+          "Say your problem in a short single message, " +
           "and SkyAnswers will search the FAQ. or say " +
           "`skip` to skip this step.",
         color: 0x88ff88,
@@ -60,9 +59,9 @@ export const chatQuotaReached = async (ticket) => {
       {
         title: "SkyAnswers > Quota reached",
         description:
-          "the FAQ part of SkyAnswers reached the max " +
-          "of 161 uses per day. don't worry, you did nothing wrong. " +
-          "let's move on to the question solver.",
+          "The FAQ part of SkyAnswers reached the max " +
+          "of 161 uses per day. Don't worry, you did nothing wrong. " +
+          "Let's move on to the solving process.",
         color: 0xff8888,
       },
     ],
@@ -73,7 +72,7 @@ export const chatNoRelevantFAQ = async (ticket, phrasing) => {
     embeds: [
       {
         title: "SkyAnswers > No relevant FAQ",
-        description: phrasing + " let's move on to the question solver.",
+        description: phrasing + " Let's move on to the solving process.",
         color: 0xff8888,
       },
     ],
@@ -89,9 +88,9 @@ export const chatIsFAQRelevant = async (ticket, question) => {
       {
         title: "SkyAnswers > Is this FAQ relevant?",
         description:
-          "we found the following FAQ for your question:\n**" +
+          "We found the following FAQ for your question:\n**" +
           question +
-          "**\nis that your question?",
+          "**\nIs that your question?",
         color: 0x88ff88,
       },
     ],
@@ -115,7 +114,7 @@ export const chatFAQAnswer = async (ticket, answer) => {
         title: "SkyAnswers > FAQ answer",
         description:
           answer +
-          "\n\ntry that, does it work? " +
+          "\n\nTry that, does it work? " +
           "(These buttons will deactivate in 10 minutes)",
         color: 0x8888ff,
       },
@@ -143,7 +142,7 @@ export const chatAskHelpCategory = async (ticket) => {
       {
         title: "SkyAnswers > What category do you need help with?",
         description:
-          "click on the dropdown, and choose the category that matches the most.",
+          "Click on the dropdown, and choose the category that matches the most.",
         color: 0x88ff88,
       },
     ],
@@ -171,9 +170,9 @@ export const chatAskIfCrashing = async (ticket) => {
         },
       },
       {
-        title: "SkyAnswers > Are you being stopped by crashing?",
+        title: "SkyAnswers > Are you crashing?",
         description:
-          "is Skyclient crashing? this could mean that the Minecraft launcher " +
+          "Is Skyclient crashing? This could mean that the Minecraft launcher " +
           "says the game crashed, or Minecraft says " +
           '"Minecraft has crashed!".',
         color: 0x88ff88,
@@ -191,7 +190,7 @@ export const chatAskIfCrashpatch = async (ticket) => {
     embeds: [
       {
         title: "SkyAnswers > Do you have CrashPatch?",
-        description: "when you crashed, did you see a screen kinda like this?",
+        description: "When you crashed, did you see a screen kinda like this?",
         color: 0x88ff88,
         image: {
           url: "https://cdn.discordapp.com/attachments/796546551878516766/963071809803145276/unknown.png",
@@ -221,8 +220,7 @@ export const chatAskUseSolution = async (ticket) => {
       {
         title: "SkyAnswers > Does it have a solution?",
         description:
-          "do you see some steps you can take to fix the problem? " +
-          "if so, follow them.",
+          "Do you see some steps to fix the problem? " + "If so, follow them.",
         color: 0x88ff88,
       },
     ],
@@ -234,9 +232,8 @@ export const chatAskForErrorCode = async (ticket) => {
     embeds: [
       {
         title: "SkyAnswers > Do you have an error code?",
-        description:
-          "do you see an error code? if so, tell us here. " +
-          "in 15 seconds, we'll go to the next step.",
+        description: "Do you see an error code? If so, tell us here. " /* +
+          "In 15 seconds, we'll go to the next step."*/,
         color: 0x88ff88,
       },
     ],
@@ -246,14 +243,14 @@ export const chatAskForLogs = async (ticket) => {
   return await ticket.send({
     embeds: [
       {
-        title: "SkyAnswers > Send your crash log.",
-        description: `do you have a crash log? if so, send it here.
-here's how to do that:
+        title: "SkyAnswers > Send your crash report.",
+        description: `Do you have a crash report? If so, send it here.
+Here's how to do that:
 1. Find your Minecraft folder. [Here's a video guide (don't enter your mods folder).](https://www.youtube.com/watch?v=E6lwqIo0-Ms)
 2. Enter your logs folder.
 3. Upload the \`latest.log\` file. (You can either copy and paste it into Discord, or drag it into the chat.)
-in 15 seconds, we'll go to the next step.
 `,
+        // In 15 seconds, we'll go to the next step.
         color: 0x88ff88,
       },
     ],
@@ -279,8 +276,8 @@ export const chatAskWhenCrashing = async (ticket) => {
       {
         title: "SkyAnswers > When did you crash?",
         description:
-          "click the button that says when you crashed. " +
-          "if you want, you can elaborate in chat.",
+          "Click the button that says when you crashed. " +
+          "If you want, you can elaborate in chat.",
         color: 0x88ff88,
       },
     ],
@@ -292,16 +289,16 @@ export const chatAskThanos = async (ticket) => {
     embeds: [
       {
         title: "SkyAnswers > Narrow down the mod.",
-        description: `if you're not sure what mod is crashing, we can find out with the Thanos method.
-don't worry, we're just seeing if you crash with half of your mods.
-so here's what you would do:
+        description: `If you don't know what mod is crashing, we can find out with the Thanos method.
+Don't worry, we're just seeing if you crash with half of your mods.
+So here's what you would do:
 1. Select half of your mods.
 2. Place them somewhere else.
 3. Launch Minecraft and see if you still crash.
   - If you still crash, remove another half, and repeat.
   - If you don't crash, add back half of the mods you removed, and repeat.
 
-then, tell us what mod makes the difference between crashing and not crashing.`,
+Then, tell us what mod makes the difference between crashing and not crashing.`,
         color: 0x88ff88,
       },
     ],
@@ -314,7 +311,7 @@ export const chatAskLauncherInfo = async (ticket) => {
       {
         title: "SkyAnswers > Tell us more so we can help you setup Skyclient.",
         description:
-          "say what OS you're on, what type of Skyclient installer you're using " +
+          "Say what OS you're on, what type of Skyclient installer you're using " +
           "(exe/jar/web), and what Minecraft launcher you're using.",
         color: 0x88ff88,
       },
@@ -327,7 +324,7 @@ export const chatAskModInfo = async (ticket) => {
       {
         title: "SkyAnswers > Tell us more about the mod that isn't working.",
         description:
-          "say the name of the mod you're having trouble with, " +
+          "Say the name of the mod you're having trouble with, " +
           "and what you wanted to do with it.",
         color: 0x88ff88,
       },
@@ -340,7 +337,7 @@ export const chatReferToGuides = async (ticket) => {
       {
         title: "SkyAnswers > Guides to help you with your mods",
         description:
-          "if you want to view some info about what different mods do, " +
+          "If you want to view some info about what different mods do, " +
           "[check out the guides](https://github.com/nacrt/SkyblockClient-REPO/tree/main/files/guides).",
         color: 0x88ff88,
       },

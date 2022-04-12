@@ -44,7 +44,7 @@ client.on("channelCreate", async (channel) => {
     ).toString();
     console.log(`Quota for ${todayKey} is ${quota[todayKey]}`);
     if (userQuestion.content.toLowerCase() == "skip") {
-      channel.send("got it, let's move on to the question solver.");
+      channel.send("Got it, let's move on to the solving process.");
     } else if (quota[todayKey] > 5000 / 31) {
       await chatQuotaReached(channel);
     } else {
@@ -104,13 +104,13 @@ client.on("channelCreate", async (channel) => {
           const suggestedAnswerMsg = await chatFAQAnswer(channel, suggestedAnswer);
           const interactionWorks = await collectActions(suggestedAnswerMsg, "BUTTON");
           if (interactionWorks.customId == "yes") {
-            channel.send("great! consider closing this ticket now.");
+            channel.send("Great! Consider closing this ticket now.");
             return;
           } else {
-            await chatNoRelevantFAQ(channel, "sorry that didn't work.");
+            await chatNoRelevantFAQ(channel, "Sorry that didn't work.");
           }
         } else {
-          await chatNoRelevantFAQ(channel, "sorry that FAQ wasn't relevant.");
+          await chatNoRelevantFAQ(channel, "Sorry that FAQ wasn't relevant.");
         }
       }
     }
