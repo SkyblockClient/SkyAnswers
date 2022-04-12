@@ -22,17 +22,18 @@ export const collectActions = (message, componentFilter) => {
 };
 export const chatWelcome = async (ticket) => {
   const choiceActions = new MessageActionRow().addComponents(
-    new MessageButton().setLabel("Yes").setCustomId("yes").setStyle("SECONDARY"),
-    new MessageButton().setLabel("No").setCustomId("no").setStyle("SECONDARY")
+    new MessageButton()
+      .setLabel("Get Automated Help")
+      .setCustomId("yes")
+      .setStyle("SECONDARY")
   );
   return await ticket.send({
     embeds: [
       {
         title: "SkyAnswers Support",
         description:
-          ":wave: Hey! I'm a support bot. " +
-          "I'll try to find a solution, but if I can't, what you share will help us.\n" +
-          "Do you want to use me?",
+          ":wave: Hey! I'm a support bot.\n" +
+          "I'll try to find a solution, but if I can't, what you share will help us.",
         color: 0x88ff88,
       },
     ],
