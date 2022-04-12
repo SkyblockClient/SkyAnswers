@@ -159,15 +159,9 @@ export const chatAskIfCrashing = async (ticket) => {
   return await ticket.send({
     embeds: [
       {
-        title: "Example #1 (don't worry about the text)",
+        title: "Examples of crashing",
         image: {
-          url: "https://cdn.discordapp.com/attachments/796546551878516766/963071809803145276/unknown.png",
-        },
-      },
-      {
-        title: "Example #2 (don't worry about the text)",
-        image: {
-          url: "https://cdn.discordapp.com/attachments/796546551878516766/963073992531542056/unknown.png",
+          url: "https://cdn.discordapp.com/attachments/887818760126345246/963548910482239618/crashexample.jpg",
         },
       },
       {
