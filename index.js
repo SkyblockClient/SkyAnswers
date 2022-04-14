@@ -28,6 +28,10 @@ const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
 client.once("ready", () => console.log("Ready!"));
+client.on("error", (e) => console.error("Error:", e));
+client.on("warning", (e) => console.warn("Warning:", e));
+client.on("debug", (e) => console.info("Debug: ", e));
+client.on("unhandledRejection", (error) => console.error("Promise rejection:", error));
 
 client.on("channelCreate", async (channel) => {
   if (!channel.name.startsWith("ticket-")) return;
