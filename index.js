@@ -36,11 +36,13 @@ client.on("channelCreate", async (channel) => {
   const welcomeMsg = await chatWelcome(channel);
   const interactionWelcome = await collectActions(welcomeMsg, "BUTTON");
   if (interactionWelcome.customId != "yes") return;
+
   await chatAskForFAQ(channel);
   const userQuestion = (await channel.awaitMessages({ max: 1 })).first().content;
   const currentQuota = await fs.readFile("quota.json", "utf8");
   const quota = JSON.parse(currentQuota);
   const todayKey = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24)).toString();
+
   console.log(`Quota for ${todayKey} is ${quota[todayKey]}`);
   if (userQuestion.toLowerCase() == "skip") {
     channel.send("Got it, let's move on to the solving process.");
@@ -87,7 +89,9 @@ client.on("channelCreate", async (channel) => {
       };
       */
     if (faqAnswerJson.answers[0].answer == "No idea ¯\\_(ツ)_/¯") {
-      await chatNoRelevantFAQ(channel, "Sorry, we couldn't find any relevant FAQ.");
+      if (!userQuestion.toLowerCase().includes("crash")) {
+        await chatNoRelevantFAQ(channel, "Sorry, we couldn't find any relevant FAQ.");
+      }
     } else {
       const suggestedQuestion = faqAnswerJson.answers[0].questions[0];
       const suggestedAnswer = faqAnswerJson.answers[0].answer;
