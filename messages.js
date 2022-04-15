@@ -16,7 +16,7 @@ export const collectActions = (message, componentFilter) => {
       if (hasResponse) return;
       if (!message.channel) return;
       message.reply("I didn't get any response in time.");
-      resolve({ customId: "timeout" });
+      resolve({ customId: "timeout", values: [null] });
     }, 1000 * 60 * 10);
   });
 };
