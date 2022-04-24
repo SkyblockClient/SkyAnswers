@@ -48,7 +48,9 @@ export const chatAskForFAQ = async (ticket) => {
         description:
           "Say your problem in a short single message, " +
           "and SkyAnswers will search the FAQ. or say " +
-          "`skip` to skip this step.",
+          "`skip` to skip this step.\n" +
+          '**Please be specific. Don\'t say "Hello". Don\'t say "Skyclient is crashing". ' +
+          'Say something more like "I get a "OneCore has failed to download message".**',
         color: 0x88ff88,
       },
     ],
