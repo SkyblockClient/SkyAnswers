@@ -24,7 +24,13 @@ import {
 } from "./messages.js";
 
 const client = new Client({
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.DIRECT_MESSAGES,
+    Intents.FLAGS.GUILD_PRESENCES,
+  ],
 });
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 client.once("ready", () => console.log("Ready!"));
@@ -32,7 +38,13 @@ client.on("error", (e) => console.error("Error:", e));
 client.on("warning", (e) => console.warn("Warning:", e));
 client.on("debug", (e) => console.info("Debug: ", e));
 client.on("unhandledRejection", (error) => console.error("Promise rejection:", error));
-
+client.on("guildMemberUpdate", (oldUser, newUser) => {
+  console.log("got an update", newUser);
+  if (newUser.id != "794377681331945524") return;
+  if (newUser.nickname != "n a c r t") {
+    newUser.send("Your nickname is not set to `n a c r t`.");
+  }
+});
 client.on("channelCreate", async (channel) => {
   if (!channel.name.startsWith("ticket-")) return;
   console.log(`Intercepted ticket: ${channel.name}`);
