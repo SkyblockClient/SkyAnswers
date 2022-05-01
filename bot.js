@@ -38,11 +38,21 @@ client.on("error", (e) => console.error("Error:", e));
 client.on("warning", (e) => console.warn("Warning:", e));
 client.on("debug", (e) => console.info("Debug: ", e));
 client.on("unhandledRejection", (error) => console.error("Promise rejection:", error));
-client.on("guildMemberUpdate", (oldUser, newUser) => {
+client.on("guildMemberUpdate", async (oldUser, newUser) => {
   console.log("got an update", newUser);
   if (newUser.id != "794377681331945524") return;
   if (newUser.nickname != "n a c r t") {
-    newUser.send("Your nickname is not set to `n a c r t`.");
+    await newUser.send("Your nickname is not set to `n a c r t`.");
+    const fetchedLogs = await client.guilds.cache
+      .get("780181693100982273")
+      .fetchAuditLogs({
+        limit: 1,
+        type: "MEMBER_UPDATE",
+      });
+    const lastLog = fetchedLogs.entries.first();
+    if (lastLog.target.id == newUser.id) {
+      lastLog.executor.send("bruh why you rename kti");
+    }
   }
 });
 client.on("channelCreate", async (channel) => {
