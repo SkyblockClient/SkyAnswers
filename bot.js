@@ -78,27 +78,37 @@ client.on("channelCreate", async (channel) => {
     quota[todayKey] = (quota[todayKey] || 0) + 1;
     await fs.writeFile("quota.json", JSON.stringify(quota));
     channel.send("Got it, checking...");
-    const faqAnswer = await fetch(
-      "https://centralus.api.cognitive.microsoft.com/language/:query-knowledgebases?" +
-        new URLSearchParams({
-          projectName: "SkyclientAnswers",
-          "api-version": "2021-10-01",
-          deploymentName: "production",
-        }),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Ocp-Apim-Subscription-Key": tokens.qaToken,
-        },
-        body: JSON.stringify({
-          top: 1,
-          question: userQuestion,
-          confidenceScoreThreshold: 0.3,
-        }),
+    let faqAnswer, faqAnswerJson;
+    try {
+      faqAnswer = await fetch(
+        "https://skyanswerstext.cognitiveservices.azure.com/language/:query-knowledgebases?" +
+          new URLSearchParams({
+            projectName: "SkyAnswers",
+            "api-version": "2021-10-01",
+            deploymentName: "production",
+          }),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Ocp-Apim-Subscription-Key": tokens.qaToken,
+          },
+          body: JSON.stringify({
+            top: 1,
+            question: userQuestion,
+            confidenceScoreThreshold: 0.3,
+          }),
+        }
+      );
+      faqAnswerJson = await faqAnswer.json();
+      if (faqAnswerJson.answers.length == 0) {
+        throw new Error(faqAnswerJson);
       }
-    );
-    const faqAnswerJson = await faqAnswer.json();
+    } catch (e) {
+      channel.send("Something went wrong inside of SkyAnswers. Oops!");
+      console.log(faqAnswer);
+      console.error(e);
+    }
     /*
         const faqAnswerJson = {
           answers: [
