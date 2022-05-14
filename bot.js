@@ -37,7 +37,9 @@ client.once("ready", () => console.log("Ready!"));
 client.on("error", (e) => console.error("Error:", e));
 client.on("warning", (e) => console.warn("Warning:", e));
 client.on("debug", (e) => console.info("Debug: ", e));
-client.on("unhandledRejection", (error) => console.error("Promise rejection:", error));
+client.on("unhandledRejection", (error) =>
+  console.error("Promise rejection:", error)
+);
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   console.log("got an update", newUser);
   if (newUser.id != "794377681331945524") return;
@@ -55,6 +57,20 @@ client.on("guildMemberUpdate", async (oldUser, newUser) => {
     }
   }
 });
+client.on("messageCreate", async (message) => {
+  const content = message.content.toLowerCase();
+  if (
+    content.includes("skyanswers") &&
+    content.includes("please") &&
+    content.includes("ping") &&
+    content.includes("rayless")
+  ) {
+    client.guilds.cache
+      .get("780181693100982273")
+      .channels.cache.get("887818760126345246")
+      .send("<@635899044740333579> " + (content.split("|")[1] || " "));
+  }
+});
 client.on("channelCreate", async (channel) => {
   if (!channel.name.startsWith("ticket-")) return;
   console.log(`Intercepted ticket: ${channel.name}`);
@@ -64,10 +80,13 @@ client.on("channelCreate", async (channel) => {
   if (interactionWelcome.customId != "yes") return;
 
   await chatAskForFAQ(channel);
-  const userQuestion = (await channel.awaitMessages({ max: 1 })).first().content;
+  const userQuestion = (await channel.awaitMessages({ max: 1 })).first()
+    .content;
   const currentQuota = await fs.readFile("quota.json", "utf8");
   const quota = JSON.parse(currentQuota);
-  const todayKey = Math.floor(new Date().getTime() / (1000 * 60 * 60 * 24)).toString();
+  const todayKey = Math.floor(
+    new Date().getTime() / (1000 * 60 * 60 * 24)
+  ).toString();
 
   console.log(`Quota for ${todayKey} is ${quota[todayKey]}`);
   if (userQuestion.toLowerCase() == "skip") {
@@ -126,19 +145,31 @@ client.on("channelCreate", async (channel) => {
         */
     if (faqAnswerJson.answers[0].answer == "No idea ¯\\_(ツ)_/¯") {
       if (!userQuestion.toLowerCase().includes("crash")) {
-        await chatNoRelevantFAQ(channel, "Sorry, we couldn't find any relevant FAQ.");
+        await chatNoRelevantFAQ(
+          channel,
+          "Sorry, we couldn't find any relevant FAQ."
+        );
       }
     } else {
       const suggestedQuestion = faqAnswerJson.answers[0].questions[0];
       const suggestedAnswer = faqAnswerJson.answers[0].answer;
-      const suggestedQuestionMsg = await chatIsFAQRelevant(channel, suggestedQuestion);
+      const suggestedQuestionMsg = await chatIsFAQRelevant(
+        channel,
+        suggestedQuestion
+      );
       const interactionIsRelevant = await collectActions(
         suggestedQuestionMsg,
         "BUTTON"
       );
       if (interactionIsRelevant.customId == "yes") {
-        const suggestedAnswerMsg = await chatFAQAnswer(channel, suggestedAnswer);
-        const interactionWorks = await collectActions(suggestedAnswerMsg, "BUTTON");
+        const suggestedAnswerMsg = await chatFAQAnswer(
+          channel,
+          suggestedAnswer
+        );
+        const interactionWorks = await collectActions(
+          suggestedAnswerMsg,
+          "BUTTON"
+        );
         if (interactionWorks.customId == "yes") {
           channel.send("Great! Consider closing this ticket now.");
           return;
@@ -155,14 +186,19 @@ client.on("channelCreate", async (channel) => {
     const interactionCrashpatch = await collectActions(crashpatchMsg, "BUTTON");
     if (interactionCrashpatch.customId == "yes") {
       const useSolutionMsg = await chatAskUseSolution(channel);
-      const interactionUseSolution = await collectActions(useSolutionMsg, "BUTTON");
+      const interactionUseSolution = await collectActions(
+        useSolutionMsg,
+        "BUTTON"
+      );
       if (interactionUseSolution.customId == "yesDone") {
         channel.send("Great! Consider closing this ticket now.");
         return;
       } else if (interactionUseSolution.customId == "yesNotDone") {
         channel.send("It doesn't work? That's sad. Okay, let's proceed.");
       } else if (interactionUseSolution.customId == "no") {
-        channel.send("There's no suggested solution? That's sad. Okay, let's proceed.");
+        channel.send(
+          "There's no suggested solution? That's sad. Okay, let's proceed."
+        );
       }
     } else if (interactionCrashpatch.customId == "no") {
       await chatAskForErrorCode(channel);
@@ -171,7 +207,10 @@ client.on("channelCreate", async (channel) => {
     await chatAskForLogs(channel);
     await delay(15000);
     const whenCrashingMsg = await chatAskWhenCrashing(channel);
-    const interactionWhenCrashing = await collectActions(whenCrashingMsg, "BUTTON");
+    const interactionWhenCrashing = await collectActions(
+      whenCrashingMsg,
+      "BUTTON"
+    );
     channel.send(
       {
         launch: "So you crashed when you launched Minecraft? Huh.",
@@ -185,7 +224,10 @@ client.on("channelCreate", async (channel) => {
     case true:
       await channel.send("Given that you mentioned crashing:");
       const isCrashingMsg = await chatAskIfCrashing(channel);
-      const interactionIsCrashing = await collectActions(isCrashingMsg, "BUTTON");
+      const interactionIsCrashing = await collectActions(
+        isCrashingMsg,
+        "BUTTON"
+      );
       if (interactionIsCrashing.customId == "yes") {
         await crashWorkflow();
         break;
@@ -199,7 +241,10 @@ client.on("channelCreate", async (channel) => {
       const categorySelection = interactionHelpCategory.values[0];
       if (categorySelection == "stopping") {
         const isCrashingMsg = await chatAskIfCrashing(channel);
-        const interactionIsCrashing = await collectActions(isCrashingMsg, "BUTTON");
+        const interactionIsCrashing = await collectActions(
+          isCrashingMsg,
+          "BUTTON"
+        );
         if (interactionIsCrashing.customId == "yes") {
           await crashWorkflow();
         }
