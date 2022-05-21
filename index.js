@@ -1,5 +1,5 @@
-import tokens from "./config.json" assert { type: "json" };
 import { ShardingManager } from "discord.js";
-const manager = new ShardingManager("./bot.js", { token: tokens.botToken });
+import "dotenv/config";
+const manager = new ShardingManager("./bot.js", { token: process.env.BOT_TOKEN });
 manager.on("shardCreate", (shard) => console.log(`Launched shard ${shard.id}`));
 manager.spawn();
