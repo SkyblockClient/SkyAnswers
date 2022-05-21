@@ -20,12 +20,76 @@ export const collectActions = (message, componentFilter) => {
     }, 1000 * 60 * 10);
   });
 };
-export const chatWelcome = async (ticket) => {
+/*const sendSupportMsg = async (channel) => {
+  const choiceActions = new MessageActionRow().addComponents(
+    new MessageButton().setLabel("Open Ticket").setCustomId("yes").setStyle("SECONDARY")
+  );
+  return await channel.send({
+    embeds: [
+      {
+        title: "Support",
+        description: "To open a support ticket, click the button below.",
+        color: 0x88ff88,
+      },
+    ],
+    components: [choiceActions],
+  });
+};
+export const chatWelcome = async (ticket, user) => {
   const choiceActions = new MessageActionRow().addComponents(
     new MessageButton()
       .setLabel("Get Automated Help")
-      .setCustomId("yes")
-      .setStyle("SECONDARY")
+      .setCustomId("manageHelp")
+      .setStyle("SUCCESS"),
+    new MessageButton().setLabel("Close Ticket").setCustomId("manageFinished").setStyle("DANGER")
+  );
+  return await ticket.send({
+    content: `${user} Here's your ticket.`,
+    embeds: [
+      {
+        title: "Ticket Created",
+        description: `:wave: You can use automatic help by clicking the green button below (recommended).
+Please immediately state your problem.`,
+        color: 0x88ff88,
+      },
+    ],
+    components: [choiceActions],
+  });
+};
+export const chatConfirmClose = async (context) => {
+  const choiceActions = new MessageActionRow().addComponents(
+    new MessageButton().setLabel("Close Ticket").setCustomId("manageCloseFR").setStyle("DANGER")
+  );
+  return await context.reply({
+    embeds: [
+      {
+        title: "Are you sure?",
+        description:
+          "Only close your ticket if your issue is resolved. Your ticket will still be viewable and re-openable by support staff.",
+        color: 0xff8888,
+      },
+    ],
+    components: [choiceActions],
+  });
+};
+export const chatCloseActions = async (ticket) => {
+  const choiceActions = new MessageActionRow().addComponents(
+    new MessageButton().setLabel("Delete").setCustomId("manageDelete").setStyle("DANGER"),
+    new MessageButton().setLabel("Open").setCustomId("manageOpen").setStyle("SUCCESS")
+  );
+  return await ticket.send({
+    embeds: [
+      {
+        title: "Ticket Controls",
+        color: 0xffff88,
+      },
+    ],
+    components: [choiceActions],
+  });
+};*/
+export const chatWelcome = async (ticket) => {
+  const choiceActions = new MessageActionRow().addComponents(
+    new MessageButton().setLabel("Get Automated Help").setCustomId("yes").setStyle("SECONDARY")
   );
   return await ticket.send({
     embeds: [
@@ -47,7 +111,7 @@ export const chatAskForFAQ = async (ticket) => {
         title: "SkyAnswers > What's the problem?",
         description:
           "Say your problem in a short single message, " +
-          "and SkyAnswers will search the FAQ. or say " +
+          "and SkyAnswers will search the FAQ. Or say " +
           "`skip` to skip this step.\n" +
           '*Please be specific. Don\'t say "Hello". Don\'t say "Skyclient is crashing". ' +
           "Say something more like \"I get a 'OneCore has failed to download message'\".*",
@@ -102,10 +166,7 @@ export const chatIsFAQRelevant = async (ticket, question) => {
 };
 export const chatFAQAnswer = async (ticket, answer) => {
   const choiceActions = new MessageActionRow().addComponents(
-    new MessageButton()
-      .setLabel("My issue is solved")
-      .setCustomId("yes")
-      .setStyle("SECONDARY"),
+    new MessageButton().setLabel("My issue is solved").setCustomId("yes").setStyle("SECONDARY"),
     new MessageButton()
       .setLabel("Proceed with normal solving")
       .setCustomId("no")
@@ -116,9 +177,7 @@ export const chatFAQAnswer = async (ticket, answer) => {
       {
         title: "SkyAnswers > FAQ answer",
         description:
-          answer +
-          "\n\nTry that, does it work? " +
-          "(These buttons will deactivate in 10 minutes)",
+          answer + "\n\nTry that, does it work? " + "(These buttons will deactivate in 10 minutes)",
         color: 0x8888ff,
       },
     ],
@@ -144,8 +203,7 @@ export const chatAskHelpCategory = async (ticket) => {
     embeds: [
       {
         title: "SkyAnswers > What category do you need help with?",
-        description:
-          "Click on the dropdown, and choose the category that matches the most.",
+        description: "Click on the dropdown, and choose the category that matches the most.",
         color: 0x88ff88,
       },
     ],
@@ -216,8 +274,7 @@ export const chatAskUseSolution = async (ticket) => {
     embeds: [
       {
         title: "SkyAnswers > Does it have a solution?",
-        description:
-          "Do you see some steps to fix the problem? " + "If so, follow them.",
+        description: "Do you see some steps to fix the problem? " + "If so, follow them.",
         color: 0x88ff88,
       },
     ],
@@ -259,14 +316,8 @@ export const chatAskWhenCrashing = async (ticket) => {
       .setLabel("When I launch Minecraft")
       .setCustomId("launch")
       .setStyle("SECONDARY"),
-    new MessageButton()
-      .setLabel("When I join Hypixel")
-      .setCustomId("login")
-      .setStyle("SECONDARY"),
-    new MessageButton()
-      .setLabel("Another time")
-      .setCustomId("other")
-      .setStyle("SECONDARY")
+    new MessageButton().setLabel("When I join Hypixel").setCustomId("login").setStyle("SECONDARY"),
+    new MessageButton().setLabel("Another time").setCustomId("other").setStyle("SECONDARY")
   );
   return await ticket.send({
     embeds: [

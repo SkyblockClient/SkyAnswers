@@ -13,6 +13,8 @@ import {
   chatAskThanos,
   chatAskUseSolution,
   chatAskWhenCrashing,
+  //chatCloseActions,
+  //chatConfirmClose,
   chatFAQAnswer,
   chatIsFAQRelevant,
   chatNoRelevantFAQ,
@@ -22,6 +24,7 @@ import {
   collectActions,
 } from "./messages.js";
 
+const TICKET_MODE = false;
 const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
@@ -32,11 +35,13 @@ const client = new Client({
   ],
 });
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 client.once("ready", () => console.log("Ready!"));
 client.on("error", (e) => console.error("Error:", e));
 client.on("warning", (e) => console.warn("Warning:", e));
 client.on("debug", (e) => console.info("Debug: ", e));
 client.on("unhandledRejection", (error) => console.error("Promise rejection:", error));
+
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   console.log("got an update", newUser);
   if (newUser.id != "794377681331945524") return;
@@ -60,20 +65,71 @@ client.on("messageCreate", async (message) => {
     content.includes("ping") &&
     content.includes("rayless")
   ) {
-    client.guilds.cache
-      .get("780181693100982273")
-      .channels.cache.get("887818760126345246")
-      .send("<@635899044740333579> " + (content.split("|")[1] || " "));
+    message.channel.send("<@635899044740333579> " + (content.split("|")[1] || " "));
+  }
+  if (message.author.id == "573176011416666132" && content.includes("ratio")) {
+    message.reply("no u");
   }
 });
-client.on("channelCreate", async (channel) => {
-  if (!channel.name.startsWith("ticket-")) return;
-  console.log(`Intercepted ticket: ${channel.name}`);
-  await delay(500);
-  const welcomeMsg = await chatWelcome(channel);
-  const interactionWelcome = await collectActions(welcomeMsg, "BUTTON");
-  if (interactionWelcome.customId != "yes") return;
 
+if (TICKET_MODE) {
+  client.on("interactionCreate", async (interaction) => {
+    if (!interaction.isButton()) return;
+    const serverSupportChannel =
+      interaction.guildId == "962319226377474078" ? "977595800135794740" : "931624995522773032";
+    const serverTicketCategory =
+      interaction.guildId == "962319226377474078" ? "977624175944552518" : "931628263971893318";
+    if (interaction.channelId == serverSupportChannel) {
+      const ticket = await interaction.guild.channels.create(`ticket-${interaction.user.tag}`, {
+        parent: serverTicketCategory,
+        permissionOverwrites: [
+          {
+            id: interaction.guild.id,
+            deny: ["VIEW_CHANNEL"],
+          },
+          {
+            id:
+              interaction.guildId == "962319226377474078"
+                ? "962323782498938920"
+                : "931626562539909130",
+            allow: ["VIEW_CHANNEL"],
+          },
+          {
+            id: interaction.user.id,
+            allow: ["VIEW_CHANNEL"],
+          },
+        ],
+      });
+      (await chatWelcome(ticket, interaction.user)).pinned = true;
+      interaction.deferUpdate();
+    } else if (interaction.customId == "manageHelp") {
+      interaction.deferUpdate();
+      await supportWorkflow(interaction.channel);
+    } else if (interaction.customId == "manageFinished") {
+      const confMessage = await chatConfirmClose(interaction);
+      const interactionConf = await collectActions(confMessage, "BUTTON");
+      if (interactionConf.customId == "manageCloseFR") {
+        const origName = interaction.channel.name;
+        await interaction.channel.setName(origName.replace(/^ticket-/, "closed-"));
+        //await interaction.channel.permissionOverwrites.delete(
+        await chatCloseActions(interaction.channel);
+      }
+    }
+  });
+} else {
+  client.on("channelCreate", async (channel) => {
+    if (!channel.name.startsWith("ticket-")) return;
+    console.log(`Intercepted ticket: ${channel.name}`);
+    await delay(500);
+    const welcomeMsg = await chatWelcome(channel);
+    const interactionWelcome = await collectActions(welcomeMsg, "BUTTON");
+    if (interactionWelcome.customId == "yes") {
+      await supportWorkflow(channel);
+    }
+  });
+}
+
+const supportWorkflow = async (channel) => {
   await chatAskForFAQ(channel);
   const userQuestion = (await channel.awaitMessages({ max: 1 })).first().content;
   let quota;
@@ -226,6 +282,6 @@ client.on("channelCreate", async (channel) => {
       "Let's wait for a human to get here. " +
       "Don't forget to state your problem clearly."
   );
-});
+};
 console.log("loaded");
 client.login();
