@@ -10,8 +10,7 @@ import { Message, MessageActionRow, MessageButton, MessageSelectMenu } from "dis
 export const collectActions = (message, componentFilter, silentNoResponse) => {
   const collector = message.createMessageComponentCollector({
     componentType: componentFilter,
-    //time: 1000 * 60 * 10,
-    time: 1000,
+    time: 1000 * 60 * 10,
   });
   return new Promise((resolve) => {
     let hasResponse = false;
@@ -26,7 +25,7 @@ export const collectActions = (message, componentFilter, silentNoResponse) => {
       if (!silentNoResponse) message.reply("I didn't get any response in time.");
       message.edit({ components: [] });
       resolve({ customId: "timeout", values: [null] });
-    }, 1000 /* * 60 * 10*/);
+    }, 1000 * 60 * 10);
   });
 };
 /*const sendSupportMsg = async (channel) => {
