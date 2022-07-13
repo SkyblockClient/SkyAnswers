@@ -248,9 +248,9 @@ const supportWorkflow = async (channel) => {
     const interactionWhenCrashing = await collectActions(whenCrashingMsg, "BUTTON");
     channel.send(
       {
-        launch: "So you crashed when you launched Minecraft? Huh.",
-        login: "So you crashed when you joined Hypixel? Huh.",
-        other: "So you crashed when you did something else? Huh.",
+        launch: "They said they crashed on launch.",
+        login: "They said they crashed when they joined Hypixel.",
+        other: "They said they crashed when they did something else.",
       }[interactionWhenCrashing.customId]
     );
     await chatAskThanos(channel);
