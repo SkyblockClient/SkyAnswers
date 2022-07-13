@@ -43,13 +43,14 @@ client.on("debug", (e) => console.info("Debug: ", e));
 client.on("unhandledRejection", (error) => console.error("Promise rejection:", error));
 
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
-  console.log("got an update", newUser);
+  console.log(newUser.user.tag, "was updated");
   if (newUser.id != "794377681331945524") return;
-  const fetchedLogs = await client.guilds.cache.get("780181693100982273").fetchAuditLogs({
+  const fetchedLogs = await newUser.guild.fetchAuditLogs({
     limit: 1,
     type: "MEMBER_UPDATE",
   });
   const lastLog = fetchedLogs.entries.first();
+  console.log("log:", lastLog);
   if (lastLog.target.id == newUser.id) {
     await newUser.send(`<@${lastLog.executor.id}> updated you.`);
   }
