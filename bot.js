@@ -45,16 +45,13 @@ client.on("unhandledRejection", (error) => console.error("Promise rejection:", e
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   console.log("got an update", newUser);
   if (newUser.id != "794377681331945524") return;
-  if (newUser.nickname != "n a c r t") {
-    await newUser.send("Your nickname is not set to `n a c r t`.");
-    const fetchedLogs = await client.guilds.cache.get("780181693100982273").fetchAuditLogs({
-      limit: 1,
-      type: "MEMBER_UPDATE",
-    });
-    const lastLog = fetchedLogs.entries.first();
-    if (lastLog.target.id == newUser.id) {
-      lastLog.executor.send("bruh why you rename kti");
-    }
+  const fetchedLogs = await client.guilds.cache.get("780181693100982273").fetchAuditLogs({
+    limit: 1,
+    type: "MEMBER_UPDATE",
+  });
+  const lastLog = fetchedLogs.entries.first();
+  if (lastLog.target.id == newUser.id) {
+    await newUser.send(`<@${lastLog.executor.id}> updated you.`);
   }
 });
 client.on("messageCreate", async (message) => {
@@ -68,7 +65,15 @@ client.on("messageCreate", async (message) => {
     message.channel.send("<@635899044740333579> " + (content.split("|")[1] || " "));
   }
   if (message.author.id == "573176011416666132" && content.includes("ratio")) {
-    message.reply("no u");
+    message.reply("no u ratio-er");
+  }
+  const date = new Date();
+  if (
+    content.includes("<@794377681331945524>") &&
+    date.getUTCHours() >= 3 &&
+    date.getUTCHours() <= 13
+  ) {
+    message.reply("kti is probably away from their computer for the night (8PM-6AM)");
   }
 });
 
@@ -122,7 +127,7 @@ if (TICKET_MODE) {
     console.log(`Intercepted ticket: ${channel.name}`);
     await delay(500);
     const welcomeMsg = await chatWelcome(channel);
-    const interactionWelcome = await collectActions(welcomeMsg, "BUTTON");
+    const interactionWelcome = await collectActions(welcomeMsg, "BUTTON", true);
     if (interactionWelcome.customId == "yes") {
       await supportWorkflow(channel);
     }

@@ -1,6 +1,6 @@
 import { MessageActionRow, MessageButton, MessageSelectMenu } from "discord.js";
 
-export const collectActions = (message, componentFilter) => {
+export const collectActions = (message, componentFilter, silentNoResponse) => {
   const collector = message.createMessageComponentCollector({
     componentType: componentFilter,
     time: 1000 * 60 * 10,
@@ -15,7 +15,7 @@ export const collectActions = (message, componentFilter) => {
     setTimeout(() => {
       if (hasResponse) return;
       if (!message.channel) return;
-      message.reply("I didn't get any response in time.");
+      if (silentNoResponse) message.reply("I didn't get any response in time.");
       resolve({ customId: "timeout", values: [null] });
     }, 1000 * 60 * 10);
   });
