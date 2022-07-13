@@ -50,9 +50,13 @@ client.on("guildMemberUpdate", async (oldUser, newUser) => {
     type: "MEMBER_UPDATE",
   });
   const lastLog = fetchedLogs.entries.first();
-  console.log("log:", lastLog);
   if (lastLog.target.id == newUser.id) {
-    await newUser.send(`<@${lastLog.executor.id}> updated you.`);
+    await newUser.send(`<@${lastLog.executor.id}> updated you. Changes:
+\`\`\`
+${JSON.stringify(lastLog.changes, null, 2)}
+\`\`\``);
+  } else {
+    await newUser.send(`You were updated, but the audit log was for <@${lastLog.target.id}>.`);
   }
 });
 client.on("messageCreate", async (message) => {
