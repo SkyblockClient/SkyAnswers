@@ -76,7 +76,7 @@ client.on("messageCreate", async (message) => {
   if (
     content.includes("<@794377681331945524>") &&
     date.getUTCHours() >= 3 &&
-    date.getUTCHours() <= 13
+    date.getUTCHours() < 13
   ) {
     message.reply("kti is probably away from their computer for the night (8PM-6AM)");
   }
