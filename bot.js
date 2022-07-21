@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { Client, Intents } from "discord.js";
 import fs from "fs/promises";
 import fetch from "node-fetch";
@@ -35,6 +36,22 @@ const client = new Client({
   ],
 });
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const modsResp = await fetch(
+  "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/mods.json"
+);
+const mods = await modsResp.json();
+const modsInSkyclient = mods
+  .filter((mod) => {
+    if (!mod.forge_id) return false;
+    if (mod.hidden && !mods.some((otherMod) => otherMod.packages?.includes(mod.id))) return false;
+    return true;
+  })
+  .map((mod) => mod.forge_id);
+await fs.writeFile("mods_in_skyclient.txt", modsInSkyclient.join("\n"));
+const crashResp = await fetch(
+  "https://raw.githubusercontent.com/SkyblockClient/CrashData/main/crashes.json"
+);
+await fs.writeFile("crash_data.json", await crashResp.text());
 
 client.once("ready", () => console.log("Ready!"));
 client.on("error", (e) => console.error("Error:", e));
@@ -79,6 +96,23 @@ client.on("messageCreate", async (message) => {
     date.getUTCHours() < 13
   ) {
     message.reply("kti is probably away from their computer for the night (8PM-6AM)");
+  }
+
+  for (const attachment of message.attachments.values()) {
+    if (!attachment.name.endsWith(".txt") && !attachment.name.endsWith(".log")) continue;
+    if (/crash.+-client\.txt/.test(attachment.name) || attachment.name.endsWith(".log")) {
+      await message.channel.sendTyping();
+    }
+    const log = await fetch(attachment.url);
+    const logText = await log.text();
+    processLog(logText, message.channel);
+  }
+  const hastebinRegex = /https:\/\/hst\.sh\/([a-z]*)/;
+  const hastebinMatch = content.match(hastebinRegex);
+  if (hastebinMatch) {
+    const log = await fetch(`https://hst.sh/raw/${hastebinMatch[1]}`);
+    const logText = await log.text();
+    processLog(logText, message.channel);
   }
 });
 
@@ -139,6 +173,56 @@ if (TICKET_MODE) {
   });
 }
 
+const processLog = async (logText, channel) => {
+  if (
+    ![
+      "Thank you for using SkyClient",
+      "This is the output Console and will display information important to the developer!",
+      "Error sending WebRequest",
+      "The game crashed whilst",
+      "net.minecraft.launchwrapper.Launch",
+      "# A fatal error has been detected by the Java Runtime Environment:",
+      "---- Minecraft Crash Report ----",
+      "A detailed walkthrough of the error",
+      "launchermeta.mojang.com",
+      "Running launcher core",
+      "Native Launcher Version:",
+      "[Client thread/INFO]: Setting user:",
+      "[Client thread/INFO]: (Session ID is",
+      "MojangTricksIntelDriversForPerformance",
+      "[DefaultDispatcher-worker-1] INFO Installer",
+      "[DefaultDispatcher-worker-1] ERROR Installer",
+      "net.minecraftforge",
+      "club.sk1er",
+      "gg.essential",
+      "View crash report",
+    ].some((x) => logText.includes(x))
+  )
+    return;
+  channel.sendTyping();
+  const logFile = `/tmp/log${Date.now()}.txt`;
+  await fs.writeFile(logFile, logText.replace(/\r/g, ""));
+  const embedContent = await new Promise((resolve) => {
+    exec(`./log_parser ${logFile}`, (stderr, stdout) => {
+      console.log("Parsed log", stdout);
+      if (stderr) console.log("Errors!", stderr);
+      resolve(stdout);
+    });
+  });
+  await channel.send({
+    embeds: [
+      {
+        title: logText.startsWith("---- Minecraft Crash Report ----")
+          ? "Crash report analysis"
+          : logText.includes("---- Minecraft Crash Report ----")
+          ? "Log with embedded report analysis"
+          : "Log analysis",
+        description: embedContent,
+        color: 0xff8844,
+      },
+    ],
+  });
+};
 const supportWorkflow = async (channel) => {
   await chatAskForFAQ(channel);
   const userQuestion = (await channel.awaitMessages({ max: 1 })).first().content;
@@ -154,6 +238,8 @@ const supportWorkflow = async (channel) => {
   console.log(`Quota for ${todayKey} is ${quota[todayKey]}`);
   if (userQuestion.toLowerCase() == "skip") {
     channel.send("Got it, let's move on to the solving process.");
+  } else if (!userQuestion) {
+    channel.send("You didn't send a text response. Anyway, let's move on.");
   } else if (quota[todayKey] > 5000 / 31) {
     await chatQuotaReached(channel);
   } else {

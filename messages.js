@@ -306,8 +306,8 @@ export const chatAskForLogs = async (ticket) => {
     embeds: [
       {
         title: "SkyAnswers > Send your crash report.",
-        description: `Do you have a crash report? If so, send it here.
-Here's how to do that:
+        description: `If you see the screen with a button to copy your crash report, click on it, and paste it here.
+If you don't, upload your log:
 1. Find your Minecraft folder. [Here's a video guide (don't enter your mods folder).](https://www.youtube.com/watch?v=E6lwqIo0-Ms)
 2. Enter your logs folder.
 3. Upload the \`latest.log\` file. (You can either copy and paste it into Discord, or drag it into the chat.)

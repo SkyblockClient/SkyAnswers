@@ -1,3 +1,5 @@
 node_modules
 quota.json
 .env
+mods_in_skyclient.txt
+crash_data.json
