@@ -24,6 +24,7 @@ import {
   chatWelcome,
   collectActions,
 } from "./messages.js";
+import { fileURLToPath } from "url";
 
 const TICKET_MODE = false;
 const client = new Client({
@@ -100,12 +101,14 @@ client.on("messageCreate", async (message) => {
 
   for (const attachment of message.attachments.values()) {
     if (!attachment.name.endsWith(".txt") && !attachment.name.endsWith(".log")) continue;
-    if (/crash.+-client\.txt/.test(attachment.name) || attachment.name.endsWith(".log")) {
+    let isDefinitelyLog =
+      /crash.+-client\.txt/.test(attachment.name) || attachment.name.endsWith(".log");
+    if (isDefinitelyLog) {
       await message.channel.sendTyping();
     }
     const log = await fetch(attachment.url);
     const logText = await log.text();
-    processLog(logText, message.channel);
+    processLog(logText, message.channel, isDefinitelyLog);
   }
   const hastebinRegex = /https:\/\/hst\.sh\/([a-z]*)/;
   const hastebinMatch = content.match(hastebinRegex);
@@ -173,7 +176,7 @@ if (TICKET_MODE) {
   });
 }
 
-const processLog = async (logText, channel) => {
+const processLog = async (logText, channel, alreadyTyping = false) => {
   if (
     ![
       "Thank you for using SkyClient",
@@ -199,11 +202,12 @@ const processLog = async (logText, channel) => {
     ].some((x) => logText.includes(x))
   )
     return;
-  channel.sendTyping();
+  if (!alreadyTyping) channel.sendTyping();
   const logFile = `/tmp/log${Date.now()}.txt`;
   await fs.writeFile(logFile, logText.replace(/\r/g, ""));
   const embedContent = await new Promise((resolve) => {
-    exec(`./log_parser ${logFile}`, (stderr, stdout) => {
+    const pathToLogParser = fileURLToPath(import.meta.url).replace("bot.js", "log_parser");
+    exec(`${pathToLogParser} ${logFile}`, (stderr, stdout) => {
       console.log("Parsed log", stdout);
       if (stderr) console.log("Errors!", stderr);
       resolve(stdout);
@@ -379,5 +383,5 @@ const supportWorkflow = async (channel) => {
       "Don't forget to state your problem clearly."
   );
 };
-console.log("loaded");
+console.log("loaded", import.meta.url);
 client.login();
