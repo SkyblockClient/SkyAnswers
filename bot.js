@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { Client, Intents } from "discord.js";
 import fs from "fs/promises";
 import fetch from "node-fetch";
@@ -78,6 +78,7 @@ ${JSON.stringify(lastLog.changes, null, 2)}
   }
 });
 client.on("messageCreate", async (message) => {
+  if (message.author.bot) return;
   const content = message.content.toLowerCase();
   if (
     content.includes("skyanswers") &&
@@ -206,10 +207,13 @@ const processLog = async (logText, channel, alreadyTyping = false) => {
   const logFile = `/tmp/log${Date.now()}.txt`;
   await fs.writeFile(logFile, logText.replace(/\r/g, ""));
   const embedContent = await new Promise((resolve) => {
-    const pathToLogParser = fileURLToPath(import.meta.url).replace("bot.js", "log_parser");
-    exec(`${pathToLogParser} ${logFile}`, (stderr, stdout) => {
-      console.log("Parsed log", stdout);
-      if (stderr) console.log("Errors!", stderr);
+    const pathToLogParser = fileURLToPath(import.meta.url).replace(
+      "bot.js",
+      process.env.NODE_ENV == "production" ? "log_parser_docker" : "log_parser"
+    );
+    execFile(pathToLogParser, [logFile], (error, stdout, stderr) => {
+      console.log("Parsed log!", stdout);
+      if (error || stderr) console.log("Errors!", error, stderr);
       resolve(stdout);
     });
   });
