@@ -97,7 +97,9 @@ client.on("messageCreate", async (message) => {
     date.getUTCHours() >= 3 &&
     date.getUTCHours() < 13
   ) {
-    message.reply("kti is probably away from their computer for the night (8PM-6AM)");
+    message.reply(
+      "kti is probably away from their computer for the night (<t:14400:t>-<t:50400:t>)"
+    );
   }
 
   for (const attachment of message.attachments.values()) {
