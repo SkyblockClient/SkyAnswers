@@ -14,8 +14,6 @@ import {
   chatAskThanos,
   chatAskUseSolution,
   chatAskWhenCrashing,
-  //chatCloseActions,
-  //chatConfirmClose,
   chatFAQAnswer,
   chatIsFAQRelevant,
   chatNoRelevantFAQ,
@@ -26,7 +24,6 @@ import {
 } from "./messages.js";
 import { fileURLToPath } from "url";
 
-const TICKET_MODE = false;
 const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
@@ -98,7 +95,7 @@ client.on("messageCreate", async (message) => {
     date.getUTCHours() < 13
   ) {
     message.reply(
-      "kti is probably away from their computer for the night (<t:14400:t>-<t:50400:t>)"
+      "kti is probably away from their computer for the night (8PM-6AM my time, <t:14400:t>-<t:50400:t> your time)"
     );
   }
 
@@ -122,62 +119,16 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-if (TICKET_MODE) {
-  client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isButton()) return;
-    const serverSupportChannel =
-      interaction.guildId == "962319226377474078" ? "977595800135794740" : "931624995522773032";
-    const serverTicketCategory =
-      interaction.guildId == "962319226377474078" ? "977624175944552518" : "931628263971893318";
-    if (interaction.channelId == serverSupportChannel) {
-      const ticket = await interaction.guild.channels.create(`ticket-${interaction.user.tag}`, {
-        parent: serverTicketCategory,
-        permissionOverwrites: [
-          {
-            id: interaction.guild.id,
-            deny: ["VIEW_CHANNEL"],
-          },
-          {
-            id:
-              interaction.guildId == "962319226377474078"
-                ? "962323782498938920"
-                : "931626562539909130",
-            allow: ["VIEW_CHANNEL"],
-          },
-          {
-            id: interaction.user.id,
-            allow: ["VIEW_CHANNEL"],
-          },
-        ],
-      });
-      (await chatWelcome(ticket, interaction.user)).pinned = true;
-      interaction.deferUpdate();
-    } else if (interaction.customId == "manageHelp") {
-      interaction.deferUpdate();
-      await supportWorkflow(interaction.channel);
-    } else if (interaction.customId == "manageFinished") {
-      const confMessage = await chatConfirmClose(interaction);
-      const interactionConf = await collectActions(confMessage, "BUTTON");
-      if (interactionConf.customId == "manageCloseFR") {
-        const origName = interaction.channel.name;
-        await interaction.channel.setName(origName.replace(/^ticket-/, "closed-"));
-        //await interaction.channel.permissionOverwrites.delete(
-        await chatCloseActions(interaction.channel);
-      }
-    }
-  });
-} else {
-  client.on("channelCreate", async (channel) => {
-    if (!channel.name.startsWith("ticket-")) return;
-    console.log(`Intercepted ticket: ${channel.name}`);
-    await delay(500);
-    const welcomeMsg = await chatWelcome(channel);
-    const interactionWelcome = await collectActions(welcomeMsg, "BUTTON", true);
-    if (interactionWelcome.customId == "yes") {
-      await supportWorkflow(channel);
-    }
-  });
-}
+client.on("channelCreate", async (channel) => {
+  if (!channel.name.startsWith("ticket-")) return;
+  console.log(`Intercepted ticket: ${channel.name}`);
+  await delay(500);
+  const welcomeMsg = await chatWelcome(channel);
+  const interactionWelcome = await collectActions(welcomeMsg, "BUTTON", true);
+  if (interactionWelcome.customId == "yes") {
+    await supportWorkflow(channel);
+  }
+});
 
 const processLog = async (logText, channel, alreadyTyping = false) => {
   if (
@@ -287,21 +238,6 @@ const supportWorkflow = async (channel) => {
       console.log(faqAnswer);
       console.error(e);
     }
-    /*
-        const faqAnswerJson = {
-          answers: [
-            {
-              questions: ["How can I download SkyClient?", "Where do I get SkyClient?"],
-              answer: "View the downloads at https://ktibow.github.io/Skyclient/ or in <#780940408175853609>.",
-              confidenceScore: 0.5277000000000001,
-              id: 194,
-              source: "scfaq.txt",
-              metadata: { system_metadata_qna_edited_manually: "true" },
-              dialog: { isContextOnly: false, prompts: [] },
-            },
-          ],
-        };
-        */
     if (faqAnswerJson.answers[0].answer == "No idea ¯\\_(ツ)_/¯") {
       if (!userQuestion.toLowerCase().includes("crash")) {
         await chatNoRelevantFAQ(channel, "Sorry, we couldn't find any relevant FAQ.");
