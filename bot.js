@@ -14,6 +14,7 @@ import {
   chatAskThanos,
   chatAskUseSolution,
   chatAskWhenCrashing,
+  chatBump,
   chatFAQAnswer,
   chatIsFAQRelevant,
   chatNoRelevantFAQ,
@@ -95,6 +96,16 @@ client.on("messageCreate", async (message) => {
         },
       ],
     });
+  }
+  if (content == "sky bump") {
+    const channelMessages = await message.channel.messages.fetch();
+    const openingMessage = channelMessages
+      .filter((message) => {
+        return message.author.id == "557628352828014614" && message.content.includes("Welcome");
+      })
+      .first();
+    const ticketOwner = openingMessage.content.match(/[0-9]+/)[0];
+    await chatBump(message.channel, ticketOwner);
   }
   if (message.author.id == "573176011416666132" && /(?:^|[^\s])ratio/.match(content)) {
     message.reply("no u ratio-er");

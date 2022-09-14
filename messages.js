@@ -400,3 +400,18 @@ export const chatReferToGuides = async (ticket) => {
     ],
   });
 };
+export const chatBump = async (ticket, user) => {
+  let seconds5DaysFromNow = Math.floor(Date.now() / 1000 + 60 * 60 * 24 * 5);
+  return await ticket.send({
+    content: `Hey <@${user}>, do you still need help?`,
+    embeds: [
+      {
+        title: "SkyAnswers > Help us decrease our open tickets",
+        description: `1. *No, all my problems are resolved*: Close the ticket. Scroll up to the top or view the pinned message, and click the :lock: button to close your ticket.
+2. *Yes, I still need help*: Restate your problem as clearly as possible. If someone asked you to upload something, do that.
+If you do not respond in the next 5 days (<t:${seconds5DaysFromNow}:R>), your ticket will be closed.`,
+        color: 0xffff88,
+      },
+    ],
+  });
+};
