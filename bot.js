@@ -76,16 +76,27 @@ ${JSON.stringify(lastLog.changes, null, 2)}
 });
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  const content = message.content.toLowerCase();
-  if (
-    content.includes("skyanswers") &&
-    content.includes("please") &&
-    content.includes("ping") &&
-    content.includes("rayless")
-  ) {
-    message.channel.send("<@635899044740333579> " + (content.split("|")[1] || " "));
+  if (message.stickers.has("1019337107292049471")) {
+    await client.users.cache.get("794377681331945524").send("someone blamed you\n" + message.url);
   }
-  if (message.author.id == "573176011416666132" && content.includes("ratio")) {
+  const content = message.content.toLowerCase();
+  const searchRegex = /sky search ([^]+)/;
+  const searchMatch = content.match(searchRegex);
+  if (searchMatch) {
+    await message.channel.sendTyping();
+    const query = searchMatch[1];
+    const answer = await skySearch(query);
+    await message.channel.send({
+      embeds: [
+        {
+          title: `FAQ: ${answer.answers[0].questions[0]}`,
+          description: answer.answers[0].answer,
+          color: 0x88ff88,
+        },
+      ],
+    });
+  }
+  if (message.author.id == "573176011416666132" && /(?:^|[^\s])ratio/.match(content)) {
     message.reply("no u ratio-er");
   }
   const date = new Date();
@@ -184,6 +195,35 @@ const processLog = async (logText, channel, alreadyTyping = false) => {
     ],
   });
 };
+
+const skySearch = async (userQuestion) => {
+  const faqAnswer = await fetch(
+    "https://skyanswerstext.cognitiveservices.azure.com/language/:query-knowledgebases?" +
+      new URLSearchParams({
+        projectName: "SkyAnswers",
+        "api-version": "2021-10-01",
+        deploymentName: "production",
+      }),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": process.env.AZURE_QA_KEY,
+      },
+      body: JSON.stringify({
+        top: 1,
+        question: userQuestion,
+        confidenceScoreThreshold: 0.3,
+      }),
+    }
+  );
+  const faqAnswerJson = await faqAnswer.json();
+  console.log(faqAnswerJson.answers);
+  if (faqAnswerJson.answers.length == 0) {
+    throw new Error("something went wrong in faq");
+  }
+  return faqAnswerJson;
+};
 const supportWorkflow = async (channel) => {
   await chatAskForFAQ(channel);
   const userQuestion = (await channel.awaitMessages({ max: 1 })).first().content;
@@ -207,35 +247,11 @@ const supportWorkflow = async (channel) => {
     quota[todayKey] = (quota[todayKey] || 0) + 1;
     await fs.writeFile("quota.json", JSON.stringify(quota));
     channel.send("Got it, checking...");
-    let faqAnswer, faqAnswerJson;
+    let faqAnswerJson;
     try {
-      faqAnswer = await fetch(
-        "https://skyanswerstext.cognitiveservices.azure.com/language/:query-knowledgebases?" +
-          new URLSearchParams({
-            projectName: "SkyAnswers",
-            "api-version": "2021-10-01",
-            deploymentName: "production",
-          }),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Ocp-Apim-Subscription-Key": process.env.AZURE_QA_KEY,
-          },
-          body: JSON.stringify({
-            top: 1,
-            question: userQuestion,
-            confidenceScoreThreshold: 0.3,
-          }),
-        }
-      );
-      faqAnswerJson = await faqAnswer.json();
-      if (faqAnswerJson.answers.length == 0) {
-        throw new Error(faqAnswerJson);
-      }
+      faqAnswerJson = await skySearch(userQuestion);
     } catch (e) {
       channel.send("Something went wrong inside of SkyAnswers. Oops!");
-      console.log(faqAnswer);
       console.error(e);
     }
     if (faqAnswerJson.answers[0].answer == "No idea ¯\\_(ツ)_/¯") {
@@ -271,9 +287,9 @@ const supportWorkflow = async (channel) => {
         channel.send("Great! Consider closing this ticket now.");
         return;
       } else if (interactionUseSolution.customId == "yesNotDone") {
-        channel.send("It doesn't work? That's sad. Okay, let's proceed.");
+        channel.send("They said it didn't work. Let's proceed.");
       } else if (interactionUseSolution.customId == "no") {
-        channel.send("There's no suggested solution? That's sad. Okay, let's proceed.");
+        channel.send("They said there was no suggested solution. Let's proceed.");
       }
     } else if (interactionCrashpatch.customId == "no") {
       await chatAskForErrorCode(channel);
