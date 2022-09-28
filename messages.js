@@ -403,7 +403,7 @@ export const chatReferToGuides = async (ticket) => {
 export const chatBump = async (ticket, user) => {
   let seconds5DaysFromNow = Math.floor(Date.now() / 1000 + 60 * 60 * 24 * 5);
   return await ticket.send({
-    content: `Hey <@${user}>, do you still need help?`,
+    content: `Hey${user ? " <@" + user + ">" : ""}, do you still need help?`,
     embeds: [
       {
         title: "SkyAnswers > Help us decrease our open tickets",

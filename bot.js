@@ -104,8 +104,11 @@ client.on("messageCreate", async (message) => {
         return message.author.id == "557628352828014614" && message.content.includes("Welcome");
       })
       .first();
-    const ticketOwner = openingMessage.content.match(/[0-9]+/)[0];
+    const ticketOwner = openingMessage?.content?.match(/[0-9]+/)?.at(0);
     await chatBump(message.channel, ticketOwner);
+  }
+  if (content == "sky start") {
+    await supportWorkflow(message.channel);
   }
   if (message.author.id == "573176011416666132" && /(?:^|[^\s])ratio/.match(content)) {
     message.reply("no u ratio-er");
