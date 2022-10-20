@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { AuditLogEvent, Client, GatewayIntentBits } from "discord.js";
-import { bump, help, search } from "./modules/commands.js";
+import { bump, findMod, findPack, handleCommand, help, search } from "./modules/commands.js";
 import { handleNewTicket, interactions, unlockChannel } from "./modules/ticket.js";
 const client = new Client({
   intents: [
@@ -14,7 +14,9 @@ const client = new Client({
   ],
 });
 let kti;
-const db = createClient("https://fkjmuugisxgmrklcfyaj.supabase.co", process.env.SB_KEY);
+const db =
+  process.env.SB_KEY &&
+  createClient("https://fkjmuugisxgmrklcfyaj.supabase.co", process.env.SB_KEY);
 // HEY DON'T FORGET TO ADD OVERFLOW ANIMATIONS NOTICE FOR LOG PARSING
 client.once("ready", () => {
   console.log("Connected"), (kti = client.users.cache.get("794377681331945524"));
@@ -60,22 +62,14 @@ client.on("interactionCreate", async (interaction) => {
   if (handler) await handler(interaction);
 });
 
-const searchRegex = /sky search (.+)/;
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   const content = message.content.toLowerCase();
-  const searchMatch = content.match(searchRegex);
-  const date = new Date();
 
   if (message.stickers.has("1019337107292049471")) {
     await kti.send("someone blamed you\n" + message.url);
   }
-  if (content == "sky bump") await bump(message.channel);
-  if (content == "sky unlock") await unlockChannel(message.channel);
-  if (searchMatch) {
-    await message.channel.sendTyping();
-    await message.channel.send(await search(searchMatch[1], message.channel));
-  }
+  const date = new Date();
   if (
     content.includes("<@794377681331945524>") &&
     date.getUTCHours() >= 3 &&
@@ -85,17 +79,31 @@ client.on("messageCreate", async (message) => {
       "kti is probably away from their computer for the night (8PM-6AM my time, <t:14400:t>-<t:50400:t> your time)"
     );
   }
+
+  if (content == "sky bump") await bump(message.channel);
+  if (content == "sky unlock") await unlockChannel(message.channel);
+  if (content == "sky mod" || content == "sky pack") await message.reply("ha ha very funny");
   if (content.startsWith("sky help") || content == "<@" + client.user.id + ">")
     await help(message.channel);
-
-  const { error } = await db.from("messages").insert({
-    id: message.id,
-    time: new Date(message.createdTimestamp),
-    status: message.member.presence?.status,
-    author: message.member.id,
-    pings: Array.from(message.mentions.users.values()).map((p) => p.id),
+  handleCommand("sky search", content, async (q) => {
+    await message.channel.sendTyping();
+    await message.channel.send(await search(q, message.channel));
   });
-  if (error) throw error;
+  handleCommand("-mod", content, async (id) => await findMod(message, id));
+  handleCommand("-pack", content, async (id) => await findPack(message, id));
+
+  if (db) {
+    const { error } = await db.from("messages").insert({
+      id: message.id,
+      time: new Date(message.createdTimestamp),
+      status: message.member.presence?.status,
+      author: message.member.id,
+      pings: Array.from(message.mentions.users.values()).map((p) => p.id),
+    });
+    if (error) throw error;
+  } else {
+    console.warn("you should set up the db");
+  }
 });
 
 client.login();

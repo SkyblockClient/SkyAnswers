@@ -38,3 +38,28 @@ export const search = async (query) => {
   if (answer.answer == `No idea ¯\\_(ツ)_/¯`) return null;
   return answer;
 };
+
+let trackedData = {};
+export const getTrackedData = async (url) => {
+  const lastUpdated = trackedData[url]?.lastUpdated;
+  if (!lastUpdated || Date.now() - lastUpdated > 1000 * 60 * 60) {
+    const resp = await fetch(url);
+    trackedData[url] = { data: await resp.json(), lastUpdated: Date.now() };
+  }
+  return trackedData[url].data;
+};
+export const queryDownloadable = async (options, query, hosting) => {
+  const option = options.find(
+    (opt) => opt.id == query || opt.nicknames?.includes?.(query) || opt.display == query
+  );
+  return (
+    option && {
+      ...option,
+      download:
+        option.url ||
+        "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/" +
+          hosting +
+          option.file,
+    }
+  );
+};
