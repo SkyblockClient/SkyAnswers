@@ -138,23 +138,22 @@ let activeModUpdates = {};
  */
 export const updateMod = async (message, url) => {
   const statusMsg = await message.reply(`downloading <${url}>...`);
-  const resp = await fetch(url, {
+  const modResp = await fetch(url, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36",
     },
   });
-  if (!resp.ok) {
-    console.log(await resp.text());
-    throw resp.statusText;
+  if (!modResp.ok) {
+    console.log(await modResp.text());
+    throw modResp.statusText;
   }
+  const modFile = await modResp.arrayBuffer();
 
-  const data = await resp.arrayBuffer();
   statusMsg.edit("unzipping...");
-  const modZip = await JSZip.loadAsync(data);
-
-  let modId;
+  const modZip = await JSZip.loadAsync(modFile);
   const modInfoFile = modZip.file("mcmod.info");
+  let modId;
   if (modInfoFile) {
     const modInfoStr = await modInfoFile.async("text");
     const modInfo = JSON.parse(modInfoStr);
@@ -162,18 +161,18 @@ export const updateMod = async (message, url) => {
   }
 
   statusMsg.edit(`getting the new data for ${modId}...`);
-  const newData = {
+  const modData = {
     id: modId,
     url,
     file: decodeURI(url).split("/").pop(),
-    hash: createHash("md5").update(new Uint8Array(data)).digest("hex"),
+    hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
   };
 
   statusMsg.edit({
     content: `okay, ready to push out:
-url: \`${newData.url}\`
-filename: \`${newData.file}\`
-hash: \`${newData.hash}\`
+url: \`${modData.url}\`
+filename: \`${modData.file}\`
+hash: \`${modData.hash}\`
 nothing will happen until you press a button`,
     components: [
       {
@@ -193,17 +192,28 @@ nothing will happen until you press a button`,
             type: ComponentType.Button,
             customId: "editModUpdate",
             label: "Edit",
-            style: ButtonStyle.Primary,
+            style: ButtonStyle.Secondary,
           },
         ],
       },
     ],
   });
-  activeModUpdates[statusMsg.id] = newData;
+  activeModUpdates[statusMsg.id] = modData;
 };
-const sendNewMod = async (newMod, modDataInfo) => {
-  const allMods = JSON.parse(atob(modDataInfo.content));
-  const updatedMods = allMods.map((mod) => (mod.id == newMod.id ? { ...mod, ...newMod } : mod));
+const sendNewMod = async (modData) => {
+  const modsFileResp = await fetch(
+    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
+    {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${process.env.GH_KEY}`,
+      },
+    }
+  );
+  const modsFileInfo = await modsFileResp.json();
+  const mods = JSON.parse(atob(modsFileInfo.content));
+
+  const updatedMods = mods.map((mod) => (mod.id == modData.id ? { ...mod, ...modData } : mod));
   const resp = await fetch(
     "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
     {
@@ -213,9 +223,9 @@ const sendNewMod = async (newMod, modDataInfo) => {
         Authorization: `Bearer ${process.env.GH_KEY}`,
       },
       body: JSON.stringify({
-        message: `Update ${newMod.id} to ${newMod.file}`,
+        message: `Update ${modData.id} to ${modData.file}`,
         content: btoa(JSON.stringify(updatedMods, null, 4) + "\n"),
-        sha: modDataInfo.sha,
+        sha: modsFileInfo.sha,
       }),
     }
   );
@@ -224,6 +234,7 @@ const sendNewMod = async (newMod, modDataInfo) => {
     throw resp.statusText;
   }
 };
+
 /**
  * @param {import("discord.js").Interaction} interaction
  */
@@ -236,21 +247,11 @@ const confirmModUpdate = async (interaction) => {
     return;
   }
   await interaction.update({ content: "pushing out update...", components: [] });
-  const modDataResp = await fetch(
-    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${process.env.GH_KEY}`,
-      },
-    }
-  );
-  const modDataInfo = await modDataResp.json();
-  const source = interaction.message.id;
-  const data = activeModUpdates[source];
 
-  await sendNewMod(data, modDataInfo);
-  await interaction.message.edit(`updated ${data.id} :D`);
+  const source = interaction.message.id;
+  const modData = activeModUpdates[source];
+  await sendNewMod(modData);
+  await interaction.message.edit(`updated ${modData.id} :D`);
 };
 /**
  * @param {import("discord.js").Interaction} interaction
@@ -263,35 +264,37 @@ const editModUpdate = async (interaction) => {
     await interaction.reply("why do you think you can do this?");
     return;
   }
+
   const source = interaction.message.id;
-  const data = activeModUpdates[source];
+  const modData = activeModUpdates[source];
+  const inputs = [
+    {
+      label: "Mod ID",
+      customId: "id",
+    },
+    {
+      label: "Mod URL",
+      customId: "url",
+    },
+    {
+      label: "Mod hash",
+      customId: "hash",
+    },
+    {
+      label: "Mod filename",
+      customId: "file",
+    },
+  ];
   await interaction.showModal({
     title: "Edit the mod data",
     customId: "modalUpdate",
-    components: [
-      {
-        label: "Mod ID",
-        customId: "id",
-      },
-      {
-        label: "Mod URL",
-        customId: "url",
-      },
-      {
-        label: "Mod hash",
-        customId: "hash",
-      },
-      {
-        label: "Mod filename",
-        customId: "file",
-      },
-    ].map((i) => ({
+    components: inputs.map((i) => ({
       type: ComponentType.ActionRow,
       components: [
         {
           ...i,
           type: ComponentType.TextInput,
-          value: data[i.customId],
+          value: modData[i.customId],
           style: TextInputStyle.Short,
         },
       ],
@@ -302,20 +305,10 @@ const editModUpdate = async (interaction) => {
  * @param {import("discord.js").Interaction} interaction
  */
 const handleModalUpdate = async (interaction) => {
-  const newMod = Object.fromEntries(interaction.fields.fields.map((i) => [i.customId, i.value]));
+  const modData = Object.fromEntries(interaction.fields.fields.map((i) => [i.customId, i.value]));
   await interaction.update({ content: "pushing out update...", components: [] });
-  const modDataResp = await fetch(
-    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${process.env.GH_KEY}`,
-      },
-    }
-  );
-  const modDataInfo = await modDataResp.json();
-  await sendNewMod(newMod, modDataInfo);
-  await interaction.message.edit(`updated ${newMod.id} (custom settings) :D`);
+  await sendNewMod(modData);
+  await interaction.message.edit(`updated ${modData.id} (custom settings) :D`);
 };
 
 export const interactions = {
