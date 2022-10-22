@@ -1,6 +1,6 @@
 import fetch from "cross-fetch";
 import { createHash } from "crypto";
-import { ButtonStyle, ComponentType, hyperlink } from "discord.js";
+import { ButtonStyle, ComponentType, hyperlink, TextInputStyle } from "discord.js";
 import JSZip from "jszip";
 import { getTrackedData, queryDownloadable } from "./data.js";
 
@@ -137,14 +137,6 @@ let activeModUpdates = {};
  * @param {string} url
  */
 export const updateMod = async (message, url) => {
-  if (
-    !message.member.roles.cache.has("799020944487612428") &&
-    !message.member.permissions.has("Administrator")
-  ) {
-    await message.reply("why do you think you can do this?");
-    return;
-  }
-
   const statusMsg = await message.reply(`downloading <${url}>...`);
   const resp = await fetch(url, {
     headers: {
@@ -160,51 +152,92 @@ export const updateMod = async (message, url) => {
   const data = await resp.arrayBuffer();
   statusMsg.edit("unzipping...");
   const modZip = await JSZip.loadAsync(data);
-  const modInfoFile = modZip.file("mcmod.info");
-  if (!modInfoFile) throw "no mcmod.info file found";
-  const modInfoStr = await modInfoFile.async("text");
-  const modInfo = JSON.parse(modInfoStr);
-  const modId = modInfo[0].modid;
 
-  statusMsg.edit(`finding ${modId} in the mods list...`);
-  const allMods = await getTrackedData(
-    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"
-  );
-  const scModData = allMods.find((mod) => mod.forge_id == modId);
+  let modId;
+  const modInfoFile = modZip.file("mcmod.info");
+  if (modInfoFile) {
+    const modInfoStr = await modInfoFile.async("text");
+    const modInfo = JSON.parse(modInfoStr);
+    modId = modInfo[0].modid;
+  }
+
   statusMsg.edit(`getting the new data for ${modId}...`);
-  scModData.url = url;
-  scModData.file = decodeURI(url).split("/").pop();
-  scModData.hash = createHash("md5").update(new Uint8Array(data)).digest("hex");
+  const newData = {
+    id: modId,
+    url,
+    file: decodeURI(url).split("/").pop(),
+    hash: createHash("md5").update(new Uint8Array(data)).digest("hex"),
+  };
 
   statusMsg.edit({
     content: `okay, ready to push out:
-url: \`${scModData.url}\`
-filename: \`${scModData.file}\`
-hash: \`${scModData.hash}\`
-if you don't click confirm nothing will happen`,
+url: \`${newData.url}\`
+filename: \`${newData.file}\`
+hash: \`${newData.hash}\`
+nothing will happen until you press a button`,
     components: [
       {
         type: ComponentType.ActionRow,
         components: [
+          ...(modId
+            ? [
+                {
+                  type: ComponentType.Button,
+                  customId: "confirmModUpdate",
+                  label: "Confirm",
+                  style: ButtonStyle.Primary,
+                },
+              ]
+            : []),
           {
             type: ComponentType.Button,
-            customId: "confirmModUpdate",
-            label: "Confirm",
+            customId: "editModUpdate",
+            label: "Edit",
             style: ButtonStyle.Primary,
           },
         ],
       },
     ],
   });
-  activeModUpdates[statusMsg.id] = scModData;
+  activeModUpdates[statusMsg.id] = newData;
+};
+const sendNewMod = async (newMod, modDataInfo) => {
+  const allMods = JSON.parse(atob(modDataInfo.content));
+  const updatedMods = allMods.map((mod) => (mod.id == newMod.id ? { ...mod, ...newMod } : mod));
+  const resp = await fetch(
+    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
+    {
+      method: "PUT",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${process.env.GH_KEY}`,
+      },
+      body: JSON.stringify({
+        message: `Update ${newMod.id} to ${newMod.file}`,
+        content: btoa(JSON.stringify(updatedMods, null, 4) + "\n"),
+        sha: modDataInfo.sha,
+      }),
+    }
+  );
+  if (!resp.ok) {
+    console.log(await resp.text());
+    throw resp.statusText;
+  }
 };
 /**
  * @param {import("discord.js").Interaction} interaction
  */
-export const confirmModUpdate = async (interaction) => {
+const confirmModUpdate = async (interaction) => {
+  if (
+    !interaction.member.roles.cache.has("799020944487612428") &&
+    !interaction.member.permissions.has("Administrator")
+  ) {
+    await interaction.reply("why do you think you can do this?");
+    return;
+  }
   await interaction.update({ content: "pushing out update...", components: [] });
   const modDataResp = await fetch(
-    "https://api.github.com/repos/SkyblockClient/SkyblockClient-REPO/contents/files/mods.json",
+    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
     {
       headers: {
         Accept: "application/vnd.github+json",
@@ -213,33 +246,80 @@ export const confirmModUpdate = async (interaction) => {
     }
   );
   const modDataInfo = await modDataResp.json();
-  const allMods = JSON.parse(atob(modDataInfo.content));
   const source = interaction.message.id;
   const data = activeModUpdates[source];
 
-  const updatedMods = allMods.map((mod) => (mod.id == data.id ? data : mod));
-  const resp = await fetch(
-    "https://api.github.com/repos/SkyblockClient/SkyblockClient-REPO/contents/files/mods.json",
+  await sendNewMod(data, modDataInfo);
+  await interaction.message.edit(`updated ${data.id} :D`);
+};
+/**
+ * @param {import("discord.js").Interaction} interaction
+ */
+const editModUpdate = async (interaction) => {
+  if (
+    !interaction.member.roles.cache.has("799020944487612428") &&
+    !interaction.member.permissions.has("Administrator")
+  ) {
+    await interaction.reply("why do you think you can do this?");
+    return;
+  }
+  const source = interaction.message.id;
+  const data = activeModUpdates[source];
+  await interaction.showModal({
+    title: "Edit the mod data",
+    customId: "modalUpdate",
+    components: [
+      {
+        label: "Mod ID",
+        customId: "id",
+      },
+      {
+        label: "Mod URL",
+        customId: "url",
+      },
+      {
+        label: "Mod hash",
+        customId: "hash",
+      },
+      {
+        label: "Mod filename",
+        customId: "file",
+      },
+    ].map((i) => ({
+      type: ComponentType.ActionRow,
+      components: [
+        {
+          ...i,
+          type: ComponentType.TextInput,
+          value: data[i.customId],
+          style: TextInputStyle.Short,
+        },
+      ],
+    })),
+  });
+};
+/**
+ * @param {import("discord.js").Interaction} interaction
+ */
+const handleModalUpdate = async (interaction) => {
+  const newMod = Object.fromEntries(interaction.fields.fields.map((i) => [i.customId, i.value]));
+  await interaction.update({ content: "pushing out update...", components: [] });
+  const modDataResp = await fetch(
+    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
     {
-      method: "PUT",
       headers: {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${process.env.GH_KEY}`,
       },
-      body: JSON.stringify({
-        message: `Update ${data.id} to ${data.file}`,
-        content: btoa(JSON.stringify(updatedMods, null, 4)),
-        sha: modDataInfo.sha,
-      }),
     }
   );
-  if (resp.ok) await interaction.message.edit(`updated ${data.id} :D`);
-  else {
-    console.log(await resp.text());
-    throw resp.statusText;
-  }
+  const modDataInfo = await modDataResp.json();
+  await sendNewMod(newMod, modDataInfo);
+  await interaction.message.edit(`updated ${newMod.id} (custom settings) :D`);
 };
 
 export const interactions = {
   confirmModUpdate,
+  editModUpdate,
+  modalUpdate: handleModalUpdate,
 };
