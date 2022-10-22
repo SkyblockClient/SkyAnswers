@@ -1,12 +1,18 @@
-import { hyperlink } from "discord.js";
-import { getTrackedData, queryDownloadable, search as searchQuery } from "./data.js";
-/**
- * @param {string} name
- * @param {string} content
- * @param {function} func
- */
+import { search as searchQuery } from "./data.js";
+import { interactions as repoInteractions } from "./repo.js";
+import { interactions as ticketInteractions } from "./ticket.js";
+
 export const handleCommand = async (name, content, func) => {
-  if (content.startsWith(name)) await func(content.slice(name.length + 1));
+  if (Array.isArray(name)) {
+    await Promise.all(name.map(async (n) => await handleCommand(n, content, func)));
+    return;
+  }
+  const prefix = name + " ";
+  if (content.startsWith(prefix)) await func(content.slice(prefix.length));
+};
+export const interactions = {
+  ...repoInteractions,
+  ...ticketInteractions,
 };
 /**
  * @param {import("discord.js").TextChannel} channel
@@ -72,57 +78,11 @@ export const help = async (channel) => {
 - opening a ticket will start the support process
 Commands:
 - sky bump: bumps a ticket
+- sky unlock: tries to give send message perms to everyone in a ticket
 - sky search [query]: looks up the query in the knowledge base
-- sky help / ping me: this`);
-};
-
-const getDownloadableEmbed = (downloadable) => ({
-  ...(downloadable.screenshot ? { image: { url: downloadable.screenshot } } : {}),
-  color: Number("0x" + downloadable.hash.slice(0, 6)),
-  title: downloadable.display,
-  description: downloadable.description,
-  fields: [
-    ...(downloadable.command ? [{ name: "Command", value: downloadable.command }] : []),
-    { name: "Download", value: hyperlink(downloadable.file, downloadable.download) },
-  ],
-  footer: { text: `Created by ${downloadable.creator}` },
-  thumbnail: {
-    url: `https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/icons/${encodeURIComponent(
-      downloadable.icon
-    )}`,
-  },
-});
-/**
- * @param {import("discord.js").Message} message
- * @param string id
- */
-export const findMod = async (message, id) => {
-  const mods = await getTrackedData(
-    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"
-  );
-  const mod = await queryDownloadable(mods, id, "mods");
-  if (!mod) {
-    await message.reply(`No mod found for "${id}"`);
-    return;
-  }
-  await message.reply({
-    embeds: [getDownloadableEmbed(mod)],
-  });
-};
-/**
- * @param {import("discord.js").Message} message
- * @param string id
- */
-export const findPack = async (message, id) => {
-  const packs = await getTrackedData(
-    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/packs.json"
-  );
-  const pack = await queryDownloadable(packs, id, "packs");
-  if (!pack) {
-    await message.reply(`No pack found for "${id}"`);
-    return;
-  }
-  await message.reply({
-    embeds: [getDownloadableEmbed(pack)],
-  });
+- sky help / ping me: this
+- -mod [id/name]: tells you about a mod
+- -pack [id/name]: tells you about a resource pack
+- -invalidate: clears data caches
+- -update [url]: updates a mod`);
 };

@@ -1,7 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { AuditLogEvent, Client, GatewayIntentBits } from "discord.js";
-import { bump, findMod, findPack, handleCommand, help, search } from "./modules/commands.js";
-import { handleNewTicket, interactions, unlockChannel } from "./modules/ticket.js";
+import { bump, handleCommand, help, interactions, search } from "./modules/commands.js";
+import { invalidateTrackedData } from "./modules/data.js";
+import { findItem, listMods, listPacks, updateMod } from "./modules/repo.js";
+import { handleNewTicket, unlockChannel } from "./modules/ticket.js";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -58,51 +60,69 @@ client.on("channelCreate", async (channel) => {
   await handleNewTicket(channel);
 });
 client.on("interactionCreate", async (interaction) => {
-  const handler = interactions[interaction.customId];
-  if (handler) await handler(interaction);
+  try {
+    const handler = interactions[interaction.customId];
+    if (handler) await handler(interaction);
+  } catch (e) {
+    await interaction.message.reply("An error happened inside SkyAnswers, " + e), console.error(e);
+  }
 });
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  const content = message.content.toLowerCase();
+  try {
+    const content = message.content.toLowerCase();
 
-  if (message.stickers.has("1019337107292049471")) {
-    await kti.send("someone blamed you\n" + message.url);
-  }
-  const date = new Date();
-  if (
-    content.includes("<@794377681331945524>") &&
-    date.getUTCHours() >= 3 &&
-    date.getUTCHours() < 13
-  ) {
-    message.reply(
-      "kti is probably away from their computer for the night (8PM-6AM my time, <t:14400:t>-<t:50400:t> your time)"
-    );
-  }
+    if (message.stickers.has("1019337107292049471")) {
+      await kti.send("someone blamed you\n" + message.url);
+    }
+    const date = new Date();
+    if (
+      content.includes("<@794377681331945524>") &&
+      date.getUTCHours() >= 3 &&
+      date.getUTCHours() < 13
+    ) {
+      message.reply(
+        "kti is probably away from their computer for the night (8PM-6AM my time, <t:14400:t>-<t:50400:t> your time)"
+      );
+    }
 
-  if (content == "sky bump") await bump(message.channel);
-  if (content == "sky unlock") await unlockChannel(message.channel);
-  if (content == "sky mod" || content == "sky pack") await message.reply("ha ha very funny");
-  if (content.startsWith("sky help") || content == "<@" + client.user.id + ">")
-    await help(message.channel);
-  handleCommand("sky search", content, async (q) => {
-    await message.channel.sendTyping();
-    await message.channel.send(await search(q, message.channel));
-  });
-  handleCommand("-mod", content, async (id) => await findMod(message, id));
-  handleCommand("-pack", content, async (id) => await findPack(message, id));
-
-  if (db) {
-    const { error } = await db.from("messages").insert({
-      id: message.id,
-      time: new Date(message.createdTimestamp),
-      status: message.member.presence?.status,
-      author: message.member.id,
-      pings: Array.from(message.mentions.users.values()).map((p) => p.id),
+    if (content.startsWith("sky mod") || content.startsWith("sky pack") || content == "-help")
+      await message.reply("ha ha very funny\n(you mixed up `sky ` and `-`)");
+    if (content == "-pullrepo") await message.reply("it's `-invalidate` now");
+    if (content == "-repo") await message.reply("it's `-update [dl url]` now");
+    if (content == "sky bump") await bump(message.channel);
+    if (content == "sky unlock") await unlockChannel(message.channel);
+    if (content.startsWith("sky help") || content == "<@" + client.user.id + ">")
+      await help(message.channel);
+    await handleCommand("sky search", content, async (q) => {
+      await message.channel.sendTyping();
+      await message.channel.send(await search(q, message.channel));
     });
-    if (error) throw error;
-  } else {
-    console.warn("you should set up the db");
+    await handleCommand("-mod", content, async (query) => await findItem(message, query, "mods"));
+    await handleCommand("-pack", content, async (query) => await findItem(message, query, "packs"));
+    if (content == "-mods" || content == "-modlist") await listMods(message);
+    if (content == "-packs" || content == "-packlist") await listPacks(message);
+    await handleCommand("-update", message.content, async (url) => await updateMod(message, url));
+    if (content == "-invalidate") {
+      invalidateTrackedData();
+      await message.reply("cleared caches");
+    }
+
+    if (db) {
+      const { error } = await db.from("messages").insert({
+        id: message.id,
+        time: new Date(message.createdTimestamp),
+        status: message.member.presence?.status,
+        author: message.member.id,
+        pings: Array.from(message.mentions.users.values()).map((p) => p.id),
+      });
+      if (error) throw error;
+    } else {
+      console.warn("you should set up the db");
+    }
+  } catch (e) {
+    await message.reply("An error happened inside SkyAnswers, " + e), console.error(e);
   }
 });
 
