@@ -51,6 +51,40 @@ export const findItem = async (message, query, type) => {
 };
 
 /**
+ * @param {string} query
+ * @returns {import("discord.js").Message}
+ */
+export const getDiscordMessage = async (query) => {
+  const items = await getTrackedData(
+    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/discords.json"
+  );
+  const item = await queryDownloadable(items, query);
+  if (!item) {
+    return { content: `No discord found for "${query}"` };
+  }
+  const message = {
+    content: "discord.gg/" + item.code,
+    embeds: [
+      {
+        color: 0x8ff03f,
+        title: item.fancyname,
+      },
+    ],
+  };
+  if (item.icon) {
+    message.embeds[0].thumbnail = {
+      url:
+        "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/discords/" +
+        encodeURIComponent(item.icon),
+    };
+  }
+  if (item.description) {
+    message.embeds[0].description = item.description;
+  }
+  return message;
+};
+
+/**
  * @param {import("discord.js").Message} message
  */
 export const listMods = async (message) => {
@@ -62,10 +96,10 @@ export const listMods = async (message) => {
     mod.packages
       ? 0
       : mod.categories?.includes("2;All Skyblock")
-      ? 2
+      ? 1
       : mod.categories?.includes("5;All PvP")
-      ? 3
-      : 1;
+      ? 2
+      : 3;
   const formatMods = (modList) =>
     modList
       .map((mod) => `- ${mod.display} by ${mod.creator}: ` + "`-mod " + mod.id + "`")
@@ -77,19 +111,19 @@ export const listMods = async (message) => {
       (mod) => `- ${mod.display}: ` + [mod.id, ...mod.packages].map((p) => "`" + p + "`").join(", ")
     )
     .join("\n");
-  const otherStr = formatMods(activeMods.filter((mod) => modType(mod) == 1));
-  const sbStr = formatMods(activeMods.filter((mod) => modType(mod) == 2));
-  const pvpStr = formatMods(activeMods.filter((mod) => modType(mod) == 3));
+  const sbStr = formatMods(activeMods.filter((mod) => modType(mod) == 1));
+  const pvpStr = formatMods(activeMods.filter((mod) => modType(mod) == 2));
+  const otherStr = formatMods(activeMods.filter((mod) => modType(mod) == 3));
   const embed = {
     color: message.member.displayColor || 0x8ff03f,
     description: `**Bundles**
 ${bundleStr}
-**Other**
-${otherStr}
 **Skyblock**
 ${sbStr}
 **PvP**
-${pvpStr}`,
+${pvpStr}
+**Other**
+${otherStr}`,
   };
   await message.reply({
     embeds: [embed],
@@ -105,26 +139,26 @@ export const listPacks = async (message) => {
   const activePacks = packs.filter((pack) => !pack.hidden);
   const packType = (pack) =>
     pack.categories?.includes("1;All Skyblock")
-      ? 2
+      ? 1
       : pack.categories?.includes("3;All PvP")
-      ? 3
-      : 1;
+      ? 2
+      : 3;
   const formatPacks = (packList) =>
     packList
       .map((pack) => `- ${pack.display} by ${pack.creator}: ` + "`-pack " + pack.id + "`")
       .join("\n");
 
-  const otherStr = formatPacks(activePacks.filter((pack) => packType(pack) == 1));
-  const sbStr = formatPacks(activePacks.filter((pack) => packType(pack) == 2));
-  const pvpStr = formatPacks(activePacks.filter((pack) => packType(pack) == 3));
+  const sbStr = formatPacks(activePacks.filter((pack) => packType(pack) == 1));
+  const pvpStr = formatPacks(activePacks.filter((pack) => packType(pack) == 2));
+  const otherStr = formatPacks(activePacks.filter((pack) => packType(pack) == 3));
   const embed = {
     color: message.member.displayColor || 0x8ff03f,
-    description: `**Other**
-${otherStr}
-**Skyblock**
+    description: `**Skyblock**
 ${sbStr}
 **PvP**
-${pvpStr}`,
+${pvpStr}
+**Other**
+${otherStr}`,
   };
   await message.reply({
     embeds: [embed],
@@ -137,6 +171,13 @@ let activeModUpdates = {};
  * @param {string} url
  */
 export const updateMod = async (message, url) => {
+  if (
+    !message.member.roles.cache.has("799020944487612428") &&
+    !message.member.permissions.has("Administrator")
+  ) {
+    await message.reply("why do you think you can do this?");
+    return;
+  }
   const statusMsg = await message.reply(`downloading <${url}>...`);
   const modResp = await fetch(url, {
     headers: {
@@ -243,7 +284,7 @@ const confirmModUpdate = async (interaction) => {
     !interaction.member.roles.cache.has("799020944487612428") &&
     !interaction.member.permissions.has("Administrator")
   ) {
-    await interaction.reply("why do you think you can do this?");
+    await interaction.reply({ content: "why do you think you can do this?", ephemeral: true });
     return;
   }
   await interaction.update({ content: "pushing out update...", components: [] });
@@ -261,7 +302,7 @@ const editModUpdate = async (interaction) => {
     !interaction.member.roles.cache.has("799020944487612428") &&
     !interaction.member.permissions.has("Administrator")
   ) {
-    await interaction.reply("why do you think you can do this?");
+    await interaction.reply({ content: "why do you think you can do this?", ephemeral: true });
     return;
   }
 

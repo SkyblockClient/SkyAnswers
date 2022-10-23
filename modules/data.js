@@ -53,7 +53,7 @@ export const getTrackedData = async (url) => {
 export const queryDownloadable = async (options, query, hosting) => {
   const option = options.find(
     (opt) =>
-      opt.id == query || opt.nicknames?.includes?.(query) || opt.display.toLowerCase() == query
+      opt.id == query || opt.nicknames?.includes?.(query) || opt.display?.toLowerCase() == query
   );
   return (
     option && {

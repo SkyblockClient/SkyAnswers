@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { AuditLogEvent, Client, GatewayIntentBits } from "discord.js";
 import { bump, handleCommand, help, interactions, search } from "./modules/commands.js";
 import { invalidateTrackedData } from "./modules/data.js";
-import { findItem, listMods, listPacks, updateMod } from "./modules/repo.js";
+import { findItem, getDiscordMessage, listMods, listPacks, updateMod } from "./modules/repo.js";
 import { handleNewTicket, unlockChannel } from "./modules/ticket.js";
 const client = new Client({
   intents: [
@@ -87,7 +87,12 @@ client.on("messageCreate", async (message) => {
       );
     }
 
-    if (content.startsWith("sky mod") || content.startsWith("sky pack") || content == "-help")
+    if (
+      content.startsWith("sky mod") ||
+      content.startsWith("sky pack") ||
+      content.startsWith("sky discord") ||
+      content == "-help"
+    )
       await message.reply("ha ha very funny\n(you mixed up `sky ` and `-`)");
     if (content == "-pullrepo") await message.reply("it's `-invalidate` now");
     if (content == "-repo") await message.reply("it's `-update [dl url]` now");
@@ -103,6 +108,15 @@ client.on("messageCreate", async (message) => {
     await handleCommand("-pack", content, async (query) => await findItem(message, query, "packs"));
     if (content == "-mods" || content == "-modlist") await listMods(message);
     if (content == "-packs" || content == "-packlist") await listPacks(message);
+    await handleCommand(
+      "-discord",
+      content,
+      async (query) =>
+        await message.reply({
+          ...(await getDiscordMessage(query)),
+          allowedMentions: { repliedUser: false },
+        })
+    );
     await handleCommand("-update", message.content, async (url) => await updateMod(message, url));
     if (content == "-invalidate") {
       invalidateTrackedData();
