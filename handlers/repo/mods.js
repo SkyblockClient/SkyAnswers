@@ -1,4 +1,4 @@
-import { getTrackedData } from "../../modules/data.js";
+import { getTrackedData } from "../../data.js";
 export const command = async ({ respond, member }) => {
   const mods = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"

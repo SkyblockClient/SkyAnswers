@@ -1,4 +1,4 @@
-import { getTrackedData, queryDownloadable } from "../../modules/data.js";
+import { getTrackedData, queryDownloadable } from "../../data.js";
 import { hyperlink } from "discord.js";
 export const getDownloadableEmbed = (downloadable) => ({
   ...(downloadable.screenshot ? { image: { url: downloadable.screenshot } } : {}),

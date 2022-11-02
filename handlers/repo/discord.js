@@ -1,4 +1,4 @@
-import { getTrackedData, queryDownloadable } from "../../modules/data.js";
+import { getTrackedData, queryDownloadable } from "../../data.js";
 export const getDiscordEmbed = (item) => {
   const message = {
     content: "discord.gg/" + item.code,

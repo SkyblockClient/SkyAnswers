@@ -1,4 +1,4 @@
-import { searchEmbed } from "../../modules/data.js";
+import { searchEmbed } from "../../data.js";
 
 export const command = async ({ channel, respond }, query) => {
   await channel.sendTyping();

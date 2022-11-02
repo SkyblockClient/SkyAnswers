@@ -52,7 +52,12 @@ client.on("interactionCreate", async (interaction) => {
       ephemeral: true,
     });
   }
-  await handler.command(interaction);
+  try {
+    await handler.command(interaction);
+  } catch (e) {
+    console.error(e);
+    await interaction.channel.send("An error happened inside SkyAnswers, " + e);
+  }
 });
 
 client.on("messageCreate", async (message) => {
@@ -61,19 +66,24 @@ client.on("messageCreate", async (message) => {
   const content = message.content.toLowerCase();
   message.respond = (data) => message.reply({ ...data, allowedMentions: { repliedUser: false } });
 
-  await Promise.all(
-    client.handlers.map(async (handler) => {
-      if (handler.when.all == "messages") await handler.command(message);
-      if (!handler.when.starts) return;
-      const match = handler.when.input
-        ? handler.when.starts.find((name) => content.startsWith(name + " "))
-        : handler.when.starts.find((name) => content == name);
-      if (!match) return;
+  try {
+    await Promise.all(
+      client.handlers.map(async (handler) => {
+        if (handler.when.all == "messages") await handler.command(message);
+        if (!handler.when.starts) return;
+        const match = handler.when.input
+          ? handler.when.starts.find((name) => content.startsWith(name + " "))
+          : handler.when.starts.find((name) => content == name);
+        if (!match) return;
 
-      if (handler.when.input) await handler.command(message, content.slice(match.length + 1));
-      else await handler.command(message);
-    })
-  );
+        if (handler.when.input) await handler.command(message, content.slice(match.length + 1));
+        else await handler.command(message);
+      })
+    );
+  } catch (e) {
+    await message.reply("An error happened inside SkyAnswers, " + e);
+    console.error(e);
+  }
 });
 
 client.login();

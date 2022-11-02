@@ -1,5 +1,5 @@
 import { ButtonStyle, ComponentType } from "discord.js";
-import { getTrackedData } from "../../modules/data.js";
+import { getTrackedData } from "../../data.js";
 export const findAutoresps = async (message) => {
   const options = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/botautoresponse.json"

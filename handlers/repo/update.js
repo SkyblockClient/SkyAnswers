@@ -3,17 +3,18 @@ import fetch from "cross-fetch";
 import { createHash } from "crypto";
 import { ComponentType, ButtonStyle } from "discord.js";
 
+const modsFileEndpoint =
+  "https://api.github.com/repos/" +
+  (process.env.USER == "ubuntu" ? "SkyblockClient" : "KTibow") +
+  "/SkyblockClient-REPO/contents/files/mods.json";
 export let activeUpdates = [];
 export const sendNewMod = async (modData) => {
-  const modsFileResp = await fetch(
-    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${process.env.GH_KEY}`,
-      },
-    }
-  );
+  const modsFileResp = await fetch(modsFileEndpoint, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${process.env.GH_KEY}`,
+    },
+  });
   const modsFileInfo = await modsFileResp.json();
   const mods = JSON.parse(atob(modsFileInfo.content));
 
@@ -24,21 +25,18 @@ export const sendNewMod = async (modData) => {
   );
   if (JSON.stringify(updatedMods, null, 4) == JSON.stringify(mods, null, 4))
     throw "Identical files";
-  const resp = await fetch(
-    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
-    {
-      method: "PUT",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${process.env.GH_KEY}`,
-      },
-      body: JSON.stringify({
-        message: `Update ${modData.forge_id || modData.id} to ${modData.file}`,
-        content: btoa(JSON.stringify(updatedMods, null, 4) + "\n"),
-        sha: modsFileInfo.sha,
-      }),
-    }
-  );
+  const resp = await fetch(modsFileEndpoint, {
+    method: "PUT",
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${process.env.GH_KEY}`,
+    },
+    body: JSON.stringify({
+      message: `Update ${modData.forge_id || modData.id} to ${modData.file}`,
+      content: btoa(JSON.stringify(updatedMods, null, 4) + "\n"),
+      sha: modsFileInfo.sha,
+    }),
+  });
   if (!resp.ok) {
     console.log(await resp.text());
     throw resp.statusText;

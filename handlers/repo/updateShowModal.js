@@ -14,9 +14,10 @@ export const command = async (interaction) => {
 
   const source = interaction.message.id;
   const modData = activeUpdates[source];
+  if (!modData) throw "could not find that update";
   const inputs = [
     {
-      label: "Mod ID",
+      label: "Mod ID (used as id, filled from forge_id)",
       customId: "id",
       value: modData.forge_id,
     },
