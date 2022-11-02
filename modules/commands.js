@@ -1,4 +1,4 @@
-import { search as searchQuery } from "./data.js";
+import { getTrackedData, search as searchQuery } from "./data.js";
 import { interactions as repoInteractions } from "./repo.js";
 import { interactions as ticketInteractions } from "./ticket.js";
 
@@ -76,6 +76,7 @@ export const help = async (channel) => {
 - updating kti will notify kti
 - mentioning kti during sleep hours will reply with a notice
 - opening a ticket will start the support process
+- messages will eventually be used to track when people are awake
 Commands:
 - sky bump: bumps a ticket
 - sky unlock: tries to give send message perms to everyone in a ticket
@@ -83,6 +84,34 @@ Commands:
 - sky help / ping me: this
 - -mod [id/name]: tells you about a mod
 - -pack [id/name]: tells you about a resource pack
+- -mods: lists the mods
+- -packs: lists the resource packs
+- -discord [id/name]: gets the link to a discord server we have
 - -invalidate: clears data caches
 - -update [url]: updates a mod`);
+};
+
+/**
+ * @param {string} message
+ */
+export const findAutoresp = async (message) => {
+  const options = await getTrackedData(
+    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/botautoresponse.json"
+  );
+  const matches = options
+    .map((option) => {
+      if (option.unclebot) return message == option.triggers[0][0] && option.response;
+
+      const matcher = new RegExp(
+        option.triggers
+          .map((part) => {
+            const escapeForGroup = (str) => str.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
+            return `(?:${part.map((trig) => escapeForGroup(trig)).join("|")})`;
+          })
+          .join("[^]*")
+      );
+      if (matcher.test(message)) return option.response;
+    })
+    .filter((resp) => resp);
+  return matches;
 };

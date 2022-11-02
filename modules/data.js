@@ -38,6 +38,28 @@ export const search = async (query) => {
   if (answer.answer == `No idea ¯\\_(ツ)_/¯`) return null;
   return answer;
 };
+export const searchEmbed = async (query) => {
+  const answer = await search(query);
+  if (!answer) {
+    return {
+      embeds: [
+        {
+          title: "Nothing relevant in the FAQ found",
+          color: 0xff8888,
+        },
+      ],
+    };
+  }
+  return {
+    embeds: [
+      {
+        title: `FAQ: ${answer.questions[0]}`,
+        description: answer.answer,
+        color: 0x88ff88,
+      },
+    ],
+  };
+};
 
 let trackedData = {};
 export const invalidateTrackedData = () => (trackedData = {});
@@ -62,7 +84,7 @@ export const queryDownloadable = async (options, query, hosting) => {
         option.url ||
         "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/" +
           hosting +
-          "/" +
+          "s/" +
           option.file,
     }
   );

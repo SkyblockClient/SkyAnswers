@@ -66,7 +66,7 @@ export const getDiscordMessage = async (query) => {
     content: "discord.gg/" + item.code,
     embeds: [
       {
-        color: 0x8ff03f,
+        color: 0x88ff88,
         title: item.fancyname,
       },
     ],
@@ -115,7 +115,7 @@ export const listMods = async (message) => {
   const pvpStr = formatMods(activeMods.filter((mod) => modType(mod) == 2));
   const otherStr = formatMods(activeMods.filter((mod) => modType(mod) == 3));
   const embed = {
-    color: message.member.displayColor || 0x8ff03f,
+    color: message.member.displayColor || 0x88ff88,
     description: `**Bundles**
 ${bundleStr}
 **Skyblock**
@@ -152,7 +152,7 @@ export const listPacks = async (message) => {
   const pvpStr = formatPacks(activePacks.filter((pack) => packType(pack) == 2));
   const otherStr = formatPacks(activePacks.filter((pack) => packType(pack) == 3));
   const embed = {
-    color: message.member.displayColor || 0x8ff03f,
+    color: message.member.displayColor || 0x88ff88,
     description: `**Skyblock**
 ${sbStr}
 **PvP**
@@ -243,7 +243,7 @@ nothing will happen until you press a button`,
 };
 const sendNewMod = async (modData) => {
   const modsFileResp = await fetch(
-    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
+    "https://api.github.com/repos/SkyblockClient/SkyblockClient-REPO/contents/files/mods.json",
     {
       headers: {
         Accept: "application/vnd.github+json",
@@ -256,7 +256,7 @@ const sendNewMod = async (modData) => {
 
   const updatedMods = mods.map((mod) => (mod.id == modData.id ? { ...mod, ...modData } : mod));
   const resp = await fetch(
-    "https://api.github.com/repos/KTibow/SkyblockClient-REPO/contents/files/mods.json",
+    "https://api.github.com/repos/SkyblockClient/SkyblockClient-REPO/contents/files/mods.json",
     {
       method: "PUT",
       headers: {

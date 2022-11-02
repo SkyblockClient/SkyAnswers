@@ -11,3 +11,9 @@ to only answer tickets, but extended to replace another bot
    optional: set `SB_KEY` for the supabase db and `AZURE_QA_KEY` for the azure question answering if you want
 4. make sure the bot has edit channel perms
 5. `npm run run`
+
+## syncing
+
+```
+rsync -a -v --filter=':- .gitignore' -e "ssh -i $HOME/[key path]" . [host]:~/skyanswersrsync
+```

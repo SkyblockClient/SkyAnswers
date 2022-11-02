@@ -158,7 +158,7 @@ const sendLogInstructions = async (interaction) => {
   if (interaction.customId == "crashTypeCP") {
     await interaction.update({ content: "User crashed w/ CrashPatch", components: [] });
     await interaction.channel.send(
-      'Click the button that says "Copy crash report" and paste it here.'
+      '**Click the button that says "Copy crash report" and paste it here.**'
     );
   } else if (interaction.customId == "crashTypeLauncher") {
     await interaction.update({ content: "User crashed into the launcher", components: [] });
