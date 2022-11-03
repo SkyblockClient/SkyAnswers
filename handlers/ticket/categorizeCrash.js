@@ -1,4 +1,5 @@
 import { InteractionType } from "discord.js";
+import { setTicketOpen } from "./start";
 
 export const command = async (interaction) => {
   const origContent = interaction.message.content;
@@ -33,6 +34,7 @@ Go to the \`logs\` folder and upload the file called \`latest.log\`.`);
       await interaction.channel.send("Describe how you crashed so we can help you.");
       break;
   }
+  await setTicketOpen(interaction.channel, true);
 };
 export const when = {
   interactionId: "ticketCategorizeCrash",

@@ -9,6 +9,7 @@ export const setTicketOpen = async (channel, open) => {
       perm.allow.equals(open ? 1024n : 3072n) &&
       perm.deny.equals(open ? 2048n : 0n)
   );
+  console.log("opening", channel, "for", creator);
   if (creator) await channel.permissionOverwrites.edit(creator.id, { SendMessages: open });
   else console.warn("Could not set open for channel", perms);
 };

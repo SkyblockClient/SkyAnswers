@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-const db =
+export const db =
   process.env.SB_KEY &&
   createClient("https://fkjmuugisxgmrklcfyaj.supabase.co", process.env.SB_KEY);
 
