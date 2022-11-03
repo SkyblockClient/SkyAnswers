@@ -5,9 +5,10 @@ export const command = async ({ content, respond }) => {
     date.getUTCHours() >= 3 &&
     date.getUTCHours() < 13
   ) {
-    await respond(
-      "kti is probably away from their computer for the night (8PM-6AM my time, <t:14400:t>-<t:50400:t> your time)"
-    );
+    await respond({
+      content:
+        "kti is probably away from their computer for the night (8PM-6AM my time, <t:14400:t>-<t:50400:t> your time)",
+    });
   }
 };
 export const when = {
