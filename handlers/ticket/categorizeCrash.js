@@ -1,5 +1,5 @@
 import { InteractionType } from "discord.js";
-import { setTicketOpen } from "./start";
+import { setTicketOpen } from "./start.js";
 
 export const command = async (interaction) => {
   const origContent = interaction.message.content;
