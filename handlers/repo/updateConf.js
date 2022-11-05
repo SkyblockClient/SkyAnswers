@@ -16,7 +16,7 @@ export const command = async (interaction) => {
   const source = interaction.message.id;
   const modData = activeUpdates[source];
   await sendNewMod(modData);
-  await interaction.message.edit(`updated ${modData.forge_id} :D`);
+  await interaction.editReply(`updated ${modData.forge_id} :D`);
 };
 export const when = {
   interactionId: "confirmModUpdate",
