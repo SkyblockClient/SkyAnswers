@@ -27,7 +27,7 @@ export const command = async ({ respond }, query) => {
   );
   const item = await queryDownloadable(items, query);
   if (!item) {
-    await respond({ content: `No discord found for "${query}"` });
+    return await respond({ content: `No discord found for "${query}"` });
   }
   await respond(getDiscordEmbed(item));
 };

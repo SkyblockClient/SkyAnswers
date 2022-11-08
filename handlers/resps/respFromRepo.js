@@ -24,6 +24,14 @@ export const findAutoresps = async (message) => {
 };
 export const command = async (message) => {
   if (message.member.roles.cache.has("852016624605462589")) return;
+  if (
+    message.channel.id != "780181693553704973" && // general
+    message.channel.id != "1001798063964303390" && // support
+    message.channel.id != "796546551878516766" && // bot commands
+    !message.channel.name.startsWith("ticket-") &&
+    message.guild.id != "962319226377474078"
+  )
+    return;
   const responses = await findAutoresps(message.content);
   if (responses.length > 3) return;
   await Promise.all(
