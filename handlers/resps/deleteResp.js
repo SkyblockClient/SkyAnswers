@@ -14,6 +14,7 @@ export const command = async (interaction) => {
   try {
     await interaction.message.delete();
   } catch (e) {
+    await interaction.reply({ content: "could not delete", ephemeral: true });
     console.log("could not delete", interaction.message);
   }
 };
