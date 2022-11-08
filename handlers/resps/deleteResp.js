@@ -11,7 +11,11 @@ export const command = async (interaction) => {
   ) {
     return await interaction.reply({ content: "not your autoresponse", ephemeral: true });
   }
-  await interaction.message.delete();
+  try {
+    await interaction.message.delete();
+  } catch (e) {
+    console.log("could not delete", interaction.message);
+  }
 };
 export const when = {
   interactionId: "deleteResp",
