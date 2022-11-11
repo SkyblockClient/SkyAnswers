@@ -8,10 +8,12 @@ const loadHandlers = async () => {
   const handlerPaths = await promise("./handlers/**/*.js");
   return await Promise.all(handlerPaths.map((path) => import(path)));
 };
-const registerCommands = async (body) =>
-  api.put(Routes.applicationGuildCommands(atob(token.split(".")[0])), {
+const registerCommands = async (body) => {
+  const registerEndpoint = Routes.applicationCommands(atob(token.split(".")[0]));
+  api.put(registerEndpoint, {
     body,
   });
+};
 
 const handlers = await loadHandlers();
 const slashCommands = handlers.filter((handler) => handler.when.slash);
