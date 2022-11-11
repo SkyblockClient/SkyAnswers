@@ -5,7 +5,6 @@ export const command = async (interaction) => {
   const message = await interaction.reply({
     content: "blazingly fast ⚡",
     fetchReply: true,
-    ephemeral: true,
   });
   const ping = interaction.client.ws.ping;
   const recieveTime = recievedTime - interaction.createdTimestamp;
@@ -22,6 +21,7 @@ total: ${totalTime}ms`
 export const when = {
   interactionId: "speed",
   interactionType: InteractionType.ApplicationCommand,
+  public: true,
   slash: {
     data: {
       name: "speed",
