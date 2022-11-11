@@ -10,9 +10,14 @@ export const command = async ({ client, respond }) => {
         const invite = await ch.createInvite();
         return "discord.gg/" + invite.code;
       } catch (e) {}
+      return `No invite to "${ch.guild.name} (${ch.guild.id})"`;
     })
   );
-  await respond({ content: invites.filter((inv) => inv).join("\n") });
+  await respond({
+    content: `${client.guilds.cache.size} server(s):
+${invites.filter((inv) => inv).join("\n")}`,
+    allowedMentions: { parse: [] },
+  });
 };
 export const when = {
   starts: ["sky servers"],
