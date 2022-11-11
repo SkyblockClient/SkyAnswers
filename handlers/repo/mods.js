@@ -45,4 +45,5 @@ export const when = {
   starts: ["-mods", "-modlist"],
   desc: "Lists all the mods in SkyClient",
   input: false,
+  public: true,
 };

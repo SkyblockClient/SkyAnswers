@@ -35,4 +35,5 @@ export const when = {
   starts: ["-packs", "-packlist"],
   desc: "Lists all the packs in SkyClient",
   input: false,
+  public: true,
 };

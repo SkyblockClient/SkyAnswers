@@ -19,12 +19,16 @@ const loadHandlers = async () => {
   const handlerPaths = await promise("./handlers/**/*.js");
   client.handlers = await Promise.all(handlerPaths.map((path) => import(path)));
 };
+const checkPublic = (interaction, handler) =>
+  handler.when.public ||
+  ["780181693100982273", "962319226377474078"].includes(interaction.guild.id);
 
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   if (!client.handlers) await loadHandlers();
   await Promise.all(
     client.handlers.map(async (handler) => {
       if (handler.when.all != "member updates") return;
+      if (!checkPublic(newUser, handler)) return;
       await handler.command(oldUser, newUser);
     })
   );
@@ -35,6 +39,7 @@ client.on("channelCreate", async (channel) => {
   await Promise.all(
     client.handlers.map(async (handler) => {
       if (handler.when.all != "channels") return;
+      if (!checkPublic(channel, handler)) return;
       await handler.command(channel);
     })
   );
@@ -44,7 +49,9 @@ client.on("interactionCreate", async (interaction) => {
   const name = interaction.customId ? interaction.customId.split("|")[0] : interaction.commandName;
   const handler = client.handlers.find(
     (handler) =>
-      handler.when.interactionId == name && handler.when.interactionType == interaction.type
+      handler.when.interactionId == name &&
+      handler.when.interactionType == interaction.type &&
+      checkPublic(interaction, handler)
   );
   if (!handler) {
     return await interaction.reply({
@@ -69,6 +76,7 @@ client.on("messageCreate", async (message) => {
   try {
     await Promise.all(
       client.handlers.map(async (handler) => {
+        if (!checkPublic(message, handler)) return;
         if (handler.when.all == "messages") await handler.command(message);
         if (!handler.when.starts) return;
         const match = handler.when.input

@@ -42,4 +42,5 @@ export const when = {
   starts: ["-mod", "-pack"],
   desc: "Gives info about a mod or pack",
   input: true,
+  public: true,
 };

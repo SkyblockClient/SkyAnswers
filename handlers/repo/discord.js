@@ -35,4 +35,5 @@ export const when = {
   starts: ["-discord"],
   desc: "Gives the link to a discord",
   input: true,
+  public: true,
 };
