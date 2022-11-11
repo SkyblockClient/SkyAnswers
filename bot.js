@@ -41,10 +41,10 @@ client.on("channelCreate", async (channel) => {
 });
 client.on("interactionCreate", async (interaction) => {
   if (!client.handlers) await loadHandlers();
+  const name = interaction.customId ? interaction.customId.split("|")[0] : interaction.commandName;
   const handler = client.handlers.find(
     (handler) =>
-      handler.when.interactionId == interaction.customId.split("|")[0] &&
-      handler.when.interactionType == interaction.type
+      handler.when.interactionId == name && handler.when.interactionType == interaction.type
   );
   if (!handler) {
     return await interaction.reply({
