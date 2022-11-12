@@ -1,7 +1,7 @@
 import { getTrackedData, queryDownloadable } from "../../data.js";
 import { hyperlink } from "discord.js";
 export const getDownloadableEmbed = (downloadable) => ({
-  ...(downloadable.screenshot ? { image: { url: downloadable.screenshot } } : {}),
+  ...(downloadable.screenshot ? { image: { url: encodeURI(downloadable.screenshot) } } : {}),
   color: downloadable.hash && Number("0x" + downloadable.hash.slice(0, 6)),
   title: downloadable.display,
   description: downloadable.description,
