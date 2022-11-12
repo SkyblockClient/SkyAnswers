@@ -22,5 +22,8 @@
     "glob-promise": "^5.0.0",
     "jszip": "^3.10.1",
     "node": "^19.0.0"
+  },
+  "dependencies": {
+    "js-levenshtein": "^1.1.6"
   }
 }
