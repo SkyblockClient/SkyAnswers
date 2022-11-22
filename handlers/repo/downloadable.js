@@ -1,39 +1,43 @@
 import { getTrackedData, queryDownloadable } from "../../data.js";
 import { hyperlink } from "discord.js";
 import levenshtein from "js-levenshtein";
-export const getDownloadableEmbed = (downloadable) => ({
-  ...(downloadable.screenshot ? { image: { url: encodeURI(downloadable.screenshot) } } : {}),
-  color: downloadable.hash && Number("0x" + downloadable.hash.slice(0, 6)),
-  title: downloadable.display,
-  description: downloadable.description,
-  fields: [
-    ...(downloadable.command ? [{ name: "Command", value: downloadable.command }] : []),
-    ...(downloadable.hidden
-      ? [
-          {
-            name: "Warning",
-            value:
-              "This item is hidden, so it won't show up in the normal installer. It might be internal, part of a bundle, or outdated.",
-          },
-        ]
-      : []),
-    {
-      name: "Download",
-      value: hyperlink(
-        downloadable.file,
-        downloadable.download.includes(" ")
-          ? encodeURI(downloadable.download)
-          : downloadable.download
-      ),
+export const getDownloadableEmbed = (downloadable, bundledIn) => {
+  const embed = {
+    color: downloadable.hash && Number("0x" + downloadable.hash.slice(0, 6)),
+    title: downloadable.display,
+    description: downloadable.description,
+    fields: [
+      {
+        name: "Download",
+        value: hyperlink(
+          downloadable.file,
+          downloadable.download.includes(" ")
+            ? encodeURI(downloadable.download)
+            : downloadable.download
+        ),
+      },
+    ],
+    footer: { text: `Created by ${downloadable.creator}` },
+    thumbnail: {
+      url: `https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/icons/${encodeURIComponent(
+        downloadable.icon
+      )}`,
     },
-  ],
-  footer: { text: `Created by ${downloadable.creator}` },
-  thumbnail: {
-    url: `https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/icons/${encodeURIComponent(
-      downloadable.icon
-    )}`,
-  },
-});
+  };
+  if (downloadable.screenshot) embed.image = { url: encodeURI(downloadable.screenshot) };
+  if (downloadable.command) embed.fields.unshift({ name: "Command", value: downloadable.command });
+  if (downloadable.hidden)
+    embed.fields.unshift({
+      name: "Note",
+      value:
+        "This item is hidden, so it won't show up in the normal installer. " +
+        (bundledIn
+          ? `You can get it in the bundle ${bundledIn}.`
+          : "It might be internal or outdated."),
+    });
+
+  return embed;
+};
 const getDistance = (item, query) => {
   const allNames = [item.id, ...(item.nicknames || []), item.display].map((name) =>
     name.toLowerCase()
@@ -57,8 +61,12 @@ export const command = async ({ content, respond }, query) => {
         (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ""),
     });
   }
+  let bundledIn;
+  if (item.hidden) {
+    bundledIn = items.find((otherItem) => otherItem.packages?.includes(item.id))?.id;
+  }
   await respond({
-    embeds: [getDownloadableEmbed(item)],
+    embeds: [getDownloadableEmbed(item, bundledIn)],
   });
 };
 export const when = {
