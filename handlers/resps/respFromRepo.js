@@ -1,12 +1,13 @@
 import { ButtonStyle, ComponentType } from "discord.js";
 import { getTrackedData } from "../../data.js";
-export const findAutoresps = async (message) => {
+export const findAutoresps = async (message, skipNonCommands) => {
   const options = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/botautoresponse.json"
   );
   const matches = options
     .map((option) => {
       if (option.unclebot) return message == option.triggers[0][0] && option.response;
+      if (skipNonCommands) return;
 
       const matcher = new RegExp(
         option.triggers
@@ -23,7 +24,6 @@ export const findAutoresps = async (message) => {
   return matches;
 };
 export const command = async (message) => {
-  if (message.member.roles.cache.has("852016624605462589")) return;
   if (
     message.channel.id != "780181693553704973" && // general
     message.channel.id != "1001798063964303390" && // support
@@ -32,7 +32,10 @@ export const command = async (message) => {
     message.guild.id != "962319226377474078"
   )
     return;
-  const responses = await findAutoresps(message.content);
+  const responses = await findAutoresps(
+    message.content,
+    message.member.roles.cache.has("852016624605462589")
+  );
   if (responses.length > 3) return;
   await Promise.all(
     responses.map((resp) =>
