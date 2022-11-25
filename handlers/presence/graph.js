@@ -14,6 +14,9 @@ export const command = async ({ respond, channel, client }, query) => {
   const allStatuses = ["online", "dnd", "idle", "offline", null].filter((status) =>
     data.some((group) => group.status == status)
   );
+  const silentTimes = Array.from({ length: 24 }, (v, i) => i).filter((hour) =>
+    data.every((group) => group.date_part != hour || group.count < 5)
+  );
 
   const graphSpace = createCanvas(1920, 1080);
   const bgPlugin = {
@@ -81,7 +84,9 @@ export const command = async ({ respond, channel, client }, query) => {
   });
   const buffer = graphSpace.toBuffer("image/png");
   await respond({
-    content: `fyi it's currently ${new Date().getUTCHours()} hours in UTC`,
+    content: `this user is barely online at ${silentTimes
+      .map((time) => `<t:${time * 60 * 60}:t>`)
+      .join(", ")}`,
     files: [
       {
         attachment: buffer,

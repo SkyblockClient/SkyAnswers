@@ -2,8 +2,8 @@ export const command = async ({ content, respond }) => {
   const date = new Date();
   if (
     content.includes("<@794377681331945524>") &&
-    date.getUTCHours() >= 3 &&
-    date.getUTCHours() < 13
+    date.getUTCHours() >= 4 &&
+    date.getUTCHours() < 14
   ) {
     await respond({
       content:
