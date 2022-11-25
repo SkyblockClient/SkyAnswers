@@ -1,13 +1,95 @@
 import { db } from "./recorder.js";
+import { createCanvas } from "canvas";
+import chartPkg from "chart.js";
+const { Chart } = chartPkg;
 
-export const command = async ({ respond }, query) => {
+export const command = async ({ respond, channel, client }, query) => {
   if (!db) throw "no db hooked up";
   const user = query.match(/[0-9]+/)[0];
   if (!user) throw "no user specified";
-  throw "this is still wip";
-  const { data, error } = await db.from("messages").select("time, status").eq("author", user);
+  channel.sendTyping();
+
+  const { data, error } = await db.rpc("get_message_times", { author_to_use: user });
   if (error) throw error;
-  console.log(data);
+  const allStatuses = ["online", "dnd", "idle", "offline", null].filter((status) =>
+    data.some((group) => group.status == status)
+  );
+
+  const graphSpace = createCanvas(1920, 1080);
+  const bgPlugin = {
+    id: "custom_canvas_background_color",
+    beforeDraw: (chart) => {
+      const ctx = chart.canvas.getContext("2d");
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-over";
+      ctx.fillStyle = "#2e3440";
+      ctx.fillRect(0, 0, chart.width, chart.height);
+      ctx.restore();
+    },
+  };
+  Chart.defaults.color = "white";
+  Chart.defaults.font.family = "system-ui, Roboto, sans-serif";
+  Chart.defaults.font.size = 27;
+
+  const chart = new Chart(graphSpace, {
+    type: "bar",
+    data: {
+      labels: Array.from({ length: 24 }, (v, i) => i),
+      datasets: allStatuses.map((status) => ({
+        label: status,
+        data: Array.from(
+          { length: 24 },
+          (v, i) => data.find((group) => group.status == status && group.date_part == i)?.count || 0
+        ),
+        backgroundColor:
+          status == "dnd"
+            ? "#bf616a"
+            : status == "online"
+            ? "#a3be8c"
+            : status == "idle"
+            ? "#ebcb8b"
+            : status == "offline"
+            ? "#434c5e"
+            : "#b48ead",
+      })),
+    },
+    options: {
+      scales: {
+        x: {
+          stacked: true,
+          grid: {
+            color: "#3b4252",
+            lineWidth: 4,
+          },
+        },
+        y: {
+          stacked: true,
+          grid: {
+            color: "#3b4252",
+            lineWidth: 4,
+          },
+        },
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: `${client.users.cache.get(user)?.username || "unknown"} messages / hour (utc)`,
+        },
+      },
+    },
+    plugins: [bgPlugin],
+  });
+  const buffer = graphSpace.toBuffer("image/png");
+  await respond({
+    content: `fyi it's currently ${new Date().getUTCHours()} hours in UTC`,
+    files: [
+      {
+        attachment: buffer,
+        name: "messageTimes.png",
+        contentType: "image/png",
+      },
+    ],
+  });
 };
 export const when = {
   starts: ["sky online"],
