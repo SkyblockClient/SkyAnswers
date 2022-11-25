@@ -76,7 +76,7 @@ export const command = async ({ respond, channel, client }, query) => {
       plugins: {
         title: {
           display: true,
-          text: `${client.users.cache.get(user)?.username || "unknown"} messages / hour (utc)`,
+          text: `messages / hour (utc)`,
         },
       },
     },
@@ -84,7 +84,7 @@ export const command = async ({ respond, channel, client }, query) => {
   });
   const buffer = graphSpace.toBuffer("image/png");
   await respond({
-    content: `this user is barely online at ${silentTimes
+    content: `<@${user}> is barely online at ${silentTimes
       .map((time) => `<t:${time * 60 * 60}:t>`)
       .join(", ")}`,
     files: [
@@ -94,6 +94,7 @@ export const command = async ({ respond, channel, client }, query) => {
         contentType: "image/png",
       },
     ],
+    allowedMentions: { parse: [] },
   });
 };
 export const when = {
