@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { promise } from "glob-promise";
 const client = new Client({
   intents: [
@@ -9,6 +9,7 @@ const client = new Client({
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.MessageContent,
   ],
+  partials: [Partials.Channel],
 });
 
 console.log("Connecting...");
@@ -20,8 +21,7 @@ const loadHandlers = async () => {
   client.handlers = await Promise.all(handlerPaths.map((path) => import(path)));
 };
 const checkPublic = (interaction, handler) =>
-  handler.when.public ||
-  ["780181693100982273", "962319226377474078"].includes(interaction.guild.id);
+  handler.when.public || ["780181693100982273", "962319226377474078"].includes(interaction.guildId);
 
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   if (!client.handlers) await loadHandlers();
