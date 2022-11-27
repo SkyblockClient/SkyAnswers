@@ -2,10 +2,10 @@ import { ChannelType } from "discord.js";
 
 export const command = async (message) => {
   if (message.channel.type != ChannelType.DM) return;
-  const staffChat = message.client.channels.cache.get("796895966414110751");
-  if (!staffChat) return;
+  const memberLogs = message.client.channels.cache.get("797866972858941451");
+  if (!memberLogs) return;
   const { content, author } = message;
-  await staffChat.send({
+  await memberLogs.send({
     content: `some dude (<@${author.id}>) just dmed me
 \`\`\`
 ${content}
