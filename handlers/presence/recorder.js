@@ -10,7 +10,6 @@ export const command = async (message) => {
       time: new Date(message.createdTimestamp),
       status: message.member.presence?.status,
       author: message.member.id,
-      pings: Array.from(message.mentions.users.values()).map((p) => p.id),
     });
     if (error) throw error;
   } else {
