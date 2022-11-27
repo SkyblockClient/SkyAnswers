@@ -2,6 +2,7 @@ import { ChannelType } from "discord.js";
 
 export const command = async (message) => {
   if (message.channel.type != ChannelType.DM) return;
+  if (message.author.id == "884534013241462806") return await message.reply("no");
   const memberLogs = message.client.channels.cache.get("797866972858941451");
   if (!memberLogs) return;
   const { content, author } = message;
@@ -9,7 +10,7 @@ export const command = async (message) => {
     content: `some dude (<@${author.id}>) just dmed me
 \`\`\`
 ${content}
-\`\`\``,
+\`\`\``.slice(0, 1999),
     allowedMentions: { parse: [] },
   });
 };
