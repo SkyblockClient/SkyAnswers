@@ -42,14 +42,13 @@ export const command = async ({ respond, guild }) => {
       }
     })
   );
-  const chunkedTickets = ticketTable.reduce((resultArray, item, index) => {
-    const chunkIndex = Math.floor(index / 15);
-
-    if (!resultArray[chunkIndex]) {
-      resultArray[chunkIndex] = []; // start a new chunk
+  const chunkedTickets = ticketTable.reduce((resultArray, item) => {
+    let currentList = resultArray.at(-1);
+    if (!currentList || currentList.join("\n").length + item.length > 2000) {
+      currentList = [];
+      resultArray.push(currentList);
     }
-
-    resultArray[chunkIndex].push(item);
+    currentList.push(item);
 
     return resultArray;
   }, []);
