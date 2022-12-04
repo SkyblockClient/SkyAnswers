@@ -13,4 +13,5 @@ export const command = async (message) => {
 export const when = {
   all: "messages",
   desc: "Corrects incorrect commands",
+  public: true,
 };
