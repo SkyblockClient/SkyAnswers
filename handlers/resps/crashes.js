@@ -1,7 +1,10 @@
 import { getTrackedData } from "../../data.js";
 const hastebinRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i;
 
-const verbalizeCrash = async (log) => {
+const verbalizeCrash = async (log, isSkyclient) => {
+  const pathIndicator = "`";
+  const gameRoot = ".minecraft";
+  const profileRoot = isSkyclient ? ".minecraft/skyclient" : ".minecraft";
   const crashData = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/CrashData/main/crashes.json"
   );
@@ -18,7 +21,14 @@ const verbalizeCrash = async (log) => {
     );
     if (!groupInfo.length) return;
     return `**${type.name}**
-${groupInfo.map((info) => info.fix).join("\n")}`;
+${groupInfo
+  .map((info) =>
+    info.fix
+      .replaceAll("%pathindicator%", pathIndicator)
+      .replaceAll("%gameroot%", gameRoot)
+      .replaceAll("%profileroot%", profileRoot)
+  )
+  .join("\n")}`;
   });
   return crashGroups.filter((group) => group).join("\n");
 };
@@ -49,4 +59,5 @@ export const command = async (message) => {
 export const when = {
   all: "messages",
   desc: "Provides info and recommendations for crashes",
+  public: true,
 };
