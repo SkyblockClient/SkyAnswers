@@ -63,7 +63,7 @@ export const command = async ({ content, respond }, query) => {
   }
   let bundledIn;
   if (item.hidden) {
-    bundledIn = items.find((otherItem) => otherItem.packages?.includes(item.id))?.name;
+    bundledIn = items.find((otherItem) => otherItem.packages?.includes(item.id))?.display;
   }
   await respond({
     embeds: [getDownloadableEmbed(item, bundledIn)],
