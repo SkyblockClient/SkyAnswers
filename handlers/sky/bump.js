@@ -6,7 +6,7 @@ export const command = async ({ channel }) => {
     })
     .first();
   const ticketOwner = openingMessage?.content?.match(/[0-9]+/)?.at(0);
-  const seconds3DaysFromNow = Math.floor(Date.now() / 1000 + 60 * 60 * 24 * 3);
+  const seconds2DaysFromNow = Math.floor(Date.now() / 1000 + 60 * 60 * 24 * 2);
   return await channel.send({
     ...(ticketOwner ? { content: `Hey <@${ticketOwner}>:` } : null),
     embeds: [
@@ -17,7 +17,7 @@ export const command = async ({ channel }) => {
 ***No, all my problems are solved***: Close the ticket. View the ` +
           (openingMessage ? `[pinned message](${openingMessage.url})` : "pinned message") +
           ` at the top, and click the :lock: button to close your ticket.
-If you do not respond in the next 3 days (<t:${seconds3DaysFromNow}:R>), your ticket will be closed.`,
+If you do not respond in the next 3 days (<t:${seconds2DaysFromNow}:R>), your ticket will be closed.`,
         color: 0xffff88,
       },
     ],

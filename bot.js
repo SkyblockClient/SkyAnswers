@@ -98,6 +98,6 @@ setInterval(() => {
   const statuses = ["online", "idle", "dnd"];
   const index = Math.floor(Math.random() * statuses.length);
   client.user.setStatus(statuses[index]);
-}, 1000);
+}, 3000);
 
 client.login();
