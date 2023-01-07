@@ -17,7 +17,7 @@ export const command = async ({ channel }) => {
 ***No, all my problems are solved***: Close the ticket. View the ` +
           (openingMessage ? `[pinned message](${openingMessage.url})` : "pinned message") +
           ` at the top, and click the :lock: button to close your ticket.
-If you do not respond in the next 3 days (<t:${seconds2DaysFromNow}:R>), your ticket will be closed.`,
+If you do not respond in the next 2 days (<t:${seconds2DaysFromNow}:R>), your ticket will be closed.`,
         color: 0xffff88,
       },
     ],

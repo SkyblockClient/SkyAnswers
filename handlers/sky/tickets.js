@@ -11,7 +11,7 @@ export const command = async ({ respond, guild }) => {
       if (closed) {
         const messages = await ticket.messages.fetch();
         const close = await getCloseMessage(messages);
-        const closeIsOld = close && Date.now() - close.createdTimestamp > 1000 * 60 * 60 * 24 * 3;
+        const closeIsOld = close && Date.now() - close.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
         console.log(ticket.name, close, closeIsOld);
         return (
           (closeIsOld ? "ARCHIVE: " : "") +
@@ -26,7 +26,7 @@ export const command = async ({ respond, guild }) => {
         const bump = await getBumpMessage(messages);
         const lastMessage = messages.first();
         if (bump) {
-          const bumpIsOld = Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 3;
+          const bumpIsOld = Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
           return (
             (bumpIsOld ? "OLD BUMP: " : "") +
             `<#${ticket.id}> - ` +
@@ -34,7 +34,7 @@ export const command = async ({ respond, guild }) => {
             (lastMessage.id != bump.id ? " (response)" : "")
           );
         }
-        const messageIsOld = Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 3;
+        const messageIsOld = Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
         return (
           (messageIsOld ? "STALE: " : "") +
           `<#${ticket.id}> - last message <t:${Math.floor(lastMessage.createdTimestamp / 1000)}:R>`
