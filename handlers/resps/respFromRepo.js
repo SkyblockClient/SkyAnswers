@@ -7,7 +7,7 @@ export const findAutoresps = async (message, skipNonCommands) => {
   const matches = options
     .map((option) => {
       if (option.unclebot) return message == option.triggers[0][0] && option.response;
-      if (skipNonCommands) return;
+      if (skipNonCommands && !message.startsWith(".")) return;
 
       const matcher = new RegExp(
         option.triggers
