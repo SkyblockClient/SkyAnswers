@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import fetch from "cross-fetch";
 import { createHash } from "crypto";
 import { ComponentType, ButtonStyle } from "discord.js";
+import { format } from "prettier";
 
 const modsFileEndpoint =
   "https://api.github.com/repos/" +
@@ -23,8 +24,7 @@ export const sendNewMod = async (modData) => {
       ? { ...mod, ...modData }
       : mod
   );
-  if (JSON.stringify(updatedMods, null, 4) == JSON.stringify(mods, null, 4))
-    throw "Identical files";
+  if (JSON.stringify(updatedMods) == JSON.stringify(mods)) throw "Identical files";
   const resp = await fetch(modsFileEndpoint, {
     method: "PUT",
     headers: {
@@ -33,7 +33,7 @@ export const sendNewMod = async (modData) => {
     },
     body: JSON.stringify({
       message: `Update ${modData.forge_id || modData.id} to ${modData.file}`,
-      content: btoa(JSON.stringify(updatedMods, null, 4) + "\n"),
+      content: btoa(format(JSON.stringify(updatedMods, null, 4) + "\n", { parser: "babel" })),
       sha: modsFileInfo.sha,
     }),
   });
