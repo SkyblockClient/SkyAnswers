@@ -4,6 +4,7 @@ export const command = async (message) => {
     content.startsWith("sky mod") ||
     content.startsWith("sky pack") ||
     content.startsWith("sky discord") ||
+    content == "sky invalidate" ||
     content == "-help"
   )
     await message.reply("ha ha very funny\n(you mixed up `sky ` and `-`)");
