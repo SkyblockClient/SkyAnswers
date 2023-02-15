@@ -33,7 +33,7 @@ export const sendNewMod = async (modData) => {
     },
     body: JSON.stringify({
       message: `Update ${modData.forge_id || modData.id} to ${modData.file}`,
-      content: btoa(format(JSON.stringify(updatedMods, null, 4) + "\n", { parser: "json" })),
+      content: btoa(format(JSON.stringify(updatedMods), { parser: "json", tabWidth: 4 })),
       sha: modsFileInfo.sha,
     }),
   });
