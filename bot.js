@@ -28,7 +28,7 @@ client.on("guildMemberUpdate", async (oldUser, newUser) => {
   await Promise.all(
     client.handlers.map(async (handler) => {
       if (handler.when.all != "member updates") return;
-      if (!checkPublic(newUser, handler)) return;
+      if (!checkPublic({ guildId: newUser.guild.id }, handler)) return;
       await handler.command(oldUser, newUser);
     })
   );
