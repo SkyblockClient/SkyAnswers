@@ -1,8 +1,16 @@
 import { db } from "./recorder.js";
 import { createCanvas } from "canvas";
-import chartPkg from "chart.js";
-const { Chart } = chartPkg;
+import {
+  Chart,
+  BarController,
+  BarElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Title,
+} from "chart.js";
 
+Chart.register(BarController, BarElement, LinearScale, CategoryScale, Legend, Title);
 export const command = async ({ respond, channel, client }, query) => {
   if (!db) throw "no db hooked up";
   const user = query.match(/[0-9]+/)[0];
