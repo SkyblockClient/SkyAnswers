@@ -1,10 +1,13 @@
+import { ApplicationCommandType, InteractionType } from "discord.js";
+
 /**
- * @param {import("discord.js").Message} message
+ * @param {import("discord.js").MessageContextMenuCommandInteraction} interaction
  */
-export const command = async (message) => {
-  if (message.author.id != "464851580370419733" || !message.content.includes("ratio")) return;
+export const command = async (interaction) => {
+  interaction.reply({ content: "ratioing", ephemeral: true });
+  const message = interaction.targetMessage;
   await message.react("👎");
-  await Promise.all(
+  await Promise.allSettled(
     [
       ":micro0:1084545760961499177",
       ":micro0:1084545760961499177",
@@ -30,6 +33,13 @@ export const command = async (message) => {
   );
 };
 export const when = {
-  all: "messages",
-  desc: "Ratios ratios",
+  interactionId: "Ratio",
+  interactionType: InteractionType.ApplicationCommand,
+  public: true,
+  slash: {
+    data: {
+      name: "Ratio",
+      type: ApplicationCommandType.Message,
+    },
+  },
 };

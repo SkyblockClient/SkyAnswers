@@ -3,7 +3,10 @@ import { promise } from "glob-promise";
 import "dotenv/config";
 
 const token = process.env.BOT_TOKEN;
-const commandEndpoint = Routes.applicationCommands(atob(token.split(".")[0]));
+const guild = null;
+const commandEndpoint = guild
+  ? Routes.applicationGuildCommands(atob(token.split(".")[0]), guild)
+  : Routes.applicationCommands(atob(token.split(".")[0]));
 const api = new REST({ version: "10" }).setToken(token);
 const loadHandlers = async () => {
   const handlerPaths = await promise("./handlers/**/*.js");

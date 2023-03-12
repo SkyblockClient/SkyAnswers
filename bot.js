@@ -55,7 +55,9 @@ client.on("interactionCreate", async (interaction) => {
   );
   if (!handler) {
     return await interaction.reply({
-      content: `No matching handler found for \`${interaction.customId}\`. This is probably a bug.`,
+      content:
+        `No matching handler found for \`${name}\` with interaction type ` +
+        `\`${interaction.type}\`. This is probably a bug.`,
       ephemeral: true,
     });
   }
