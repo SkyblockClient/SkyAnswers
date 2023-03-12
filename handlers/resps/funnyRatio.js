@@ -2,7 +2,7 @@
  * @param {import("discord.js").Message} message
  */
 export const command = async (message) => {
-  if (!message.content.includes("ratio")) return;
+  if (message.author.id != "464851580370419733" || !message.content.includes("ratio")) return;
   await message.react("👎");
   await Promise.all(
     [
