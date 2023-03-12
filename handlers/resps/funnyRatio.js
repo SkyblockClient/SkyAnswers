@@ -30,7 +30,7 @@ export const command = async (interaction) => {
         ":micro16:1084545720553582673",
         ":micro17:1084545717047144499",
       ].map(async (e) => {
-        await interaction.client.emojis.message.react(e);
+        await message.react(e);
       })
     );
   } catch (e) {
