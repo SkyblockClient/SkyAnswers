@@ -12,7 +12,10 @@ export const command = async ({ client, respond, guild }) => {
             else return `- \`${handler.when.starts.join(" or ")}\`: ${handler.when.desc}`;
           }
           if (handler.when.slash)
-            return `- \`/${handler.when.slash.data.name}\`: ${handler.when.slash.data.description}`;
+            if (handler.when.slash.data.type == 2 || handler.when.slash.data.type == 3)
+              return `- context menu: ${handler.when.slash.data.name}`;
+            else
+              return `- \`/${handler.when.slash.data.name}\`: ${handler.when.slash.data.description}`;
           if (handler.when.all) {
             return `- ${handler.when.all}: ${handler.when.desc}`;
           }
