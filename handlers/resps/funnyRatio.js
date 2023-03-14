@@ -4,7 +4,7 @@ import { ApplicationCommandType, InteractionType } from "discord.js";
  * @param {import("discord.js").MessageContextMenuCommandInteraction} interaction
  */
 export const command = async (interaction) => {
-  interaction.reply({ content: "ratioing", ephemeral: true });
+  interaction.reply({ content: "ratioing" });
   const message = interaction.targetMessage;
   try {
     await message.react("👎");
