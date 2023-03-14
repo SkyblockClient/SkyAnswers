@@ -1,5 +1,7 @@
 export const command = async ({ client, respond, guild }) => {
-  const isInTrusted = ["780181693100982273", "962319226377474078"].includes(guild.id);
+  const isInTrusted =
+    guild.id == "780181693100982273" ||
+    (guild.id == "962319226377474078" && client.user.id == "977585995174252624");
   await respond({
     content:
       "Current handlers:\n" +

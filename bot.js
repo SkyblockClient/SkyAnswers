@@ -22,7 +22,10 @@ const loadHandlers = async () => {
   client.handlers = await Promise.all(handlerPaths.map((path) => import(path)));
 };
 const checkPublic = (interaction, handler) =>
-  handler.when.public || ["780181693100982273", "962319226377474078"].includes(interaction.guildId);
+  handler.when.public ||
+  interaction.guildId == "780181693100982273" ||
+  (interaction.guildId == "962319226377474078" &&
+    interaction.client.user.id == "977585995174252624");
 
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   if (!client.handlers) await loadHandlers();
