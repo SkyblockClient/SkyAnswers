@@ -15,7 +15,7 @@ const client = new Client({
 console.log("Connecting...");
 client.once("ready", () => {
   console.log("Connected");
-  client.user.setStatus("dm me the word frog");
+  client.user.setActivity("dm me the word frog");
 });
 const loadHandlers = async () => {
   const handlerPaths = await promise("./handlers/**/*.js");
