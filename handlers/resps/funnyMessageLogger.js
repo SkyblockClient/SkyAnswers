@@ -10,14 +10,12 @@ export const command = async (message) => {
     message.channel.id != "887818760126345246" // trolling
   )
     return;
-  if (Math.random() > 0.1 || Date.now() - lastTrigger < 120 * 1000) return;
+  if (Math.random() > 0.05 || Date.now() - lastTrigger < 300 * 1000) return;
   lastTrigger = Date.now();
   const messageText = `Message loggers are so dumb. You're seeing this because you have one.
 Message loggers are unethical, besides breaking the TOS. They also require extra effort from you.
 Please uninstall yours. Using a message logger is just sending a sign that you hate everyone.`;
-  const m = await message.channel.send(
-    messageText + "\n⃣".repeat(1000 - messageText.length) + messageText
-  );
+  const m = await message.channel.send(messageText);
   await m.delete();
 };
 export const when = {
