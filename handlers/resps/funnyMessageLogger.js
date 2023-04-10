@@ -10,7 +10,7 @@ export const command = async (message) => {
     message.channel.id != "887818760126345246" // trolling
   )
     return;
-  if (Math.random() > 0.05 || Date.now() - lastTrigger < 300 * 1000) return;
+  if (Math.random() > 0.0001 || Date.now() - lastTrigger < 300 * 1000) return;
   lastTrigger = Date.now();
   const messageLoggers = [
     `There once was a logger of text,
