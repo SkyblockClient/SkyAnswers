@@ -15,7 +15,12 @@ const client = new Client({
 console.log("Connecting...");
 client.once("ready", () => {
   console.log("Connected");
-  client.user.setActivity("dm me the word frog");
+  client.user.setPresence({ activities: [] });
+  setInterval(() => {
+    const statuses = ["online", "idle", "dnd"];
+    const index = Math.floor(Math.random() * statuses.length);
+    client.user.setStatus(statuses[index]);
+  }, 3000);
 });
 const loadHandlers = async () => {
   const handlerPaths = await promise("./handlers/**/*.js");
@@ -50,7 +55,9 @@ client.on("channelCreate", async (channel) => {
 });
 client.on("interactionCreate", async (interaction) => {
   if (!client.handlers) await loadHandlers();
-  const name = interaction.customId ? interaction.customId.split("|")[0] : interaction.commandName;
+  const name = interaction.customId
+    ? interaction.customId.split("|")[0]
+    : interaction.commandName;
   const handler = client.handlers.find(
     (handler) =>
       handler.when.interactionId == name &&
@@ -77,7 +84,8 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!client.handlers) await loadHandlers();
   const content = message.content.toLowerCase();
-  message.respond = (data) => message.reply({ ...data, allowedMentions: { repliedUser: false } });
+  message.respond = (data) =>
+    message.reply({ ...data, allowedMentions: { repliedUser: false } });
 
   try {
     await Promise.all(
@@ -90,7 +98,8 @@ client.on("messageCreate", async (message) => {
           : handler.when.starts.find((name) => content == name);
         if (!match) return;
 
-        if (handler.when.input) await handler.command(message, content.slice(match.length + 1));
+        if (handler.when.input)
+          await handler.command(message, content.slice(match.length + 1));
         else await handler.command(message);
       })
     );
@@ -99,11 +108,5 @@ client.on("messageCreate", async (message) => {
     console.error(e);
   }
 });
-
-setInterval(() => {
-  const statuses = ["online", "idle", "dnd"];
-  const index = Math.floor(Math.random() * statuses.length);
-  client.user.setStatus(statuses[index]);
-}, 3000);
 
 client.login();
