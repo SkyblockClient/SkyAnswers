@@ -7,7 +7,7 @@ import { format } from "prettier";
 const modsFileEndpoint =
   "https://api.github.com/repos/" +
   (process.env.USER == "ubuntu" ? "SkyblockClient" : "KTibow") +
-  "/SkyblockClient-REPO/contents/files/mods.json";
+  "/SkyblockClient-REPO/contents/files/mods_beta.json";
 export let activeUpdates = [];
 export const sendNewMod = async (modData) => {
   const modsFileResp = await fetch(modsFileEndpoint, {
@@ -57,7 +57,7 @@ export const command = async ({ member, respond, content }) => {
   ) {
     return await respond({ content: "why do you think you can do this?" });
   }
-  const url = content.slice(8);
+  const url = content.slice(9);
   const statusMsg = await respond({ content: `downloading <${url}>...` });
   const modResp = await fetch(url, {
     headers: {
@@ -79,6 +79,9 @@ export const command = async ({ member, respond, content }) => {
     const modInfoStr = await modInfoFile.async("text");
     const modInfo = JSON.parse(modInfoStr);
     modId = modInfo[0].modid;
+  } else {
+    statusMsg.edit("failed to auto-identify");
+    return;
   }
 
   statusMsg.edit(`getting the new data for ${modId}...`);
@@ -89,6 +92,14 @@ export const command = async ({ member, respond, content }) => {
     hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
   };
 
+  const buttons = [
+    {
+      type: ComponentType.Button,
+      customId: "confirmModUpdateBeta",
+      label: "Confirm",
+      style: ButtonStyle.Primary,
+    },
+  ];
   statusMsg.edit({
     content: `okay, ready to push out:
 url: \`${modData.url}\`
@@ -98,31 +109,14 @@ nothing will happen until you press a button`,
     components: [
       {
         type: ComponentType.ActionRow,
-        components: [
-          ...(modId
-            ? [
-                {
-                  type: ComponentType.Button,
-                  customId: "confirmModUpdate",
-                  label: "Confirm",
-                  style: ButtonStyle.Primary,
-                },
-              ]
-            : []),
-          {
-            type: ComponentType.Button,
-            customId: "editModUpdate",
-            label: "Edit",
-            style: ButtonStyle.Secondary,
-          },
-        ],
+        components: buttons,
       },
     ],
   });
   activeUpdates[statusMsg.id] = modData;
 };
 export const when = {
-  starts: ["-update"],
-  desc: "Updates a mod to the latest version supplied",
+  starts: ["-update-beta"],
+  desc: "Updates a **beta** mod to the latest version supplied",
   input: true,
 };
