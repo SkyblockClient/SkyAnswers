@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { promise } from "glob-promise";
+import { run } from "./ticketPinger.js";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -21,6 +22,11 @@ client.once("ready", () => {
     const index = Math.floor(Math.random() * statuses.length);
     client.user.setStatus(statuses[index]);
   }, 3000);
+  setInterval(() => {
+    const skyclient = client.guilds.cache.get("780181693100982273");
+    if (!skyclient) return;
+    run(skyclient);
+  }, 60000);
 });
 const loadHandlers = async () => {
   const handlerPaths = await promise("./handlers/**/*.js");
