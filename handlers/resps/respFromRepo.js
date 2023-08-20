@@ -6,13 +6,15 @@ export const findAutoresps = async (message, skipNonCommands) => {
   );
   const matches = options
     .map((option) => {
-      if (option.unclebot) return message == option.triggers[0][0] && option.response;
+      if (option.unclebot)
+        return message == option.triggers[0][0] && option.response;
       if (skipNonCommands && !message.startsWith(".")) return;
 
       const matcher = new RegExp(
         option.triggers
           .map((part) => {
-            const escapeForGroup = (str) => str.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
+            const escapeForGroup = (str) =>
+              str.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
             return `(?:${part.map((trig) => escapeForGroup(trig)).join("|")})`;
           })
           .join("[^]*"),
@@ -26,6 +28,7 @@ export const findAutoresps = async (message, skipNonCommands) => {
 export const command = async (message) => {
   if (
     message.channel.id != "780181693553704973" && // general
+    message.channel.id != "1110717104757416027" && // skyblock talk
     message.channel.id != "1001798063964303390" && // support
     message.channel.id != "796546551878516766" && // bot commands
     !message.channel.name.startsWith("ticket-") &&
