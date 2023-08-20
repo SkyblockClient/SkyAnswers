@@ -15,11 +15,12 @@ export const run = async (guild) => {
         return;
       }
       const messages = await ticket.messages.fetch();
-      const bump = await getBumpMessage(messages);
-      const lastMessage = messages.first();
+      const bump = getBumpMessage(messages);
+      const lastMessage = getLastMessage(messages, ownerId);
       if (!bump) return;
       if (Date.now() - bump.createdTimestamp < 1000 * 60 * 60 * 24 * 2) return;
-      if (lastMessage.id != bump.id) return;
+      if (lastMessage && lastMessage.createdTimestamp > bump.createdTimestamp)
+        return;
       await ticket.send("<@&931626562539909130> time to close (stale bump)");
     })
   );
@@ -43,6 +44,12 @@ const getBumpMessage = (messages) => {
     .filter((message) =>
       message.embeds.some((embed) => embed.title == "Do you still need help?")
     )
+    .first();
+  return bumpMessage;
+};
+const getLastMessage = (messages, ownerId) => {
+  const bumpMessage = messages
+    .filter((message) => message.author.id == ownerId)
     .first();
   return bumpMessage;
 };
