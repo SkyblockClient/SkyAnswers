@@ -1,7 +1,13 @@
 import { ComponentType, ButtonStyle, OverwriteType } from "discord.js";
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ *
+ * @param {import("discord.js").GuildChannel} channel
+ * @param {boolean} open
+ */
 export const setTicketOpen = async (channel, open) => {
-  /** @type {[import("discord.js").PermissionOverwrites]} */
   const perms = Array.from(channel.permissionOverwrites.cache.values());
   const creator = perms.find(
     (perm) =>
@@ -9,13 +15,23 @@ export const setTicketOpen = async (channel, open) => {
       perm.allow.equals(open ? 1024n : 3072n) &&
       perm.deny.equals(open ? 2048n : 0n)
   );
-  console.log("opening", channel, "for", creator);
-  if (creator) await channel.permissionOverwrites.edit(creator.id, { SendMessages: open });
-  else console.warn("Could not set open for channel", perms);
+  console.log(
+    open ? "opening" : "closing",
+    `#${channel.name} (${channel.id})`,
+    "for",
+    creator
+  );
+  if (creator) {
+    await channel.permissionOverwrites.edit(creator.id, { SendMessages: open });
+  } else
+    console.warn(
+      `While ${open ? "opening" : "closing"} ticket, failed to find member in`,
+      perms
+    );
 };
 
 export const command = async (channel) => {
-  await setTicketOpen(channel, false);
+  await sleep(500);
   await channel.send({
     content: "What is your ticket about? You must click on one to continue.",
     components: [
@@ -50,6 +66,7 @@ export const command = async (channel) => {
       },
     ],
   });
+  await setTicketOpen(channel, false);
 };
 export const when = {
   all: "channels",

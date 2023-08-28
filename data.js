@@ -67,15 +67,26 @@ export const getTrackedData = async (url) => {
   const lastUpdated = trackedData[url]?.lastUpdated;
   if (!lastUpdated || Date.now() - lastUpdated > 1000 * 60 * 60) {
     console.log("refetching", url);
-    const resp = await fetch(url);
-    trackedData[url] = { data: await resp.json(), lastUpdated: Date.now() };
+    let data;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        throw new Error(`http error ${resp.statusText} while fetching ${url}`);
+      }
+      data = await resp.json();
+    } catch (e) {
+      throw new Error(`exception ${e} while fetching ${url}`);
+    }
+    trackedData[url] = { data, lastUpdated: Date.now() };
   }
   return trackedData[url].data;
 };
 export const queryDownloadable = async (options, query, hosting) => {
   const option = options.find(
     (opt) =>
-      opt.id == query || opt.nicknames?.includes?.(query) || opt.display?.toLowerCase() == query
+      opt.id == query ||
+      opt.nicknames?.includes?.(query) ||
+      opt.display?.toLowerCase() == query
   );
   return (
     option && {
