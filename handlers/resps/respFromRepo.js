@@ -1,31 +1,29 @@
 import { ButtonStyle, ComponentType } from "discord.js";
 import { getTrackedData } from "../../data.js";
-export const findAutoresps = async (message, skipNonCommands) => {
+export const findAutoresps = async (message, noAutoresponses) => {
   const options = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/botautoresponse.json"
   );
   const matches = options
     .map((option) => {
-      if (option.unclebot)
-        return message == option.triggers[0][0] && option.response;
-      if (skipNonCommands && !message.startsWith(".")) return;
+      const tags = typeof option.tag == "string" ? [option.tag] : option.tag;
+      for (const tag of tags) {
+        if (message.toLowerCase() == tag.toLowerCase())
+          return { response: option.response, tag };
+      }
+      if (noAutoresponses) return;
 
-      const matcher = new RegExp(
-        option.triggers
-          .map((part) => {
-            const escapeForGroup = (str) =>
-              str.replace(/[.*+?^${}()|[\]\\-]/g, "\\$&");
-            return `(?:${part.map((trig) => escapeForGroup(trig)).join("|")})`;
-          })
-          .join("[^]*"),
-        "i"
-      );
-      if (matcher.test(message)) return option.response;
+      for (const re of options.triggers) {
+        const matcher = new RegExp(re, "is");
+        if (matcher.test(message))
+          return { response: option.response, tag: undefined };
+      }
     })
     .filter((resp) => resp);
   return matches;
 };
 export const command = async (message) => {
+  let noAutoresponses = message.member.roles.cache.has("852016624605462589");
   if (
     message.channel.id != "780181693553704973" && // general
     message.channel.id != "1110717104757416027" && // skyblock talk
@@ -34,32 +32,29 @@ export const command = async (message) => {
     !message.channel.name.startsWith("ticket-") &&
     message.guild.id != "962319226377474078"
   )
-    return;
-  const responses = await findAutoresps(
-    message.content,
-    message.member.roles.cache.has("852016624605462589")
-  );
+    noAutoresponses = true;
+  const responses = await findAutoresps(message.content, noAutoresponses);
   if (responses.length > 3) return;
+
   await Promise.all(
-    responses.map((resp) =>
-      message.reply({
-        content: resp,
+    responses.map(async (resp) => {
+      const deleteRow = {
+        type: ComponentType.ActionRow,
         components: [
           {
-            type: ComponentType.ActionRow,
-            components: [
-              {
-                type: ComponentType.Button,
-                customId: "deleteResp|" + message.author.id,
-                label: "Delete",
-                style: ButtonStyle.Secondary,
-              },
-            ],
+            type: ComponentType.Button,
+            customId: "deleteResp|" + message.author.id,
+            label: "Delete",
+            style: ButtonStyle.Secondary,
           },
         ],
+      };
+      message.reply({
+        content: resp.response,
+        components: resp.tag ? [] : [deleteRow],
         allowedMentions: { repliedUser: false },
-      })
-    )
+      });
+    })
   );
 };
 export const when = {

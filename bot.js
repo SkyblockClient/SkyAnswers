@@ -99,12 +99,23 @@ client.on("messageCreate", async (message) => {
         if (!checkPublic(message, handler)) return;
         if (handler.when.all == "messages") await handler.command(message);
         if (!handler.when.starts) return;
-        const match = handler.when.input
-          ? handler.when.starts.find((name) => content.startsWith(name + " "))
-          : handler.when.starts.find((name) => content == name);
-        if (!match) return;
 
-        if (handler.when.input)
+        const match = handler.when.starts.find((name) =>
+          content.startsWith(name)
+        );
+        const takesInput = handler.when.input;
+        const hasInput = content.length > match.length;
+        if (!match) return;
+        if (takesInput && !hasInput) {
+          await message.reply("Please provide input");
+          return;
+        }
+        if (!takesInput && hasInput) {
+          await message.reply("Don't provide input");
+          return;
+        }
+
+        if (takesInput)
           await handler.command(message, content.slice(match.length + 1));
         else await handler.command(message);
       })
