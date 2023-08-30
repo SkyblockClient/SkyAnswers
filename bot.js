@@ -103,9 +103,9 @@ client.on("messageCreate", async (message) => {
         const match = handler.when.starts.find((name) =>
           content.startsWith(name)
         );
+        if (!match) return;
         const takesInput = handler.when.input;
         const hasInput = content.length > match.length;
-        if (!match) return;
         if (takesInput && !hasInput) {
           await message.reply("Please provide input");
           return;

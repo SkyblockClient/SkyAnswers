@@ -6,18 +6,21 @@ export const findAutoresps = async (message, noAutoresponses) => {
   );
   const matches = options
     .map((option) => {
-      const tags = typeof option.tag == "string" ? [option.tag] : option.tag;
-      for (const tag of tags) {
-        if (message.toLowerCase() == tag.toLowerCase())
-          return { response: option.response, tag };
+      if (option.tag) {
+        const tags = typeof option.tag == "string" ? [option.tag] : option.tag;
+        for (const tag of tags) {
+          if (message.toLowerCase() == tag.toLowerCase())
+            return { response: option.response, tag };
+        }
       }
-      if (noAutoresponses) return;
 
-      for (const re of options.triggers) {
-        const matcher = new RegExp(re, "is");
-        if (matcher.test(message))
-          return { response: option.response, tag: undefined };
-      }
+      if (noAutoresponses) return;
+      if (option.triggers)
+        for (const re of option.triggers) {
+          const matcher = new RegExp(re, "is");
+          if (matcher.test(message))
+            return { response: option.response, tag: undefined };
+        }
     })
     .filter((resp) => resp);
   return matches;
