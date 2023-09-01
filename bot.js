@@ -100,8 +100,8 @@ client.on("messageCreate", async (message) => {
         if (handler.when.all == "messages") await handler.command(message);
         if (!handler.when.starts) return;
 
-        const match = handler.when.starts.find((name) =>
-          content.startsWith(name)
+        const match = handler.when.starts.find(
+          (name) => content == name || content.startsWith(name + " ")
         );
         if (!match) return;
         const takesInput = handler.when.input;
