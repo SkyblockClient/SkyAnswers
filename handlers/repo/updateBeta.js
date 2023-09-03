@@ -57,7 +57,7 @@ export const command = async ({ member, respond, content }) => {
   ) {
     return await respond({ content: "why do you think you can do this?" });
   }
-  const url = content.slice(9);
+  const url = content.slice(13);
   const statusMsg = await respond({ content: `downloading <${url}>...` });
   const modResp = await fetch(url, {
     headers: {
