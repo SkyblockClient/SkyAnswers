@@ -52,10 +52,9 @@ export const command = async (message) => {
           },
         ],
       };
-      message.reply({
+      message.respond({
         content: resp.response,
         components: resp.tag ? [] : [deleteRow],
-        allowedMentions: { repliedUser: false },
       });
     })
   );
