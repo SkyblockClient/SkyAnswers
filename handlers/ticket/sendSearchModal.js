@@ -1,5 +1,8 @@
 import { ComponentType, InteractionType, TextInputStyle } from "discord.js";
 
+/**
+ * @param {import("discord.js").MessageComponentInteraction} interaction
+ */
 export const command = async (interaction) => {
   await interaction.showModal({
     title: "Tell us your problem",

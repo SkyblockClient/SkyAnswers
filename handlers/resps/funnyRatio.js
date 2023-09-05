@@ -1,9 +1,10 @@
 import { ApplicationCommandType, InteractionType } from "discord.js";
 
 /**
- * @param {import("discord.js").MessageContextMenuCommandInteraction} interaction
+ * @param {import("discord.js").CommandInteraction} interaction
  */
 export const command = async (interaction) => {
+  if (!interaction.isMessageContextMenuCommand()) return;
   interaction.reply({ content: "ratioing" });
   const message = interaction.targetMessage;
   try {

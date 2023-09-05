@@ -1,8 +1,14 @@
+/**
+ * @param {import("../../bot.js").MessageData} message
+ */
 export const command = async ({ channel }) => {
   const pins = await channel.messages.fetchPinned();
   const openingMessage = pins
     .filter((message) => {
-      return message.author.id == "557628352828014614" && message.content.includes("Welcome");
+      return (
+        message.author.id == "557628352828014614" &&
+        message.content.includes("Welcome")
+      );
     })
     .first();
   const ticketOwner = openingMessage?.content?.match(/[0-9]+/)?.at(0);
@@ -15,7 +21,9 @@ export const command = async ({ channel }) => {
         description:
           `***Yes***: Restate your problem clearly. If someone asked you to upload something, do that.
 ***No, all my problems are solved***: Close the ticket. View the ` +
-          (openingMessage ? `[pinned message](${openingMessage.url})` : "pinned message") +
+          (openingMessage
+            ? `[pinned message](${openingMessage.url})`
+            : "pinned message") +
           ` at the top, and click the :lock: button to close your ticket.
 If you do not respond in the next 2 days (<t:${seconds2DaysFromNow}:R>), your ticket will be closed.`,
         color: 0xffff88,

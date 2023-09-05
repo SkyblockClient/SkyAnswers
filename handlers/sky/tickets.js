@@ -1,22 +1,29 @@
 /**
- * @param {import("discord.js").Message} param0
+ * @param {import("../../bot.js").MessageData} message
  */
 export const command = async ({ respond, guild }) => {
-  const allTickets = Array.from(
-    guild.channels.cache.filter((c) => ticketMatcher.test(c.name)).values()
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  const allTickets = /** @type {import("discord.js").TextChannel[]} */ (
+    Array.from(
+      guild.channels.cache.filter((c) => ticketMatcher.test(c.name)).values()
+    )
+  );
+  allTickets.sort((a, b) => a.name.localeCompare(b.name));
   const ticketTable = await Promise.all(
     allTickets.map(async (ticket) => {
       const closed = ticket.name.startsWith("closed-");
       if (closed) {
         const messages = await ticket.messages.fetch();
         const close = await getCloseMessage(messages);
-        const closeIsOld = close && Date.now() - close.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
+        const closeIsOld =
+          close &&
+          Date.now() - close.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
         console.log(ticket.name, close, closeIsOld);
         return (
           (closeIsOld ? "ARCHIVE: " : "") +
           `<#${ticket.id}> - closed ` +
-          (close ? `<t:${Math.floor(close.createdTimestamp / 1000)}:R>` : "UNKNOWN")
+          (close
+            ? `<t:${Math.floor(close.createdTimestamp / 1000)}:R>`
+            : "UNKNOWN")
         );
       } else {
         const ownerId = await getOwner(ticket);
@@ -26,7 +33,8 @@ export const command = async ({ respond, guild }) => {
         const bump = await getBumpMessage(messages);
         const lastMessage = messages.first();
         if (bump) {
-          const bumpIsOld = Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
+          const bumpIsOld =
+            Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
           return (
             (bumpIsOld ? "OLD BUMP: " : "") +
             `<#${ticket.id}> - ` +
@@ -34,10 +42,13 @@ export const command = async ({ respond, guild }) => {
             (lastMessage.id != bump.id ? " (response)" : "")
           );
         }
-        const messageIsOld = Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
+        const messageIsOld =
+          Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
         return (
           (messageIsOld ? "STALE: " : "") +
-          `<#${ticket.id}> - last message <t:${Math.floor(lastMessage.createdTimestamp / 1000)}:R>`
+          `<#${ticket.id}> - last message <t:${Math.floor(
+            lastMessage.createdTimestamp / 1000
+          )}:R>`
         );
       }
     })
@@ -52,14 +63,18 @@ export const command = async ({ respond, guild }) => {
 
     return resultArray;
   }, []);
-  for (const tickets of chunkedTickets) await respond({ content: tickets.join("\n") });
+  for (const tickets of chunkedTickets)
+    await respond({ content: tickets.join("\n") });
 };
 const ticketMatcher = /(?:ticket-|closed-)(\d+)/;
 const getOwner = async (ticket) => {
   const pins = await ticket.messages.fetchPinned();
   const openingMessage = pins
     .filter((message) => {
-      return message.author.id == "557628352828014614" && message.content.includes("Welcome");
+      return (
+        message.author.id == "557628352828014614" &&
+        message.content.includes("Welcome")
+      );
     })
     .first();
   const ticketOwner = openingMessage?.content?.match(/[0-9]+/)?.at(0);
@@ -70,14 +85,18 @@ const getCloseMessage = (messages) => {
     .filter(
       (message) =>
         message.author.id == "557628352828014614" &&
-        message.embeds.some((embed) => embed.description.includes("Ticket Closed by"))
+        message.embeds.some((embed) =>
+          embed.description.includes("Ticket Closed by")
+        )
     )
     .first();
   return closeMessage;
 };
 const getBumpMessage = (messages) => {
   const bumpMessage = messages
-    .filter((message) => message.embeds.some((embed) => embed.title == "Do you still need help?"))
+    .filter((message) =>
+      message.embeds.some((embed) => embed.title == "Do you still need help?")
+    )
     .first();
   return bumpMessage;
 };

@@ -1,16 +1,20 @@
 import { InteractionType } from "discord.js";
 
 /**
- * @param {import("discord.js").Interaction} interaction
+ * @param {import("discord.js").MessageComponentInteraction} interaction
  */
 export const command = async (interaction) => {
+  if (!interaction.inCachedGuild()) return;
   const respondedTo = interaction.customId.split("|")[1];
   if (
     respondedTo != interaction.member.id &&
     !interaction.member.permissions.has("ManageMessages") &&
     !interaction.member.roles.cache.has("931626562539909130") // support person
   ) {
-    return await interaction.reply({ content: "not your autoresponse", ephemeral: true });
+    return await interaction.reply({
+      content: "not your autoresponse",
+      ephemeral: true,
+    });
   }
   try {
     await interaction.message.delete();

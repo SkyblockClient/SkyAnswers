@@ -1,5 +1,9 @@
 import { searchEmbed } from "../../data.js";
 
+/**
+ * @param {import("../../bot.js").MessageData} message
+ * @param {string} query
+ */
 export const command = async ({ channel, respond }, query) => {
   await channel.sendTyping();
   await respond(await searchEmbed(query));

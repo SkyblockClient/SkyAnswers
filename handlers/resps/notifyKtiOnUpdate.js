@@ -1,5 +1,9 @@
 import { AuditLogEvent } from "discord.js";
 
+/**
+ * @param {import("discord.js").GuildMember | import("discord.js").PartialGuildMember} _
+ * @param {import("discord.js").GuildMember | import("discord.js").PartialGuildMember} user
+ */
 export const command = async (_, user) => {
   if (user.id != "794377681331945524") return;
   const fetchedUpdateLogs = await user.guild.fetchAuditLogs({
@@ -24,7 +28,9 @@ export const command = async (_, user) => {
         "\n```"
     );
   } else {
-    await user.send("You were updated, but the audit log was for someone else.");
+    await user.send(
+      "You were updated, but the audit log was for someone else."
+    );
   }
 };
 export const when = {

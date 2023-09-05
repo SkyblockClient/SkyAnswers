@@ -40,7 +40,10 @@ export const sendNewMod = async (modData) => {
     body: JSON.stringify({
       message: `Update ${modData.forge_id || modData.id} to ${modData.file}`,
       content: btoa(
-        format(JSON.stringify(updatedMods), { parser: "json", tabWidth: 4 })
+        await format(JSON.stringify(updatedMods), {
+          parser: "json",
+          tabWidth: 4,
+        })
       ),
       sha: modsFileInfo.sha,
     }),
@@ -50,6 +53,10 @@ export const sendNewMod = async (modData) => {
     throw resp.statusText;
   }
 };
+
+/**
+ * @param {import("../../bot.js").MessageData} message
+ */
 export const command = async ({ member, respond, content }) => {
   if (
     !member.roles.cache.has("799020944487612428") &&
@@ -89,6 +96,24 @@ export const command = async ({ member, respond, content }) => {
     hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
   };
 
+  /**
+   * @type {import("discord.js").MessageActionRowComponentData[]}
+   */
+  const buttons = [];
+  if (modId) {
+    buttons.push({
+      type: ComponentType.Button,
+      customId: "confirmModUpdate",
+      label: "Confirm",
+      style: ButtonStyle.Primary,
+    });
+  }
+  buttons.push({
+    type: ComponentType.Button,
+    customId: "editModUpdate",
+    label: "Edit",
+    style: ButtonStyle.Secondary,
+  });
   statusMsg.edit({
     content: `okay, ready to push out:
 url: \`${modData.url}\`
@@ -98,24 +123,7 @@ nothing will happen until you press a button`,
     components: [
       {
         type: ComponentType.ActionRow,
-        components: [
-          ...(modId
-            ? [
-                {
-                  type: ComponentType.Button,
-                  customId: "confirmModUpdate",
-                  label: "Confirm",
-                  style: ButtonStyle.Primary,
-                },
-              ]
-            : []),
-          {
-            type: ComponentType.Button,
-            customId: "editModUpdate",
-            label: "Edit",
-            style: ButtonStyle.Secondary,
-          },
-        ],
+        components: buttons,
       },
     ],
   });

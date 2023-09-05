@@ -3,6 +3,9 @@ export const db =
   process.env.SB_KEY &&
   createClient("https://fkjmuugisxgmrklcfyaj.supabase.co", process.env.SB_KEY);
 
+/**
+ * @param {import("../../bot.js").MessageData} message
+ */
 export const command = async (message) => {
   if (db) {
     const { error } = await db.from("messages").insert({

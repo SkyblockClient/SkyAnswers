@@ -1,3 +1,6 @@
+/**
+ * @param {import("../../bot.js").MessageData} message
+ */
 export const command = async ({ content, respond }) => {
   const date = new Date();
   if (

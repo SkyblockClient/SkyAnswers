@@ -1,7 +1,12 @@
-import { InteractionType } from "discord.js";
+import { ChannelType, InteractionType } from "discord.js";
 import { setTicketOpen } from "./start.js";
 
+/**
+ * @param {import("discord.js").MessageComponentInteraction} interaction
+ */
 export const command = async (interaction) => {
+  if (interaction.channel.type != ChannelType.GuildText) return;
+
   const origContent = interaction.message.content;
   const crashType = interaction.customId.split("|")[1];
   const crashTypeName = {
@@ -31,7 +36,9 @@ Go to the \`crash-reports\` folder and upload the most recent file here.
 Go to the \`logs\` folder and upload the file called \`latest.log\`.`);
       break;
     case "other":
-      await interaction.channel.send("Describe how you crashed so we can help you.");
+      await interaction.channel.send(
+        "Describe how you crashed so we can help you."
+      );
       break;
   }
   await setTicketOpen(interaction.channel, true);

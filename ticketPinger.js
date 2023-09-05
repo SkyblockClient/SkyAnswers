@@ -1,13 +1,15 @@
 /**
- * @param {import("discord.js").Guild} param0
+ * @param {import("discord.js").Guild} guild
  */
 export const run = async (guild) => {
-  const allTickets = Array.from(
-    guild.channels.cache.filter((c) => ticketMatcher.test(c.name)).values()
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  const allTickets = /** @type {import("discord.js").TextChannel[]} */ (
+    Array.from(
+      guild.channels.cache.filter((c) => ticketMatcher.test(c.name)).values()
+    )
+  );
+  allTickets.sort((a, b) => a.name.localeCompare(b.name));
   await Promise.all(
     allTickets.map(async (ticket) => {
-      if (ticket.name.startsWith("closed-")) return;
       const ownerId = await getOwner(ticket);
       const owner = guild.members.cache.get(ownerId);
       if (!owner) {
@@ -25,7 +27,7 @@ export const run = async (guild) => {
     })
   );
 };
-const ticketMatcher = /(?:ticket-|closed-)(\d+)/;
+const ticketMatcher = /ticket-(\d+)/;
 const getOwner = async (ticket) => {
   const pins = await ticket.messages.fetchPinned();
   const openingMessage = pins

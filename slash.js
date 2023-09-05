@@ -20,13 +20,19 @@ const registerCommands = (body) => {
 
 const deleteAll = false;
 if (deleteAll) {
-  const allCommands = await api.get(commandEndpoint);
+  const allCommands = /** @type {any} */ (await api.get(commandEndpoint));
   console.log(allCommands);
   console.log(
-    await Promise.all(allCommands.map((command) => api.delete(commandEndpoint + "/" + command.id)))
+    await Promise.all(
+      allCommands.map((command) =>
+        api.delete(`${commandEndpoint}/${command.id}`)
+      )
+    )
   );
 }
 const handlers = await loadHandlers();
 const slashCommands = handlers.filter((handler) => handler.when.slash);
-const resp = await registerCommands(slashCommands.map((handler) => handler.when.slash.data));
+const resp = await registerCommands(
+  slashCommands.map((handler) => handler.when.slash.data)
+);
 console.log(resp);

@@ -21,6 +21,11 @@ export const getDiscordEmbed = (item) => {
   }
   return message;
 };
+
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ * @param {string} query
+ */
 export const command = async ({ respond }, query) => {
   const items = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/discords.json"

@@ -2,6 +2,9 @@ import { getTrackedData, queryDownloadable } from "../../data.js";
 import { hyperlink } from "discord.js";
 import levenshtein from "js-levenshtein";
 export const getDownloadableEmbed = (downloadable, bundledIn) => {
+  /**
+   * @type {import("discord.js").APIEmbed}
+   */
   const embed = {
     color: downloadable.hash && Number("0x" + downloadable.hash.slice(0, 6)),
     title: downloadable.display,
@@ -24,8 +27,10 @@ export const getDownloadableEmbed = (downloadable, bundledIn) => {
       )}`,
     },
   };
-  if (downloadable.screenshot) embed.image = { url: encodeURI(downloadable.screenshot) };
-  if (downloadable.command) embed.fields.unshift({ name: "Command", value: downloadable.command });
+  if (downloadable.screenshot)
+    embed.image = { url: encodeURI(downloadable.screenshot) };
+  if (downloadable.command)
+    embed.fields.unshift({ name: "Command", value: downloadable.command });
   if (downloadable.hidden)
     embed.fields.unshift({
       name: "Note",
@@ -39,12 +44,17 @@ export const getDownloadableEmbed = (downloadable, bundledIn) => {
   return embed;
 };
 const getDistance = (item, query) => {
-  const allNames = [item.id, ...(item.nicknames || []), item.display].map((name) =>
-    name.toLowerCase()
+  const allNames = [item.id, ...(item.nicknames || []), item.display].map(
+    (name) => name.toLowerCase()
   );
   const allDistances = allNames.map((name) => levenshtein(query, name));
   return Math.min(...allDistances);
 };
+
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ * @param {string} query
+ */
 export const command = async ({ content, respond }, query) => {
   const type = content.startsWith("-mod") ? "mod" : "pack";
   const items = await getTrackedData(
@@ -52,18 +62,23 @@ export const command = async ({ content, respond }, query) => {
   );
   const item = await queryDownloadable(items, query, type);
   if (!item) {
-    const sortedOptions = items.sort((a, b) => getDistance(a, query) - getDistance(b, query));
+    const sortedOptions = items.sort(
+      (a, b) => getDistance(a, query) - getDistance(b, query)
+    );
     const bestOption = sortedOptions[0];
     const bestDistance = getDistance(bestOption, query);
-    return await respond({
+    await respond({
       content:
         `No ${type} found for "${query}"` +
         (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ""),
     });
+    return;
   }
   let bundledIn;
   if (item.hidden) {
-    bundledIn = items.find((otherItem) => otherItem.packages?.includes(item.id))?.display;
+    bundledIn = items.find((otherItem) =>
+      otherItem.packages?.includes(item.id)
+    )?.display;
   }
   await respond({
     embeds: [getDownloadableEmbed(item, bundledIn)],

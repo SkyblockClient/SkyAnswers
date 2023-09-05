@@ -32,17 +32,23 @@ ${groupInfo
   });
   return crashGroups.filter((group) => group).join("\n");
 };
+
 /**
- * @param {import("discord.js").Message} message
+ * @param {import("../../bot.js").MessageDataPublic} message
  */
 export const command = async (message) => {
   const hasLogs = message.attachments.some(
-    (attachment) => /crash.+-client\.txt/.test(attachment.name) || attachment.name.endsWith(".log")
+    (attachment) =>
+      /crash.+-client\.txt/.test(attachment.name) ||
+      attachment.name.endsWith(".log")
   );
   if (hasLogs) message.channel.sendTyping();
 
   const logsToCheck = message.attachments
-    .filter((attachment) => attachment.name.endsWith(".txt") || attachment.name.endsWith(".log"))
+    .filter(
+      (attachment) =>
+        attachment.name.endsWith(".txt") || attachment.name.endsWith(".log")
+    )
     .map((attachment) => attachment.url);
   const hastebinMatch = message.content.match(hastebinRegex);
   if (hastebinMatch) logsToCheck.push(`https://hst.sh/raw/${hastebinMatch[1]}`);

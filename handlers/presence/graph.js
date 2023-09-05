@@ -10,17 +10,30 @@ import {
   Title,
 } from "chart.js";
 
-Chart.register(BarController, BarElement, LinearScale, CategoryScale, Legend, Title);
-export const command = async ({ respond, channel, client }, query) => {
+Chart.register(
+  BarController,
+  BarElement,
+  LinearScale,
+  CategoryScale,
+  Legend,
+  Title
+);
+/**
+ * @param {import("../../bot.js").MessageData} message
+ * @param {string} query
+ */
+export const command = async ({ respond, channel }, query) => {
   if (!db) throw "no db hooked up";
   const user = query.match(/[0-9]+/)[0];
   if (!user) throw "no user specified";
   channel.sendTyping();
 
-  const { data, error } = await db.rpc("get_message_times", { author_to_use: user });
+  const { data, error } = await db.rpc("get_message_times", {
+    author_to_use: user,
+  });
   if (error) throw error;
-  const allStatuses = ["online", "dnd", "idle", "offline", null].filter((status) =>
-    data.some((group) => group.status == status)
+  const allStatuses = ["online", "dnd", "idle", "offline", null].filter(
+    (status) => data.some((group) => group.status == status)
   );
   const silentTimes = Array.from({ length: 24 }, (v, i) => i).filter((hour) =>
     data.every((group) => group.date_part != hour || group.count < 5)
@@ -42,6 +55,7 @@ export const command = async ({ respond, channel, client }, query) => {
   Chart.defaults.font.family = "system-ui, Roboto, sans-serif";
   Chart.defaults.font.size = 27;
 
+  // @ts-ignore
   const chart = new Chart(graphSpace, {
     type: "bar",
     data: {
@@ -50,7 +64,9 @@ export const command = async ({ respond, channel, client }, query) => {
         label: status,
         data: Array.from(
           { length: 24 },
-          (v, i) => data.find((group) => group.status == status && group.date_part == i)?.count || 0
+          (v, i) =>
+            data.find((group) => group.status == status && group.date_part == i)
+              ?.count || 0
         ),
         backgroundColor:
           status == "dnd"

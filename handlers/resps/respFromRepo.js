@@ -25,6 +25,10 @@ export const findAutoresps = async (message, noAutoresponses) => {
     .filter((resp) => resp);
   return matches;
 };
+
+/**
+ * @param {import("../../bot.js").MessageData} message
+ */
 export const command = async (message) => {
   let noAutoresponses = message.member.roles.cache.has("852016624605462589");
   if (
@@ -41,6 +45,9 @@ export const command = async (message) => {
 
   await Promise.all(
     responses.map(async (resp) => {
+      /**
+       * @type {import("discord.js").ActionRowData}
+       */
       const deleteRow = {
         type: ComponentType.ActionRow,
         components: [

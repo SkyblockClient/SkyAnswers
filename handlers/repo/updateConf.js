@@ -1,7 +1,11 @@
 import { InteractionType } from "discord.js";
 import { activeUpdates, sendNewMod } from "./update.js";
 
+/**
+ * @param {import("discord.js").MessageComponentInteraction} interaction
+ */
 export const command = async (interaction) => {
+  if (!interaction.inCachedGuild()) return;
   if (
     !interaction.member.roles.cache.has("799020944487612428") &&
     !interaction.member.permissions.has("Administrator")
@@ -11,7 +15,10 @@ export const command = async (interaction) => {
       ephemeral: true,
     });
   }
-  await interaction.update({ content: "pushing out update...", components: [] });
+  await interaction.update({
+    content: "pushing out update...",
+    components: [],
+  });
 
   const source = interaction.message.id;
   const modData = activeUpdates[source];

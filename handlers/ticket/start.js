@@ -1,4 +1,9 @@
-import { ComponentType, ButtonStyle, OverwriteType } from "discord.js";
+import {
+  ComponentType,
+  ButtonStyle,
+  OverwriteType,
+  ChannelType,
+} from "discord.js";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -30,7 +35,15 @@ export const setTicketOpen = async (channel, open) => {
     );
 };
 
+/**
+ * @param {import("discord.js").NonThreadGuildBasedChannel} channel
+ */
 export const command = async (channel) => {
+  if (
+    !channel.name.startsWith("ticket-") ||
+    channel.type != ChannelType.GuildText
+  )
+    return;
   await sleep(500);
   await channel.send({
     content: "What is your ticket about? You must click on one to continue.",

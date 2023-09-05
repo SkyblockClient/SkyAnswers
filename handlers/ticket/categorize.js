@@ -1,5 +1,8 @@
 import { ButtonStyle, ComponentType, InteractionType } from "discord.js";
 
+/**
+ * @param {import("discord.js").MessageComponentInteraction} interaction
+ */
 export const command = async (interaction) => {
   const ticketType = interaction.customId.split("|")[1];
   const ticketTypeName = {
@@ -11,7 +14,9 @@ export const command = async (interaction) => {
   const ticketTypeDesc = `**Ticket category**: ${ticketTypeName}`;
   if (ticketType == "crash") {
     await interaction.update({
-      content: ticketTypeDesc + "\nSo we can fix your crash, what do you see when you crash?",
+      content:
+        ticketTypeDesc +
+        "\nSo we can fix your crash, what do you see when you crash?",
       components: [
         {
           type: ComponentType.ActionRow,

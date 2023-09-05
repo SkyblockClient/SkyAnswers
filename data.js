@@ -6,7 +6,7 @@ import fetch from "cross-fetch";
  */
 /**
  * @param {string} query
- * @returns {QueryResponse|null}
+ * @returns {Promise<QueryResponse|null>}
  */
 export const search = async (query) => {
   const faqAnswer = await fetch(

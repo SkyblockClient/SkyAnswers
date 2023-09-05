@@ -1,6 +1,13 @@
 import { invalidateTrackedData } from "../../data.js";
+
+/**
+ * @param {import("../../bot.js").MessageData} message
+ */
 export const command = async ({ respond, member }) => {
-  if (!member.roles.cache.has("799020944487612428") && !member.permissions.has("Administrator")) {
+  if (
+    !member.roles.cache.has("799020944487612428") &&
+    !member.permissions.has("Administrator")
+  ) {
     return await respond({ content: "why do you think you can do this?" });
   }
   invalidateTrackedData();

@@ -1,9 +1,11 @@
 /**
- * @param {import("discord.js").GuildMember} oldUser
- * @param {import("discord.js").GuildMember} user
+ * @param {import("discord.js").GuildMember | import("discord.js").PartialGuildMember} oldUser
+ * @param {import("discord.js").GuildMember | import("discord.js").PartialGuildMember} user
  */
 export const command = async (oldUser, user) => {
-  const verboseBotLogs = user.client.channels.cache.get("934968221923168266");
+  const verboseBotLogs = /** @type {import("discord.js").TextChannel} */ (
+    user.client.channels.cache.get("934968221923168266")
+  );
   if (
     oldUser.roles.cache.has("829336516315971626") &&
     !user.roles.cache.has("829336516315971626")

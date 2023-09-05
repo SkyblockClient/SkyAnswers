@@ -1,5 +1,8 @@
 import { InteractionType } from "discord.js";
 
+/**
+ * @param {import("discord.js").CommandInteraction} interaction
+ */
 export const command = async (interaction) => {
   const recievedTime = Date.now();
   const message = await interaction.reply({

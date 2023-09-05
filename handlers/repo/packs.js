@@ -1,4 +1,8 @@
 import { getTrackedData } from "../../data.js";
+
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ */
 export const command = async ({ member, respond }) => {
   const packs = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/packs.json"
@@ -12,12 +16,17 @@ export const command = async ({ member, respond }) => {
       : 3;
   const formatPacks = (packList) =>
     packList
-      .map((pack) => `- ${pack.display} by ${pack.creator}: ` + "`-pack " + pack.id + "`")
+      .map(
+        (pack) =>
+          `- ${pack.display} by ${pack.creator}: ` + "`-pack " + pack.id + "`"
+      )
       .join("\n");
 
   const sbStr = formatPacks(activePacks.filter((pack) => packType(pack) == 1));
   const pvpStr = formatPacks(activePacks.filter((pack) => packType(pack) == 2));
-  const otherStr = formatPacks(activePacks.filter((pack) => packType(pack) == 3));
+  const otherStr = formatPacks(
+    activePacks.filter((pack) => packType(pack) == 3)
+  );
   const embed = {
     color: member.displayColor || 0x8ff03f,
     description: `**Skyblock**

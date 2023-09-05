@@ -1,20 +1,31 @@
-export const command = async ({ client, respond, guild }) => {
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ */
+export const command = async ({ client, respond, handlers, guild }) => {
   const isInTrusted =
-    guild.id == "780181693100982273" ||
-    (guild.id == "962319226377474078" && client.user.id == "977585995174252624");
+    guild &&
+    (guild.id == "780181693100982273" ||
+      (guild.id == "962319226377474078" &&
+        client.user.id == "977585995174252624"));
   await respond({
     content:
       "Current handlers:\n" +
-      client.handlers
+      handlers
         .map((handler) => {
           if (!handler.when.public && !isInTrusted) return;
           if (handler.when.starts) {
             if (handler.when.input)
               return `- \`${handler.when.starts[0]} [input]\`: ${handler.when.desc}`;
-            else return `- \`${handler.when.starts.join(" or ")}\`: ${handler.when.desc}`;
+            else
+              return `- \`${handler.when.starts.join(" or ")}\`: ${
+                handler.when.desc
+              }`;
           }
           if (handler.when.slash)
-            if (handler.when.slash.data.type == 2 || handler.when.slash.data.type == 3)
+            if (
+              handler.when.slash.data.type == 2 ||
+              handler.when.slash.data.type == 3
+            )
               return `- context menu: ${handler.when.slash.data.name}`;
             else
               return `- \`/${handler.when.slash.data.name}\`: ${handler.when.slash.data.description}`;

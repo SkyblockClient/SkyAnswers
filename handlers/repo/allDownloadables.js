@@ -1,6 +1,9 @@
 import { getTrackedData } from "../../data.js";
 import { hyperlink } from "discord.js";
 
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ */
 export const command = async ({ content, member, respond }) => {
   const type = content.startsWith("-mod") ? "mod" : "pack";
   const items = await getTrackedData(
@@ -10,9 +13,11 @@ export const command = async ({ content, member, respond }) => {
   const categorizeItem = (item) =>
     item.packages
       ? 0
-      : item.categories?.includes("2;All Skyblock") || item.categories?.includes("1;All Skyblock")
+      : item.categories?.includes("2;All Skyblock") ||
+        item.categories?.includes("1;All Skyblock")
       ? 1
-      : item.categories?.includes("5;All PvP") || item.categories?.includes("3;All PvP")
+      : item.categories?.includes("5;All PvP") ||
+        item.categories?.includes("3;All PvP")
       ? 2
       : 3;
   const listItems = (items) =>
@@ -25,10 +30,18 @@ export const command = async ({ content, member, respond }) => {
         return hyperlink(item.file, url);
       })
       .join("\n");
-  const bundles = listItems(activeItems.filter((item) => categorizeItem(item) == 0));
-  const skyblockItems = listItems(activeItems.filter((item) => categorizeItem(item) == 1));
-  const pvpItems = listItems(activeItems.filter((item) => categorizeItem(item) == 2));
-  const otherItems = listItems(activeItems.filter((item) => categorizeItem(item) == 3));
+  const bundles = listItems(
+    activeItems.filter((item) => categorizeItem(item) == 0)
+  );
+  const skyblockItems = listItems(
+    activeItems.filter((item) => categorizeItem(item) == 1)
+  );
+  const pvpItems = listItems(
+    activeItems.filter((item) => categorizeItem(item) == 2)
+  );
+  const otherItems = listItems(
+    activeItems.filter((item) => categorizeItem(item) == 3)
+  );
   const embeds = [];
   Object.entries({
     Bundles: bundles,
@@ -36,7 +49,12 @@ export const command = async ({ content, member, respond }) => {
     PvP: pvpItems,
     Other: otherItems,
   }).map(([title, items]) => {
-    if (items) embeds.push({ title, color: member.displayColor || 0x8ff03f, description: items });
+    if (items)
+      embeds.push({
+        title,
+        color: member.displayColor || 0x8ff03f,
+        description: items,
+      });
   });
   await respond({
     embeds,

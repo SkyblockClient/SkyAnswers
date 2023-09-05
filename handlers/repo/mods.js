@@ -1,4 +1,8 @@
 import { getTrackedData } from "../../data.js";
+
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ */
 export const command = async ({ respond, member }) => {
   const mods = await getTrackedData(
     "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"
@@ -14,13 +18,18 @@ export const command = async ({ respond, member }) => {
       : 3;
   const formatMods = (modList) =>
     modList
-      .map((mod) => `- ${mod.display} by ${mod.creator}: ` + "`-mod " + mod.id + "`")
+      .map(
+        (mod) =>
+          `- ${mod.display} by ${mod.creator}: ` + "`-mod " + mod.id + "`"
+      )
       .join("\n");
 
   const bundleStr = activeMods
     .filter((mod) => modType(mod) == 0)
     .map(
-      (mod) => `- ${mod.display}: ` + [mod.id, ...mod.packages].map((p) => "`" + p + "`").join(", ")
+      (mod) =>
+        `- ${mod.display}: ` +
+        [mod.id, ...mod.packages].map((p) => "`" + p + "`").join(", ")
     )
     .join("\n");
   const sbStr = formatMods(activeMods.filter((mod) => modType(mod) == 1));

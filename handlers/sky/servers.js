@@ -1,8 +1,16 @@
 import { ChannelType } from "discord.js";
 
+/**
+ * @param {import("../../bot.js").MessageDataPublic} message
+ */
 export const command = async ({ client, respond }) => {
-  const channels = client.guilds.cache.map((guild) =>
-    guild.channels.cache.filter((channel) => channel.type == ChannelType.GuildText).first()
+  const channels = client.guilds.cache.map(
+    (guild) =>
+      /** @type {import("discord.js").TextChannel} */ (
+        guild.channels.cache
+          .filter((channel) => channel.type == ChannelType.GuildText)
+          .first()
+      )
   );
   const invites = await Promise.all(
     channels.map(async (ch) => {

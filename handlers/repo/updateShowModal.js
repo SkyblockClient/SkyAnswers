@@ -1,7 +1,11 @@
 import { ComponentType, InteractionType, TextInputStyle } from "discord.js";
 import { activeUpdates } from "./update.js";
 
+/**
+ * @param {import("discord.js").MessageComponentInteraction} interaction
+ */
 export const command = async (interaction) => {
+  if (!interaction.inCachedGuild()) return;
   if (
     !interaction.member.roles.cache.has("799020944487612428") &&
     !interaction.member.permissions.has("Administrator")
