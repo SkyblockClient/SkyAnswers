@@ -6,10 +6,8 @@ import { activeUpdates, sendNewMod } from "./update.js";
  */
 export const command = async (interaction) => {
   if (!interaction.inCachedGuild()) return;
-  if (
-    !interaction.member.roles.cache.has("799020944487612428") &&
-    !interaction.member.permissions.has("Administrator")
-  ) {
+  const trigger = await interaction.message.fetchReference();
+  if (interaction.member.id != trigger.member.id) {
     return await interaction.reply({
       content: "why do you think you can do this?",
       ephemeral: true,
