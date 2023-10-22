@@ -11,12 +11,12 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "eslint": "^8.48.0",
+    "eslint": "^8.52.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.33.1",
+    "@supabase/supabase-js": "^2.38.2",
     "canvas": "^2.11.2",
     "chart.js": "^4.4.0",
     "cross-fetch": "^4.0.0",
