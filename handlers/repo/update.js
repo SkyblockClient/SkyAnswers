@@ -8,7 +8,11 @@ const modsFileEndpoint =
   "https://api.github.com/repos/" +
   (process.env.USER == "ubuntu" ? "SkyblockClient" : "KTibow") +
   "/SkyblockClient-REPO/contents/files/mods.json";
-export let activeUpdates = [];
+const modOwners = {
+  "332836587576492033": "dungeons_guide_loader",
+};
+
+export const activeUpdates = [];
 export const sendNewMod = async (modData) => {
   const modsFileResp = await fetch(modsFileEndpoint, {
     headers: {
@@ -58,10 +62,14 @@ export const sendNewMod = async (modData) => {
  * @param {import("../../bot.js").MessageData} message
  */
 export const command = async ({ member, respond, content }) => {
+  /**
+   * @type {string | undefined}
+   */
+  const modOwner = modOwners[member.id];
   if (
     !member.roles.cache.has("799020944487612428") &&
     !member.permissions.has("Administrator") &&
-    member.id != "332836587576492033"
+    !modOwner
   ) {
     return await respond({ content: "why do you think you can do this?" });
   }
@@ -88,7 +96,7 @@ export const command = async ({ member, respond, content }) => {
     const modInfo = JSON.parse(modInfoStr);
     modId = modInfo[0].modid;
   }
-  if (member.id == "332836587576492033" && modId != "dungeons_guide_loader") {
+  if (modOwner && modId != modOwner) {
     statusMsg.edit("you are not the owner of this mod. You can not update it.");
     return;
   }
@@ -113,7 +121,7 @@ export const command = async ({ member, respond, content }) => {
       style: ButtonStyle.Primary,
     });
   }
-  if (member.id != "332836587576492033") {
+  if (!modOwner) {
     buttons.push({
       type: ComponentType.Button,
       customId: "editModUpdate",
