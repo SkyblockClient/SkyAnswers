@@ -4,7 +4,7 @@ import { hyperlink } from "discord.js";
 /**
  * @param {import("../../bot.js").MessageDataPublic} message
  */
-export const command = async ({ content, member, respond }) => {
+export const command = async ({ content, member, channel, respond }) => {
   const type = content.startsWith("-mod") ? "mod" : "pack";
   const items = await getTrackedData(
     `https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/${type}s.json`
@@ -56,6 +56,16 @@ export const command = async ({ content, member, respond }) => {
         description: items,
       });
   });
+  const totalLength = embeds.reduce((a, b) => a + b.description.length, 0);
+  if (totalLength > 5000) {
+    await respond({
+      embeds: embeds.slice(0, -1),
+    });
+    await channel.send({
+      embeds: embeds.slice(-1),
+    });
+    return;
+  }
   await respond({
     embeds,
   });
