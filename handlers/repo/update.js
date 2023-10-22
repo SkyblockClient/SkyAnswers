@@ -60,7 +60,8 @@ export const sendNewMod = async (modData) => {
 export const command = async ({ member, respond, content }) => {
   if (
     !member.roles.cache.has("799020944487612428") &&
-    !member.permissions.has("Administrator")
+    !member.permissions.has("Administrator") &&
+    member.id != "332836587576492033"
   ) {
     return await respond({ content: "why do you think you can do this?" });
   }
@@ -87,6 +88,10 @@ export const command = async ({ member, respond, content }) => {
     const modInfo = JSON.parse(modInfoStr);
     modId = modInfo[0].modid;
   }
+  if (member.id == "332836587576492033" && modId != "dungeons_guide_loader") {
+    statusMsg.edit("you are not the owner of this mod. You can not update it.");
+    return;
+  }
 
   statusMsg.edit(`getting the new data for ${modId}...`);
   const modData = {
@@ -108,14 +113,16 @@ export const command = async ({ member, respond, content }) => {
       style: ButtonStyle.Primary,
     });
   }
-  buttons.push({
-    type: ComponentType.Button,
-    customId: "editModUpdate",
-    label: "Edit",
-    style: ButtonStyle.Secondary,
-  });
+  if (member.id != "332836587576492033") {
+    buttons.push({
+      type: ComponentType.Button,
+      customId: "editModUpdate",
+      label: "Edit",
+      style: ButtonStyle.Secondary,
+    });
+  }
   statusMsg.edit({
-    content: `okay, ready to push out:
+    content: `okay, ready to push out ${modId || "unknown mod"}:
 url: \`${modData.url}\`
 filename: \`${modData.file}\`
 hash: \`${modData.hash}\`
