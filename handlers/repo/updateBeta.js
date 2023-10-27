@@ -64,7 +64,7 @@ export const command = async ({ member, respond, content }) => {
   ) {
     return await respond({ content: "why do you think you can do this?" });
   }
-  const url = content.slice(13);
+  const url = content.replace(/^-update-beta|^-bupdate/i, "");
   const statusMsg = await respond({ content: `downloading <${url}>...` });
   const modResp = await fetch(url, {
     headers: {
@@ -126,7 +126,7 @@ nothing will happen until you press a button`,
   activeUpdates[statusMsg.id] = modData;
 };
 export const when = {
-  starts: ["-update-beta"],
+  starts: ["-update-beta", "-bupdate"],
   desc: "Updates a **beta** mod to the latest version supplied",
   input: true,
 };
