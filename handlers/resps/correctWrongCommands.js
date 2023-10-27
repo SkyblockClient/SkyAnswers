@@ -11,6 +11,8 @@ export const command = async (message) => {
     await message.reply("ha ha very funny\n(you meant to say `-discord`)");
   if (content == "sky invalidate")
     await message.reply("ha ha very funny\n(you meant to say `-invalidate`)");
+  if (content == "-help")
+    await message.reply("ha ha very funny\n(you meant to say `sky help`)");
   if (content == "-pullrepo") await message.reply("it's `-invalidate` now");
   if (content == "-repo") await message.reply("it's `-update [dl url]` now");
 };
