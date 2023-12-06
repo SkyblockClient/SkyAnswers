@@ -23,7 +23,7 @@ export const command = async (interaction) => {
   switch (crashType) {
     case "CP":
       await interaction.channel.send(
-        '**Click the button that says "Copy crash report" and paste it here.**'
+        "**Click the copy button and paste it here.**"
       );
       break;
     case "launcher":
