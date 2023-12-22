@@ -11,16 +11,16 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.2",
+    "@supabase/supabase-js": "^2.39.1",
     "canvas": "^2.11.2",
-    "chart.js": "^4.4.0",
+    "chart.js": "^4.4.1",
     "cross-fetch": "^4.0.0",
-    "discord.js": "^14.13.0",
+    "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "glob-promise": "^6.0.5",
     "js-levenshtein": "^1.1.6",

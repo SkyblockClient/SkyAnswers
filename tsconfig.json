@@ -9,6 +9,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "module": "esnext",
-    "target": "esnext"
+    "target": "esnext",
+    "noEmit": true
   }
 }

@@ -12,7 +12,15 @@ const modOwners = {
   "332836587576492033": "dungeons_guide_loader",
 };
 
-export const activeUpdates = [];
+/**
+ * @type {Record<string, {
+ *   forge_id: any;
+ *   url: string;
+ *   file: string;
+ *   hash: string;
+ * }>}
+ */
+export const activeUpdates = {};
 export const sendNewMod = async (modData) => {
   const modsFileResp = await fetch(modsFileEndpoint, {
     headers: {
