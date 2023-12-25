@@ -26,7 +26,7 @@ const check = async (id, { respond }) => {
   if (error) throw error;
 
   const averagePerHour = data.reduce((a, b) => a + b.count, 0) / 24;
-  if (averagePerHour < 8) return;
+  if (averagePerHour < 20) return;
 
   const silentThreshold = averagePerHour * 0.1;
 
