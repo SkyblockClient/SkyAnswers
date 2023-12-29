@@ -6,12 +6,13 @@ import { ChannelType } from "discord.js";
 export const command = async (message) => {
   if (message.channel.type != ChannelType.DM) return;
 
-  const memberLogs = /** @type {import("discord.js").TextChannel} */ (
+  const verboseBotLogs = /** @type {import("discord.js").TextChannel} */ (
     message.client.channels.cache.get("934968221923168266")
   );
-  if (!memberLogs) return;
+  if (!verboseBotLogs) return;
+
   const { content, author } = message;
-  await memberLogs.send({
+  await verboseBotLogs.send({
     content: `some dude (<@${author.id}>) just dmed me
 \`\`\`
 ${content}
