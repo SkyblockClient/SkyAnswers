@@ -9,7 +9,8 @@ const streaks = {};
 export const command = async ({ content, author, channel, guild, client }) => {
   const member = guild.members.cache.get(author.id);
   if (!member) return;
-  if (content.startsWith("-") || content.startsWith("sky ")) return; // exclude bot commands
+  if (content.startsWith("-") || content.toLowerCase().startsWith("sky "))
+    return; // exclude bot commands
   if (channel.id == "887818760126345246") return; // exclude trolling
   if (member.roles.cache.has("832754819588292679")) return; // cool people
   if (member.roles.cache.has("832325812329906176")) return; // already has no giveaways
