@@ -90,9 +90,7 @@ client.on("interactionCreate", async (interaction) => {
       await handler.command(interaction);
     } catch (e) {
       console.error(e);
-      await interaction.channel.send(
-        "An error happened inside SkyAnswers, " + e
-      );
+      await interaction.channel.send("This interaction handler threw. " + e);
     }
   } else if ("reply" in interaction) {
     await interaction.reply({
@@ -140,7 +138,7 @@ client.on("messageCreate", async (/** @type {MessageData} */ message) => {
       })
     );
   } catch (e) {
-    await message.reply("An error happened inside SkyAnswers, " + e);
+    await message.reply("This message handler threw. " + e);
     console.error(e);
   }
 });
