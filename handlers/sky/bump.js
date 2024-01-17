@@ -1,8 +1,8 @@
 /**
  * @param {import("../../bot.js").MessageData} message
  */
-export const command = async ({ channel }) => {
-  const pins = await channel.messages.fetchPinned();
+export const command = async (message) => {
+  const pins = await message.channel.messages.fetchPinned();
   const openingMessage = pins
     .filter((message) => {
       return (
@@ -13,7 +13,8 @@ export const command = async ({ channel }) => {
     .first();
   const ticketOwner = openingMessage?.content?.match(/[0-9]+/)?.at(0);
   const seconds2DaysFromNow = Math.floor(Date.now() / 1000 + 60 * 60 * 24 * 2);
-  return await channel.send({
+  await message.delete();
+  await message.channel.send({
     ...(ticketOwner ? { content: `Hey <@${ticketOwner}>:` } : null),
     embeds: [
       {
