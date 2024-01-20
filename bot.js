@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
-import { promise } from "glob-promise";
+import glob from "fast-glob";
 import { run } from "./ticketPinger.js";
 
 /**
@@ -23,6 +23,10 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 let handlers;
+const loadHandlers = (async () => {
+  const handlerPaths = await glob(["./handlers/**/*.js", "!**/_*.js"]);
+  handlers = await Promise.all(handlerPaths.map((path) => import(path)));
+})();
 
 console.log("Connecting...");
 client.once("ready", () => {
@@ -42,10 +46,7 @@ client.once("ready", () => {
     run(skyclient);
   }, 60000);
 });
-const loadHandlers = async () => {
-  const handlerPaths = await promise("./handlers/**/*.js");
-  handlers = await Promise.all(handlerPaths.map((path) => import(path)));
-};
+
 const checkPublic = (interaction, handler) =>
   handler.when.public ||
   interaction.guildId == "780181693100982273" ||
@@ -53,7 +54,7 @@ const checkPublic = (interaction, handler) =>
     interaction.client.user.id == "977585995174252624");
 
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
-  if (!handlers) await loadHandlers();
+  await loadHandlers;
   await Promise.all(
     handlers.map(async (handler) => {
       if (handler.when.all != "member updates") return;
@@ -64,7 +65,7 @@ client.on("guildMemberUpdate", async (oldUser, newUser) => {
 });
 
 client.on("channelCreate", async (channel) => {
-  if (!handlers) await loadHandlers();
+  await loadHandlers;
   await Promise.all(
     handlers.map(async (handler) => {
       if (handler.when.all != "channels") return;
@@ -74,7 +75,7 @@ client.on("channelCreate", async (channel) => {
   );
 });
 client.on("interactionCreate", async (interaction) => {
-  if (!handlers) await loadHandlers();
+  await loadHandlers;
   const name =
     "customId" in interaction
       ? interaction.customId.split("|")[0]
@@ -104,7 +105,8 @@ client.on("interactionCreate", async (interaction) => {
 
 client.on("messageCreate", async (/** @type {MessageData} */ message) => {
   if (message.author.bot) return;
-  if (!handlers) await loadHandlers();
+
+  await loadHandlers;
   const content = message.content.toLowerCase();
   message.respond = (data) =>
     message.reply({ ...data, allowedMentions: { repliedUser: false } });
