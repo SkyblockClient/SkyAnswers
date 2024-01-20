@@ -74,11 +74,12 @@ export const command = async ({ member, respond, content }) => {
    * @type {string | undefined}
    */
   const modOwner = modOwners[member.id];
-  if (
-    !member.roles.cache.has("799020944487612428") &&
-    !member.permissions.has("Administrator") &&
-    !modOwner
-  ) {
+  if (!member.roles.cache.has("799020944487612428") && !modOwner) {
+    if (member.permissions.has("Administrator")) {
+      return await respond({
+        content: "please assign yourself the Github Keeper role and try again",
+      });
+    }
     return await respond({ content: "why do you think you can do this?" });
   }
   const url = content.slice(8);
