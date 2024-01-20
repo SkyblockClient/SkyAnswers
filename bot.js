@@ -51,7 +51,7 @@ const checkPublic = (interaction, handler) =>
   handler.when.public ||
   interaction.guildId == "780181693100982273" ||
   (interaction.guildId == "962319226377474078" &&
-    interaction.client.user.id == "977585995174252624");
+    process.env.USER == "kendell");
 
 client.on("guildMemberUpdate", async (oldUser, newUser) => {
   await loadHandlers;
