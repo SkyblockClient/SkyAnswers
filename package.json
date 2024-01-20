@@ -12,6 +12,7 @@
   "type": "module",
   "devDependencies": {
     "eslint": "^8.56.0",
+    "isomorphic-git": "^1.25.3",
     "prettier": "^3.1.1",
     "typescript": "^5.3.3"
   },
