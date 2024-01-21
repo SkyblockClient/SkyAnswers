@@ -1,6 +1,7 @@
 import { InteractionType } from "discord.js";
 import fs from "fs/promises";
 import { add, clone, commit, push } from "isomorphic-git";
+import { randomUUID } from "crypto";
 import http from "isomorphic-git/http/node/index.js";
 import { checkMember, pendingUpdates } from "./_update.js";
 import { format } from "prettier";
@@ -43,7 +44,7 @@ export const command = async (interaction) => {
     components: [],
   });
 
-  const tmp = `/tmp/${crypto.randomUUID()}`;
+  const tmp = `/tmp/${randomUUID()}`;
   await fs.mkdir(tmp);
 
   let tasks = [];
