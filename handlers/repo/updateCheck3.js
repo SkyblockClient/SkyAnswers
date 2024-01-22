@@ -28,7 +28,7 @@ export const command = async (interaction) => {
 
   // @ts-ignore
   const perms = await checkMember(interaction.member);
-  const approved = perms.all ? true : perms.some?.includes(data.forge_id);
+  const approved = perms.all ? true : data.forge_id in perms.perms;
   if (!approved) {
     await interaction.reply({
       content: "you can't approve this update",

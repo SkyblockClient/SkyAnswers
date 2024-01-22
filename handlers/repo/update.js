@@ -9,7 +9,7 @@ import { checkMember, pendingUpdates } from "./_update.js";
  */
 export const command = async ({ member, respond, content }) => {
   const perms = await checkMember(member);
-  if (!perms.all && !perms.some) {
+  if (!perms.all && !perms.perms) {
     if (member.permissions.has("Administrator")) {
       await respond({
         content: "💡 assign yourself Github Keeper",
@@ -50,7 +50,7 @@ export const command = async ({ member, respond, content }) => {
     await msg.edit("🫨 this mod doesn't have a mod id");
     return;
   }
-  if (!perms.all && !perms.some.includes(modId)) {
+  if (!perms.all && (perms.perms ? perms.perms[modId] != "update" : false)) {
     await msg.edit(`🫨 you can't update that mod`);
     return;
   }

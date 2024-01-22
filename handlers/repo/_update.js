@@ -17,7 +17,7 @@ export const checkMember = async (member) => {
   if (data) {
     return {
       all: false,
-      some: Object.keys(data.mods).filter((mod) => data.mods[mod] == "update"),
+      perms: data.mods,
     };
   }
   return { all: false };
