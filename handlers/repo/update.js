@@ -7,7 +7,7 @@ import { checkMember, pendingUpdates } from "./_update.js";
 /**
  * @param {import("../../bot.js").MessageData} message
  */
-export const command = async ({ member, respond, content }) => {
+export const command = async ({ member, respond, content, channel, guild }) => {
   const perms = await checkMember(member);
   if (!perms.all && !perms.perms) {
     if (member.permissions.has("Administrator")) {
@@ -18,6 +18,15 @@ export const command = async ({ member, respond, content }) => {
     }
     await respond({
       content: "<:youwhat:889306727953104936> you can't update any mods",
+    });
+    return;
+  }
+
+  const isProper =
+    guild.id != "780181693100982273" || channel.id != "1198710827327434852";
+  if (!isProper) {
+    await respond({
+      content: "💡 this command is only available in <#1198710827327434852>",
     });
     return;
   }
@@ -84,8 +93,9 @@ export const command = async ({ member, respond, content }) => {
     embeds: [
       {
         description: `forge_id: ${data.forge_id}
-url: ${data.url} (hash ${data.hash})
-file: ${data.file}`,
+url: ${data.url}
+file: ${data.file}
+md5: ${data.hash}`,
       },
     ],
     components: [
