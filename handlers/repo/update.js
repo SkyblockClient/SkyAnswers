@@ -23,7 +23,7 @@ export const command = async ({ member, respond, content, channel, guild }) => {
   }
 
   const isProper =
-    guild.id != "780181693100982273" || channel.id != "1198710827327434852";
+    guild.id != "780181693100982273" || channel.id == "1198710827327434852";
   if (!isProper) {
     await respond({
       content: "💡 this command is only available in <#1198710827327434852>",
