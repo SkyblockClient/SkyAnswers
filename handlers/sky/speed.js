@@ -15,10 +15,8 @@ export const command = async (interaction) => {
   const totalTime = message.createdTimestamp - interaction.createdTimestamp;
   await interaction.editReply(
     `blazingly fast ⚡
-ws ping: ${ping}ms
-from interaction created to interaction recieved: ${recieveTime}ms
-from interaction received to message created: ${sendTime}ms
-total: ${totalTime}ms`
+ws: ${ping}ms
+this interaction: ${recieveTime}ms to recieve interaction, ${sendTime}ms to send message - total ${totalTime}ms`
   );
 };
 export const when = {
