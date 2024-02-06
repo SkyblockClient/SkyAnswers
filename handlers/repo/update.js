@@ -22,6 +22,8 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     return;
   }
 
+  const isBeta = content.startsWith("-bupdate");
+
   const isProper =
     guild.id != "780181693100982273" || channel.id == "1198710827327434852";
   if (!isProper) {
@@ -71,7 +73,7 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
   };
   const mods = await getTrackedData(
-    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"
+    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/" + (isBeta ? "mods_beta.json" : "mods.json")
   );
   const existingMod = mods.find((mod) => mod.forge_id == modId);
   if (!existingMod) {
@@ -87,7 +89,7 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     return;
   }
 
-  pendingUpdates[msg.id] = { ...data, initiator: member.id, type: "normal" };
+  pendingUpdates[msg.id] = { ...data, initiator: member.id, type: isBeta ? "beta" : "normal" };
   await msg.edit({
     content: "👀 does this look alright?",
     embeds: [
@@ -114,7 +116,7 @@ md5: ${data.hash}`,
   });
 };
 export const when = {
-  starts: ["-update"],
+  starts: ["-update", "-bupdate"],
   desc: "Updates a mod to the latest version supplied",
   input: true,
 };
