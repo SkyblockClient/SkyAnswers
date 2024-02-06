@@ -7,7 +7,7 @@ import { checkMember, pendingUpdates } from "./_update.js";
 /**
  * @param {import("../../bot.js").MessageData} message
  */
-export const command = async ({ member, respond, content, channel, guild,  }) => {
+export const command = async ({ member, respond, content, channel, guild }) => {
   const perms = await checkMember(member);
   if (!perms.all && !perms.perms) {
     if (member.permissions.has("Administrator")) {
