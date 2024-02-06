@@ -86,11 +86,13 @@ export const command = async (interaction) => {
   await interaction.message.edit({
     content: `pushing it out...`,
   });
-  const modsFile = await fs.readFile(
-    data.type == "beta"
-      ? `${tmp}/files/mods_beta.json`
-      : `${tmp}/files/mods.json`
-  );
+
+  const fileLocation = data.type == "beta"
+  ? `${tmp}/files/mods_beta.json`
+  : `${tmp}/files/mods.json`;
+
+  const modsFile = await fs.readFile(fileLocation);
+
   const mods = JSON.parse(modsFile.toString());
   const mod = mods.find((m) => m.forge_id == data.forge_id);
   mod.url = data.url;
@@ -98,9 +100,7 @@ export const command = async (interaction) => {
   mod.hash = data.hash;
 
   await fs.writeFile(
-    data.type == "beta"
-      ? `${tmp}/files/mods_beta.json`
-      : `${tmp}/files/mods.json`,
+    fileLocation,
     await format(JSON.stringify(mods), { parser: "json", tabWidth: 4 })
   );
   await add({
