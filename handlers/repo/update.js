@@ -72,15 +72,24 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     file: decodeURI(url).split("/").pop().split("?")[0],
     hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
   };
+
   const mods = await getTrackedData(
-    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/" + (isBeta ? "mods_beta.json" : "mods.json")
+    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"
   );
-  const existingMod = mods.find((mod) => mod.forge_id == modId);
-  if (!existingMod) {
+  
+  const modsBeta = isBeta ? await getTrackedData(
+    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods_beta.json"
+  ) : mods;
+
+  if (!mods.find((mod) => mod.forge_id == modId)) {
     await msg.edit("🤔 that mod doesn't exist");
     return;
   }
+
+  const existingMod = modsBeta.find((mod) => mod.forge_id == modId);
+
   if (
+    existingMod &&
     existingMod.url == data.url &&
     existingMod.file == data.file &&
     existingMod.hash == data.hash
