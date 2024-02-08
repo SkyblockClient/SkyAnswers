@@ -82,14 +82,12 @@ export const command = async ({ member, respond, content, channel, guild }) => {
       )
     : modsRef;
 
-  if (
-    !modsRef.find((mod) => mod.forge_id == modId)
-  ) {
+  if (!modsRef.find((mod) => mod.forge_id == modId)) {
     await msg.edit("🤔 that mod doesn't exist");
     return;
   }
 
-  const existingMod = modsRef.find((mod) => mod.forge_id == modId);
+  const existingMod = mods.find((mod) => mod.forge_id == modId);
 
   if (
     existingMod &&
