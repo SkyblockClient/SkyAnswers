@@ -22,8 +22,6 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     return;
   }
 
-  const isBeta = content.startsWith("-bupdate");
-
   const isProper =
     guild.id != "780181693100982273" || channel.id == "1198710827327434852";
   if (!isProper) {
@@ -72,15 +70,29 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     file: decodeURI(url).split("/").pop().split("?")[0],
     hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
   };
-  const mods = await getTrackedData(
-    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/" + (isBeta ? "mods_beta.json" : "mods.json")
+  const isBeta = content.startsWith("-bupdate");
+
+  const modsRef = await getTrackedData(
+    "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods.json"
   );
-  const existingMod = mods.find((mod) => mod.forge_id == modId);
-  if (!existingMod) {
+
+  const mods = isBeta
+    ? await getTrackedData(
+        "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/mods_beta.json"
+      )
+    : modsRef;
+
+  if (
+    !modsRef.find((mod) => mod.forge_id == modId)
+  ) {
     await msg.edit("🤔 that mod doesn't exist");
     return;
   }
+
+  const existingMod = modsRef.find((mod) => mod.forge_id == modId);
+
   if (
+    existingMod &&
     existingMod.url == data.url &&
     existingMod.file == data.file &&
     existingMod.hash == data.hash
@@ -89,7 +101,11 @@ export const command = async ({ member, respond, content, channel, guild }) => {
     return;
   }
 
-  pendingUpdates[msg.id] = { ...data, initiator: member.id, type: isBeta ? "beta" : "normal" };
+  pendingUpdates[msg.id] = {
+    ...data,
+    initiator: member.id,
+    type: isBeta ? "beta" : "normal",
+  };
   await msg.edit({
     content: "👀 does this look alright?",
     embeds: [

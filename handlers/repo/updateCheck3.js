@@ -48,13 +48,12 @@ export const command = async (interaction) => {
   await fs.mkdir(tmp);
 
   let tasks = [];
+  const kendell = process.env.USER == "kendell" ? "KTibow" : "SkyblockClient";
   tasks.push(
     clone({
       fs,
       http,
-      url: `https://github.com/${
-        process.env.USER == "kendell" ? "KTibow" : "SkyblockClient"
-      }/SkyblockClient-REPO`,
+      url: `https://github.com/${kendell}/SkyblockClient-REPO`,
       dir: tmp,
       depth: 1,
       singleBranch: true,
@@ -86,23 +85,35 @@ export const command = async (interaction) => {
   await interaction.message.edit({
     content: `pushing it out...`,
   });
-  const modsFile = await fs.readFile(
-    data.type == "beta"
-      ? `${tmp}/files/mods_beta.json`
-      : `${tmp}/files/mods.json`
-  );
-  const mods = JSON.parse(modsFile.toString());
+
+  const mods = JSON.parse((await fs.readFile(`${tmp}/files/mods.json`)).toString());
+
   const mod = mods.find((m) => m.forge_id == data.forge_id);
   mod.url = data.url;
   mod.file = data.file;
   mod.hash = data.hash;
 
-  await fs.writeFile(
-    data.type == "beta"
-      ? `${tmp}/files/mods_beta.json`
-      : `${tmp}/files/mods.json`,
-    await format(JSON.stringify(mods), { parser: "json", tabWidth: 4 })
-  );
+  if (data.type === "beta") {
+    const betaMods = JSON.parse((await fs.readFile(`${tmp}/files/mods_beta.json`)).toString());
+    const index = betaMods.findIndex(m => m.forge_id === data.forge_id);
+
+    if (index === -1) {
+      betaMods.push(mod);
+    } else {
+      betaMods[index] = mod;
+    }
+
+    await fs.writeFile(
+      `${tmp}/files/mods_beta.json`,
+      await format(JSON.stringify(betaMods), { parser: "json", tabWidth: 4 })
+    );
+  } else {
+    await fs.writeFile(
+      `${tmp}/files/mods.json`,
+      await format(JSON.stringify(mods), { parser: "json", tabWidth: 4 })
+    );
+  }
+
   await add({
     fs,
     dir: tmp,
