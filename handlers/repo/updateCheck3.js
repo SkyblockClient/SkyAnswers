@@ -99,8 +99,7 @@ export const command = async (interaction) => {
 
     if (index === -1) {
       betaMods.push(mod);
-    }
-    else {
+    } else {
       betaMods[index] = mod;
     }
 
@@ -108,10 +107,9 @@ export const command = async (interaction) => {
       `${tmp}/files/mods_beta.json`,
       await format(JSON.stringify(betaMods), { parser: "json", tabWidth: 4 })
     );
-  }
-  else {
+  } else {
     await fs.writeFile(
-      `${tmp}/files/mdos.json`,
+      `${tmp}/files/mods.json`,
       await format(JSON.stringify(mods), { parser: "json", tabWidth: 4 })
     );
   }
