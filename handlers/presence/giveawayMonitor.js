@@ -21,7 +21,7 @@ export const command = async ({ content, author, channel, guild, client }) => {
     streaks[author.id] = streak;
   }
 
-  const words = content.match(/\w+/g);
+  const words = content.match(/[\w'`´]+/g);
   if (!words) return;
 
   const isShort = words.length < 3;
