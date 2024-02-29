@@ -28,7 +28,7 @@ export const command = async (interaction) => {
 
   // @ts-ignore
   const perms = await checkMember(interaction.member);
-  const approved = perms.all ? true : data.forge_id in perms.perms;
+  const approved = perms.all || (perms.perms && data.forge_id in perms.perms);
   if (!approved) {
     await interaction.reply({
       content: "you can't approve this update",
@@ -86,7 +86,9 @@ export const command = async (interaction) => {
     content: `pushing it out...`,
   });
 
-  const mods = JSON.parse((await fs.readFile(`${tmp}/files/mods.json`)).toString());
+  const mods = JSON.parse(
+    (await fs.readFile(`${tmp}/files/mods.json`)).toString()
+  );
 
   const mod = mods.find((m) => m.forge_id == data.forge_id);
   mod.url = data.url;
@@ -94,8 +96,10 @@ export const command = async (interaction) => {
   mod.hash = data.hash;
 
   if (data.type === "beta") {
-    const betaMods = JSON.parse((await fs.readFile(`${tmp}/files/mods_beta.json`)).toString());
-    const index = betaMods.findIndex(m => m.forge_id === data.forge_id);
+    const betaMods = JSON.parse(
+      (await fs.readFile(`${tmp}/files/mods_beta.json`)).toString()
+    );
+    const index = betaMods.findIndex((m) => m.forge_id === data.forge_id);
 
     if (index === -1) {
       betaMods.push(mod);
