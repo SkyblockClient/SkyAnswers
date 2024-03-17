@@ -77,7 +77,7 @@ export const command = async (interaction) => {
     await Promise.all(tasks);
 
     await fs.writeFile(`${tmp}/files/mods/${data.file}`, Buffer.from(modData));
-    data.url = `https://raw.githubusercontent.com/KTibow/SkyblockClient-REPO/main/files/mods/${data.file}`;
+    data.url = `https://raw.githubusercontent.com/${kendell}/SkyblockClient-REPO/main/files/mods/${data.file}`;
   } else {
     await Promise.all(tasks);
   }
