@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import glob from "fast-glob";
-import { run } from "./ticketPinger.js";
+import { run } from "./bot_recurrent.js";
 
 /**
  * @typedef {Object} MessageExtra
@@ -44,7 +44,7 @@ client.once("ready", () => {
     const skyclient = client.guilds.cache.get("780181693100982273");
     if (!skyclient) return;
     run(skyclient);
-  }, 60000);
+  }, 30000);
 });
 
 const checkPublic = (interaction, handler) =>
