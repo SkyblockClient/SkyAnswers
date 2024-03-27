@@ -93,7 +93,7 @@ export const run = async (guild) => {
   if (ticketChannel) {
     const messages = await ticketChannel.messages.fetch();
     let sticky = messages.first();
-    if (!sticky) {
+    if (!sticky || sticky.author.id != guild.client.user.id) {
       sticky = await ticketChannel.send("sticky");
     }
 
