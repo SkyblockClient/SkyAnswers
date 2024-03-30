@@ -9,6 +9,12 @@ export const run = async (guild) => {
   );
   allTickets.sort((a, b) => a.name.localeCompare(b.name));
 
+  /**
+   * @type {{
+   *   ticket: import("discord.js").TextChannel,
+   *   message: string
+   * }[]}
+   */
   const table = [];
   await Promise.all(
     allTickets.map(async (ticket) => {
@@ -80,8 +86,8 @@ export const run = async (guild) => {
   );
 
   table.sort((a, b) => {
-    const aId = a.split("-")[1];
-    const bId = b.split("-")[1];
+    const aId = a.ticket.name.split("-")[1];
+    const bId = b.ticket.name.split("-")[1];
     return Number(aId) - Number(bId);
   });
 
