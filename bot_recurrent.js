@@ -15,19 +15,15 @@ export const run = async (guild) => {
       if (ticket.name.startsWith("closed")) {
         const messages = await ticket.messages.fetch();
         const close = await getCloseMessage(messages);
-        const shouldArchive =
-          close && Date.now() - close.createdTimestamp > 1000 * 60 * 60 * 24;
-        if (shouldArchive) {
-          table.push({
-            ticket,
-            message:
-              "**Archive** " +
-              `<#${ticket.id}> - closed ` +
-              (close
-                ? `<t:${Math.floor(close.createdTimestamp / 1000)}:R>`
-                : "UNKNOWN"),
-          });
-        }
+        table.push({
+          ticket,
+          message:
+            "**Archive** " +
+            `<#${ticket.id}> - closed ` +
+            (close
+              ? `<t:${Math.floor(close.createdTimestamp / 1000)}:R>`
+              : "UNKNOWN"),
+        });
       } else {
         const ownerId = await getOwner(ticket);
         const owner = guild.members.cache.get(ownerId);
