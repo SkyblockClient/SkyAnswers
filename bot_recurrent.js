@@ -30,57 +30,53 @@ export const run = async (guild) => {
               ? `<t:${Math.floor(close.createdTimestamp / 1000)}:R>`
               : "UNKNOWN"),
         });
-      } else {
-        const ownerId = await getOwner(ticket);
-        const owner = guild.members.cache.get(ownerId);
-        if (!owner) {
-          await ticket.send(
-            "<@&931626562539909130> time to close (owner left)"
-          );
-          table.push({
-            ticket,
-            message: `**Ownerless** <#${ticket.id}> (<@${ownerId}> left)`,
-          });
-          return;
-        }
+        return;
+      }
 
-        const messages = await ticket.messages.fetch();
-        const bump = getBumpMessage(messages);
-        const lastMessage = getLastMessage(messages, ownerId);
-        if (bump) {
-          if (Date.now() - bump.createdTimestamp < 1000 * 60 * 60 * 24 * 2)
-            return;
-          if (
-            lastMessage &&
-            lastMessage.createdTimestamp > bump.createdTimestamp
-          )
-            return;
-          await ticket.send(
-            "<@&931626562539909130> time to close (stale bump)"
-          );
-          table.push({
-            ticket,
-            message:
-              "**Owner abandonment** " +
-              `<#${ticket.id}> (bumped <t:${Math.floor(
-                bump.createdTimestamp / 1000
-              )}:R>)`,
-          });
-        } else {
-          const isStale =
-            lastMessage &&
-            Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
-          if (isStale) {
-            table.push({
-              ticket,
-              message:
-                "**Stale** " +
-                `<#${ticket.id}> (last message <t:${Math.floor(
-                  lastMessage.createdTimestamp / 1000
-                )}:R>)`,
-            });
-          }
-        }
+      const ownerId = await getOwner(ticket);
+      const owner = guild.members.cache.get(ownerId);
+      if (!owner) {
+        await ticket.send("<@&931626562539909130> time to close (owner left)");
+        table.push({
+          ticket,
+          message: `**Ownerless** <#${ticket.id}> (<@${ownerId}> left)`,
+        });
+        return;
+      }
+
+      const messages = await ticket.messages.fetch();
+      const bump = getBumpMessage(messages);
+      const lastMessage = getLastMessage(messages, ownerId);
+      if (
+        bump &&
+        Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2 &&
+        lastMessage &&
+        lastMessage.createdTimestamp > bump.createdTimestamp
+      ) {
+        await ticket.send("<@&931626562539909130> time to close (stale bump)");
+        table.push({
+          ticket,
+          message:
+            "**Owner abandonment** " +
+            `<#${ticket.id}> (bumped <t:${Math.floor(
+              bump.createdTimestamp / 1000
+            )}:R>)`,
+        });
+        return;
+      }
+
+      const isStale =
+        lastMessage &&
+        Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
+      if (isStale) {
+        table.push({
+          ticket,
+          message:
+            "**Stale** " +
+            `<#${ticket.id}> (last message <t:${Math.floor(
+              lastMessage.createdTimestamp / 1000
+            )}:R>)`,
+        });
       }
     })
   );
