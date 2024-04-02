@@ -50,8 +50,7 @@ export const run = async (guild) => {
       if (
         bump &&
         Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2 &&
-        lastMessage &&
-        lastMessage.createdTimestamp > bump.createdTimestamp
+        !(lastMessage && lastMessage.createdTimestamp > bump.createdTimestamp)
       ) {
         await ticket.send("<@&931626562539909130> time to close (stale bump)");
         table.push({
