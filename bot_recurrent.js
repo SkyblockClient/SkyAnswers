@@ -49,9 +49,27 @@ export const run = async (guild) => {
       const lastMessage = getLastMessage(messages, ownerId);
       if (
         bump &&
-        Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2 &&
-        !(lastMessage && lastMessage.createdTimestamp > bump.createdTimestamp)
+        Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2
       ) {
+        if (
+          lastMessage &&
+          lastMessage.createdTimestamp > bump.createdTimestamp
+        ) {
+          const isStale =
+            lastMessage &&
+            Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
+          if (isStale) {
+            table.push({
+              ticket,
+              message:
+                "**Stale** " +
+                `<#${ticket.id}> (last message <t:${Math.floor(
+                  lastMessage.createdTimestamp / 1000
+                )}:R>)`,
+            });
+          }
+          return;
+        }
         await ticket.send("<@&931626562539909130> time to close (stale bump)");
         table.push({
           ticket,
