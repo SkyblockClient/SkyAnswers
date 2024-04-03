@@ -18,83 +18,59 @@ export const run = async (guild) => {
   const table = [];
   await Promise.all(
     allTickets.map(async (ticket) => {
-      if (ticket.name.startsWith("closed")) {
+      const action = await (async () => {
+        if (ticket.name.startsWith("closed")) return "archive";
+
+        const ownerId = await getOwner(ticket);
+        const owner = guild.members.cache.get(ownerId);
+        if (!owner) return "close-ownerless";
+
         const messages = await ticket.messages.fetch();
-        const close = await getCloseMessage(messages);
-        table.push({
-          ticket,
-          message:
-            "**Archive** " +
-            `<#${ticket.id}> - closed ` +
-            (close
-              ? `<t:${Math.floor(close.createdTimestamp / 1000)}:R>`
-              : "UNKNOWN"),
-        });
-        return;
-      }
+        const bump = getBumpMessage(messages);
+        const lastMessage =
+          getLastMessage(messages, ownerId) ||
+          getLastMessage(messages, "444871677176709141");
 
-      const ownerId = await getOwner(ticket);
-      const owner = guild.members.cache.get(ownerId);
-      if (!owner) {
-        await ticket.send("<@&931626562539909130> time to close (owner left)");
-        table.push({
-          ticket,
-          message: `**Ownerless** <#${ticket.id}> (<@${ownerId}> left)`,
-        });
-        return;
-      }
-
-      const messages = await ticket.messages.fetch();
-      const bump = getBumpMessage(messages);
-      const lastMessage = getLastMessage(messages, ownerId);
-      if (
-        bump &&
-        Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2
-      ) {
-        if (
-          lastMessage &&
-          lastMessage.createdTimestamp > bump.createdTimestamp
-        ) {
-          const isStale =
+        if (bump) {
+          if (
             lastMessage &&
-            Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
-          if (isStale) {
-            table.push({
-              ticket,
-              message:
-                "**Stale** " +
-                `<#${ticket.id}> (last message <t:${Math.floor(
-                  lastMessage.createdTimestamp / 1000
-                )}:R>)`,
-            });
+            lastMessage.createdTimestamp > bump.createdTimestamp
+          ) {
+            if (
+              Date.now() - lastMessage.createdTimestamp >
+              1000 * 60 * 60 * 24 * 2
+            )
+              return "bump-stale1";
+            return "none1";
           }
-          return;
+          if (Date.now() - bump.createdTimestamp > 1000 * 60 * 60 * 24 * 2)
+            return "close-bumped";
+          return "none2";
+        } else {
+          if (
+            lastMessage &&
+            Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2
+          )
+            return "bump-stale2";
+          return "none3";
         }
-        await ticket.send("<@&931626562539909130> time to close (stale bump)");
-        table.push({
-          ticket,
-          message:
-            "**Owner abandonment** " +
-            `<#${ticket.id}> (bumped <t:${Math.floor(
-              bump.createdTimestamp / 1000
-            )}:R>)`,
-        });
-        return;
-      }
+      })();
 
-      const isStale =
-        lastMessage &&
-        Date.now() - lastMessage.createdTimestamp > 1000 * 60 * 60 * 24 * 2;
-      if (isStale) {
+      const friendly = {
+        archive: "**ARCHIVE**",
+        "close-ownerless": "**CLOSE** (no owner)",
+        "close-bumped": "**CLOSE** (dead)",
+        "bump-stale1": "**bump** (restale)",
+        "bump-stale2": "**bump** (stale)",
+        // none1: "none but will restale soon",
+        // none2: "none but will close soon",
+        // none3: "none but will stale soon",
+      }[action];
+      if (friendly)
         table.push({
           ticket,
-          message:
-            "**Stale** " +
-            `<#${ticket.id}> (last message <t:${Math.floor(
-              lastMessage.createdTimestamp / 1000
-            )}:R>)`,
+          message: `<#${ticket.id}> ${friendly}`,
         });
-      }
     })
   );
 
