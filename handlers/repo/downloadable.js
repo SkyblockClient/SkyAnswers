@@ -22,7 +22,7 @@ export const getDownloadableEmbed = (downloadable, bundledIn) => {
     ],
     footer: { text: `Created by ${downloadable.creator}` },
     thumbnail: {
-      url: `https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/icons/${encodeURIComponent(
+      url: `https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/icons/${encodeURIComponent(
         downloadable.icon
       )}`,
     },

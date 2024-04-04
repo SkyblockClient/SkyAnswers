@@ -12,7 +12,7 @@ export const getDiscordEmbed = (item) => {
   if (item.icon) {
     message.embeds[0].thumbnail = {
       url:
-        "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/discords/" +
+        "https://raw.githubusercontent.com/SkyblockClient/SkyblockClient-REPO/main/files/discords/" +
         encodeURIComponent(item.icon),
     };
   }
