@@ -1,35 +1,19 @@
-import { ChannelType } from "discord.js";
-
 /**
  * @param {import("../../bot.js").MessageDataPublic} message
  */
 export const command = async ({ client, respond }) => {
-  const channels = client.guilds.cache.map(
-    (guild) =>
-      /** @type {import("discord.js").TextChannel} */ (
-        guild.channels.cache
-          .filter((channel) => channel.type == ChannelType.GuildText)
-          .first()
-      )
-  );
-  const invites = await Promise.all(
-    channels.map(async (ch) => {
-      try {
-        const invite = await ch.createInvite();
-        return "discord.gg/" + invite.code;
-      } catch (e) {}
-      return `No invite to "${ch.guild.name} (${ch.guild.id})"`;
-    })
+  const guilds = client.guilds.cache.map(
+    (guild) => `- ${guild.name} (${guild.id})`
   );
   await respond({
-    content: `${client.guilds.cache.size} server(s):
-${invites.filter((inv) => inv).join("\n")}`,
+    content: `${client.guilds.cache.size} servers:
+${guilds.join("\n")}`,
     allowedMentions: { parse: [] },
   });
 };
 export const when = {
   starts: ["sky servers"],
-  desc: "Feeling bored? Find some servers with the wise choice of using SkyAnswers.",
+  desc: "See what servers SkyAnswers got into.",
   input: false,
   public: true,
 };
