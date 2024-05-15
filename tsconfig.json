@@ -1,15 +1,11 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "module": "esnext",
-    "target": "esnext",
-    "noEmit": true
-  }
+	"extends": ["@sapphire/ts-config", "@sapphire/ts-config/extra-strict", "@sapphire/ts-config/decorators"],
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "dist",
+		"declaration": false,
+		"declarationMap": false,
+		"tsBuildInfoFile": "dist/.tsbuildinfo"
+	},
+	"include": ["src"]
 }
