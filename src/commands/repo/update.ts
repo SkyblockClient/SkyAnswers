@@ -3,7 +3,7 @@ import { Command } from '@sapphire/framework';
 import { createHash } from 'crypto';
 import { ApplicationCommandOptionType, ButtonStyle, ComponentType } from 'discord.js';
 import JSZip from 'jszip';
-import { Mod, getTrackedData } from '../../data.js';
+import { Mod, getJSON, getMods } from '../../data.js';
 import { checkMember, pendingUpdates } from '../../lib/update.js';
 import { Channels, Emojis, Servers } from '../../const.js';
 import z from 'zod';
@@ -88,10 +88,8 @@ export class UserCommand extends Command {
 		};
 		const isBeta = interaction.options.getBoolean('beta') || false;
 
-		const modsRef = Mod.array().parse(await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods.json'));
-		const mods = isBeta
-			? Mod.array().parse(await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods_beta.json'))
-			: modsRef;
+		const modsRef = Mod.array().parse(await getMods());
+		const mods = isBeta ? Mod.array().parse(await getJSON('mods_beta')) : modsRef;
 
 		if (!modsRef.find((mod) => mod.forge_id == modId)) {
 			return msg.edit("🤔 that mod doesn't exist");

@@ -1,6 +1,7 @@
 const DevUser = 'ethan';
 const user = process.env.USER || process.env.USERNAME;
 export const isDevUser = user == DevUser;
+export const repoFilesURL = 'https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files';
 
 export enum Servers {
 	SkyClient = '780181693100982273',

@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Mod, getTrackedData } from '../../data.js';
+import { Mod, getMods } from '../../data.js';
 import { inlineCode, unorderedList } from 'discord.js';
 
 enum ModType {
@@ -23,9 +23,7 @@ export class UserCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const mods = Mod.array()
-			.parse(await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods.json'))
-			.filter((mod) => !mod.hidden);
+		const mods = (await getMods()).filter((mod) => !mod.hidden);
 
 		const modType = (mod: Mod) =>
 			mod.packages

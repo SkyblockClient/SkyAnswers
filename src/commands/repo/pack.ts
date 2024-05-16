@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Pack, getTrackedData, queryDownloadable } from '../../data.js';
-import { getDistance, getDownloadableMessage } from './mod.js';
+import { getDistance, getPacks, queryDownloadable } from '../../data.js';
+import { getDownloadableMessage } from './mod.js';
 import { ApplicationCommandOptionType } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -15,17 +15,18 @@ export class UserCommand extends Command {
 			options: [
 				{
 					type: ApplicationCommandOptionType.String,
-					name: 'query',
+					name: 'pack',
 					description: 'Pack to search for',
-					required: true
+					required: true,
+					autocomplete: true
 				}
 			]
 		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const query = interaction.options.getString('query', true);
-		const items = Pack.array().parse(await getTrackedData(`https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/packs.json`));
+		const query = interaction.options.getString('pack', true);
+		const items = await getPacks();
 		const item = queryDownloadable(items, query, 'packs');
 		if (!item) {
 			const sortedOptions = items.sort((a, b) => getDistance(a, query) - getDistance(b, query));
@@ -33,6 +34,6 @@ export class UserCommand extends Command {
 			const bestDistance = getDistance(bestOption, query);
 			return interaction.reply('No pack found' + (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ''));
 		}
-		return interaction.reply(getDownloadableMessage(item));
+		return interaction.reply(await getDownloadableMessage(item));
 	}
 }

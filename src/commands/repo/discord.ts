@@ -1,7 +1,8 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Discord, getTrackedData, queryData } from '../../data.js';
-import { APIEmbed, ApplicationCommandOptionType, InteractionReplyOptions } from 'discord.js';
+import { Discord, getJSON, queryData } from '../../data.js';
+import { ApplicationCommandOptionType, EmbedBuilder, InteractionReplyOptions } from 'discord.js';
+import { repoFilesURL } from '../../const.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Gives the link to a discord'
@@ -14,18 +15,19 @@ export class UserCommand extends Command {
 			options: [
 				{
 					type: ApplicationCommandOptionType.String,
-					name: 'query',
-					description: 'Discord to search for',
-					required: true
+					name: 'discord',
+					description: 'Discord server to search for',
+					required: true,
+					autocomplete: true
 				}
 			]
 		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const query = interaction.options.getString('query', true);
+		const query = interaction.options.getString('discord', true);
 
-		const data = await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/discords.json');
+		const data = await getJSON('discords');
 		const items = Discord.array().parse(data);
 		const item = queryData(items, query);
 		if (!item) return interaction.reply({ content: `No Discord found` });
@@ -35,15 +37,12 @@ export class UserCommand extends Command {
 }
 
 export function getDiscordEmbed(item: Discord): InteractionReplyOptions {
-	const embed: APIEmbed = {
+	const embed = new EmbedBuilder({
 		color: 0x8ff03f,
 		title: item.fancyname
-	};
-	if (item.icon)
-		embed.thumbnail = {
-			url: 'https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/discords/' + encodeURIComponent(item.icon)
-		};
-	if (item.description) embed.description = item.description;
+	});
+	if (item.icon) embed.setThumbnail(`${repoFilesURL}/discords/${encodeURIComponent(item.icon)}`);
+	if (item.description) embed.setDescription(item.description);
 
 	return {
 		content: 'discord.gg/' + item.code,

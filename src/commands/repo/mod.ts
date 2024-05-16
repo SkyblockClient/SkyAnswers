@@ -1,8 +1,17 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Downloadable, DownloadableMod, DownloadablePack, Mod, getTrackedData, queryDownloadable } from '../../data.js';
-import { APIEmbed, APIEmbedField, ApplicationCommandOptionType, ButtonStyle, ComponentType, InteractionReplyOptions } from 'discord.js';
-import levenshtein from 'js-levenshtein';
+import { DownloadableMod, DownloadablePack, getDistance, getMods, queryDownloadable } from '../../data.js';
+import {
+	ActionRowBuilder,
+	ApplicationCommandOptionType,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	InteractionReplyOptions,
+	hyperlink
+} from 'discord.js';
+import { repoFilesURL } from '../../const.js';
+import { MessageBuilder } from '@sapphire/discord.js-utilities';
 
 @ApplyOptions<Command.Options>({
 	description: 'Gives info about a mod'
@@ -15,17 +24,25 @@ export class UserCommand extends Command {
 			options: [
 				{
 					type: ApplicationCommandOptionType.String,
-					name: 'query',
+					name: 'mod',
 					description: 'Mod to search for',
-					required: true
+					required: true,
+					autocomplete: true
 				}
+				// {
+				// 	type: ApplicationCommandOptionType.String,
+				// 	name: 'instructions',
+				// 	description: 'Additional instructions to post with the mod',
+				// 	required: false,
+				// 	autocomplete: 'mod'
+				// }
 			]
 		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const query = interaction.options.getString('query', true);
-		const items = Mod.array().parse(await getTrackedData(`https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods.json`));
+		const query = interaction.options.getString('mod', true);
+		const items = await getMods();
 		const item = queryDownloadable(items, query, 'mods');
 		if (!item) {
 			const sortedOptions = items.sort((a, b) => getDistance(a, query) - getDistance(b, query));
@@ -37,56 +54,55 @@ export class UserCommand extends Command {
 		if (item.hidden) {
 			bundledIn = items.find((otherItem) => otherItem.packages?.includes(item.id))?.display;
 		}
-		return interaction.reply(getDownloadableMessage(item, bundledIn));
+		return interaction.reply(await getDownloadableMessage(item, bundledIn));
 	}
 }
 
 const isMod = (downloadable: unknown): downloadable is DownloadableMod => DownloadableMod.safeParse(downloadable).success;
 const isPack = (downloadable: unknown): downloadable is DownloadablePack => DownloadablePack.safeParse(downloadable).success;
 
-export function getDownloadableMessage(downloadable: DownloadableMod | DownloadablePack, bundledIn?: string): InteractionReplyOptions {
-	const fields: APIEmbedField[] = [];
-	const embed: APIEmbed = {
+export async function getDownloadableMessage(downloadable: DownloadableMod | DownloadablePack, bundledIn?: string): Promise<InteractionReplyOptions> {
+	const message = new MessageBuilder();
+	const embed = new EmbedBuilder({
 		color: downloadable.hash ? Number('0x' + downloadable.hash.slice(0, 6)) : undefined,
 		title: downloadable.display,
 		description: downloadable.description,
 		footer: { text: `Created by ${downloadable.creator}` }
-	};
-	if (downloadable.icon)
-		embed.thumbnail = {
-			url: `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/icons/${encodeURIComponent(downloadable.icon)}`
-		};
-	if (isPack(downloadable) && downloadable.screenshot) embed.image = { url: encodeURI(downloadable.screenshot) };
+	});
+	if (downloadable.icon) embed.setThumbnail(`${repoFilesURL}/icons/${encodeURIComponent(downloadable.icon)}`);
+	if (isPack(downloadable) && downloadable.screenshot) embed.setImage(downloadable.screenshot);
 	if (downloadable.hidden)
-		fields.push({
+		embed.addFields({
 			name: 'Note',
 			value:
 				"This item is hidden, so it won't show up in the normal installer. " +
 				(bundledIn ? `You can get it in the bundle ${bundledIn}.` : 'It might be internal or outdated.')
 		});
-	if (isMod(downloadable) && downloadable.command) fields.push({ name: 'In-Game Command', value: downloadable.command });
+	const componentRow = new ActionRowBuilder<ButtonBuilder>();
+	if (isMod(downloadable) && downloadable.packages) {
+		const mods = DownloadableMod.array().parse(await getMods());
+		const downloads: string[] = [hyperlink(downloadable.file, encodeURI(downloadable.download))];
+		for (const pkgName of downloadable.packages) {
+			const mod = mods.find((mod) => mod.id == pkgName);
+			if (mod) downloads.push(hyperlink(mod.file, encodeURI(mod.download)));
+			else downloads.push(pkgName);
+		}
+		embed.addFields({
+			name: 'Downloads',
+			value: downloads.join('\n')
+		});
+	} else {
+		componentRow.addComponents(
+			new ButtonBuilder({
+				style: ButtonStyle.Link,
+				label: 'Download',
+				url: encodeURI(downloadable.download)
+			})
+		);
+		message.setComponents([componentRow]);
+	}
+	if (isMod(downloadable) && downloadable.command) embed.addFields({ name: 'Config Command', value: downloadable.command });
 
-	embed.fields = fields;
-	return {
-		embeds: [embed],
-		components: [
-			{
-				type: ComponentType.ActionRow,
-				components: [
-					{
-						type: ComponentType.Button,
-						url: downloadable.download,
-						label: 'Download',
-						style: ButtonStyle.Link
-					}
-				]
-			}
-		]
-	};
-}
-export function getDistance(item: Downloadable, query: string) {
-	const allNames = [item.id, ...(item.nicknames || [])].map((name) => name.toLowerCase());
-	if (item.display) allNames.push(item.display.toLowerCase());
-	const allDistances = allNames.map((name) => levenshtein(query, name));
-	return Math.min(...allDistances);
+	message.setEmbeds([embed]);
+	return message;
 }

@@ -1,5 +1,7 @@
 import { fetch, FetchResultTypes } from '@sapphire/fetch';
 import { z } from 'zod';
+import { repoFilesURL } from './const.js';
+import levenshtein from 'js-levenshtein';
 
 interface TrackedData {
 	data: unknown;
@@ -25,6 +27,9 @@ export async function getTrackedData(url: string) {
 	}
 	return trackedData[url].data;
 }
+export const getJSON = (jsonFilename: string) => getTrackedData(`${repoFilesURL}/${jsonFilename}.json`);
+export const getMods = async () => Mod.array().parse(await getJSON('mods'));
+export const getPacks = async () => Pack.array().parse(await getJSON('packs'));
 
 export const DataType = z.enum(['mods', 'packs']);
 export type DataType = z.infer<typeof DataType>;
@@ -59,6 +64,7 @@ export type Discord = z.infer<typeof Discord>;
 // });
 
 export const Downloadable = Data.extend({
+	display: z.string(),
 	// enabled: z.boolean().optional(),
 	creator: z.string().optional(),
 	description: z.string(),
@@ -125,4 +131,16 @@ export function queryDownloadable<T extends Downloadable>(
 		case 'packs':
 			return DownloadablePack.parse(option);
 	}
+}
+
+export function probableMatches<T extends Data>(items: T[], query: string): T[] {
+	const ret = items.sort((a, b) => getDistance(a, query) - getDistance(b, query));
+	return ret.slice(0, 25);
+}
+
+export function getDistance(item: Data, query: string) {
+	const allNames = [item.id, ...(item.nicknames || [])].map((name) => name.toLowerCase());
+	if (item.display) allNames.push(item.display.toLowerCase());
+	const allDistances = allNames.map((name) => levenshtein(query, name));
+	return Math.min(...allDistances);
 }

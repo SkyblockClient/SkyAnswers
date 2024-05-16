@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Pack, getTrackedData } from '../../data.js';
+import { Pack, getPacks } from '../../data.js';
 import { unorderedList } from 'discord.js';
 
 enum PackType {
@@ -22,9 +22,7 @@ export class UserCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const packs = Pack.array()
-			.parse(await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/packs.json'))
-			.filter((pack) => !pack.hidden);
+		const packs = (await getPacks()).filter((pack) => !pack.hidden);
 
 		const packType = (pack: Pack) =>
 			pack.categories?.includes('1;All Skyblock') ? PackType.Skyblock : pack.categories?.includes('3;All PvP') ? PackType.PvP : PackType.Other;

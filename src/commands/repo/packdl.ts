@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { DownloadablePack, getTrackedData } from '../../data.js';
+import { DownloadablePack, getPacks } from '../../data.js';
 import { APIEmbed, hyperlink, unorderedList } from 'discord.js';
 
 enum ItemType {
@@ -22,7 +22,7 @@ export class UserCommand extends Command {
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
 		const items = DownloadablePack.array()
-			.parse(await getTrackedData(`https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/packs.json`))
+			.parse(await getPacks())
 			.filter((item) => !item.hidden);
 		const categorizeItem = (item: DownloadablePack) =>
 			item.categories?.includes('2;All Skyblock') || item.categories?.includes('1;All Skyblock')
