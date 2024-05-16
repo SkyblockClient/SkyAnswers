@@ -1,6 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { searchEmbed } from '../../data.js';
+import { ApplicationCommandOptionType } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Searches for the query in the knowledge base',
@@ -8,17 +9,18 @@ import { searchEmbed } from '../../data.js';
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-				.addStringOption((option) =>
-					option //
-						.setName('query')
-						.setDescription('the query')
-						.setRequired(true)
-				)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description,
+			options: [
+				{
+					type: ApplicationCommandOptionType.String,
+					name: 'query',
+					description: 'the query',
+					required: true
+				}
+			]
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {

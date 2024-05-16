@@ -2,23 +2,25 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Pack, getTrackedData, queryDownloadable } from '../../data.js';
 import { getDistance, getDownloadableMessage } from './mod.js';
+import { ApplicationCommandOptionType } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Gives info about a pack'
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-				.addStringOption((option) =>
-					option //
-						.setName('query')
-						.setDescription('Pack to search for')
-						.setRequired(true)
-				)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description,
+			options: [
+				{
+					type: ApplicationCommandOptionType.String,
+					name: 'query',
+					description: 'Pack to search for',
+					required: true
+				}
+			]
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {

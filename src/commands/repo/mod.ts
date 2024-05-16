@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Downloadable, DownloadableMod, DownloadablePack, Mod, getTrackedData, queryDownloadable } from '../../data.js';
-import { APIEmbed, APIEmbedField, ButtonStyle, ComponentType, InteractionReplyOptions } from 'discord.js';
+import { APIEmbed, APIEmbedField, ApplicationCommandOptionType, ButtonStyle, ComponentType, InteractionReplyOptions } from 'discord.js';
 import levenshtein from 'js-levenshtein';
 
 @ApplyOptions<Command.Options>({
@@ -9,17 +9,18 @@ import levenshtein from 'js-levenshtein';
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-				.addStringOption((option) =>
-					option //
-						.setName('query')
-						.setDescription('Mod to search for')
-						.setRequired(true)
-				)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description,
+			options: [
+				{
+					type: ApplicationCommandOptionType.String,
+					name: 'query',
+					description: 'Mod to search for',
+					required: true
+				}
+			]
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
