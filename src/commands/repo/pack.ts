@@ -1,24 +1,26 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Pack, getTrackedData, queryDownloadable } from '../../data.js';
-import { getDistance, getDownloadableEmbed } from './mod.js';
+import { getDistance, getDownloadableMessage } from './mod.js';
+import { ApplicationCommandOptionType } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Gives info about a pack'
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-				.addStringOption((option) =>
-					option //
-						.setName('query')
-						.setDescription('the query')
-						.setRequired(true)
-				)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description,
+			options: [
+				{
+					type: ApplicationCommandOptionType.String,
+					name: 'query',
+					description: 'Pack to search for',
+					required: true
+				}
+			]
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
@@ -29,12 +31,8 @@ export class UserCommand extends Command {
 			const sortedOptions = items.sort((a, b) => getDistance(a, query) - getDistance(b, query));
 			const bestOption = sortedOptions[0];
 			const bestDistance = getDistance(bestOption, query);
-			return interaction.reply({
-				content: `No pack found` + (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : '')
-			});
+			return interaction.reply('No pack found' + (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ''));
 		}
-		return interaction.reply({
-			embeds: [getDownloadableEmbed(item)]
-		});
+		return interaction.reply(getDownloadableMessage(item));
 	}
 }

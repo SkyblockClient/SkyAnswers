@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { createHash } from 'crypto';
-import { ButtonStyle, ComponentType } from 'discord.js';
+import { ApplicationCommandOptionType, ButtonStyle, ComponentType } from 'discord.js';
 import JSZip from 'jszip';
 import { Mod, getTrackedData } from '../../data.js';
 import { checkMember, pendingUpdates } from '../../lib/update.js';
@@ -14,23 +14,24 @@ import { basename } from '@std/url';
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-				.addStringOption((option) =>
-					option //
-						.setName('url')
-						.setDescription('Download URL')
-						.setRequired(true)
-				)
-				.addBooleanOption((option) =>
-					option //
-						.setName('beta')
-						.setDescription('Beta')
-						.setRequired(false)
-				)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description,
+			options: [
+				{
+					type: ApplicationCommandOptionType.String,
+					name: 'url',
+					description: 'Download URL',
+					required: true
+				},
+				{
+					type: ApplicationCommandOptionType.Boolean,
+					name: 'beta',
+					description: 'Beta',
+					required: false
+				}
+			]
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {

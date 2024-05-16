@@ -1,24 +1,25 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Discord, getTrackedData, queryData } from '../../data.js';
-import { APIEmbed, InteractionReplyOptions } from 'discord.js';
+import { APIEmbed, ApplicationCommandOptionType, InteractionReplyOptions } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Gives the link to a discord'
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-				.addStringOption((option) =>
-					option //
-						.setName('query')
-						.setDescription('the query')
-						.setRequired(true)
-				)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description,
+			options: [
+				{
+					type: ApplicationCommandOptionType.String,
+					name: 'query',
+					description: 'Discord to search for',
+					required: true
+				}
+			]
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {

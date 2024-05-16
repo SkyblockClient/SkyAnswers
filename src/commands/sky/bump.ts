@@ -10,11 +10,10 @@ import { inPrivate } from '../../preconditions/notPublic.js';
 })
 export class UserCommand extends Command {
 	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand((builder) =>
-			builder //
-				.setName(this.name)
-				.setDescription(this.description)
-		);
+		registry.registerChatInputCommand({
+			name: this.name,
+			description: this.description
+		});
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
