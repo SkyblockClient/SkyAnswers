@@ -1,4 +1,4 @@
-import { Message, TextChannel, escapeMarkdown } from 'discord.js';
+import { Message, TextChannel, escapeMarkdown, unorderedList } from 'discord.js';
 import { Channels, Roles } from '../../const.js';
 import { Events, Listener } from '@sapphire/framework';
 import { ApplyOptions } from '@sapphire/decorators';
@@ -44,17 +44,15 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
 			await member.roles.add(Roles.NoGiveaways);
 
 			const message = `${author.id} (${author.username}) sent 6 low effort messages in a row, so they were blocked from giveaways`;
-			channel.send(message);
+			await channel.send(message);
 
 			const verboseBotLogs = client.channels.cache.get(Channels.BotLogs) as TextChannel;
 			if (!verboseBotLogs) return;
 
-			verboseBotLogs.send({
-				content: message,
-				embeds: streak.map((v) => ({
-					description: escapeMarkdown(v)
-				}))
-			});
-		} catch {}
+			const list = unorderedList(streak.map((v) => escapeMarkdown(v)));
+			await verboseBotLogs.send(`${message}\n${list}`);
+		} catch (e) {
+			console.log(e);
+		}
 	}
 }
