@@ -171,8 +171,10 @@ export const DownloadablePack = Pack.transform((v) => ({
 }));
 export type DownloadablePack = z.infer<typeof DownloadablePack>;
 
-export const queryData = <T extends Data>(options: T[], query: string): T | undefined =>
-	options.find((opt) => opt.id == query || opt.nicknames?.includes?.(query) || opt.display?.toLowerCase() == query);
+export function queryData<T extends Data>(options: T[], query: string): T | undefined {
+	const q = query.toLowerCase();
+	return options.find((opt) => opt.id == q || opt.nicknames?.includes?.(q) || opt.display?.toLowerCase() == q);
+}
 
 export function queryDownloadable(options: Mod[], query: string, hosting: 'mods'): DownloadableMod | undefined;
 export function queryDownloadable(options: Pack[], query: string, hosting: 'packs'): DownloadablePack | undefined;
