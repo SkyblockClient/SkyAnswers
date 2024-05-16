@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Downloadable, DownloadableMod, DownloadablePack, Mod, getTrackedData, queryDownloadable } from '../../data.js';
-import { APIEmbed, APIEmbedField } from 'discord.js';
+import { APIEmbed, APIEmbedField, ButtonStyle, ComponentType, InteractionReplyOptions } from 'discord.js';
 import levenshtein from 'js-levenshtein';
 
 @ApplyOptions<Command.Options>({
