@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { TextChannel } from 'discord.js';
-import { setTicketOpen } from '../../listeners/ticket/start.js';
+import { setTicketOpen } from '../../lib/ticket.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Makes the person who made a ticket have send message perms'

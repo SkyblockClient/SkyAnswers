@@ -1,13 +1,18 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
-import { ButtonStyle, ComponentType } from 'discord.js';
+import { ButtonStyle, ComponentType, TextChannel } from 'discord.js';
+import { plsBePatientTY, setTicketOpen } from '../../lib/ticket.js';
 
 @ApplyOptions<InteractionHandler.Options>({
 	interactionHandlerType: InteractionHandlerTypes.Button
 })
 export class ButtonHandler extends InteractionHandler {
 	public async run(interaction: ButtonInteraction) {
+		const { channel } = interaction;
+		if (!channel) return;
+		if (!(channel instanceof TextChannel)) return;
+
 		const ticketType = interaction.customId.split('|')[1];
 		const ticketTypeName = {
 			crash: 'Crashing',
@@ -45,23 +50,14 @@ export class ButtonHandler extends InteractionHandler {
 					}
 				]
 			});
-		else
-			return interaction.update({
-				content: ticketTypeDesc + "\nDescribe your problem. I'll search for it and continue the support process.",
-				components: [
-					{
-						type: ComponentType.ActionRow,
-						components: [
-							{
-								type: ComponentType.Button,
-								customId: 'ticketSearch',
-								label: 'Search',
-								style: ButtonStyle.Primary
-							}
-						]
-					}
-				]
-			});
+		else {
+			await setTicketOpen(channel, true);
+			return interaction.update(
+				`${ticketTypeDesc}
+Go ahead and describe your problem so we can help you.
+${plsBePatientTY}`
+			);
+		}
 	}
 
 	public override parse(interaction: ButtonInteraction) {

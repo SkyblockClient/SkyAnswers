@@ -2,7 +2,7 @@ import { ApplyOptions } from '@sapphire/decorators';
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import type { ButtonInteraction } from 'discord.js';
 import { TextChannel } from 'discord.js';
-import { setTicketOpen } from '../../listeners/ticket/start.js';
+import { plsBePatientTY, setTicketOpen } from '../../lib/ticket.js';
 
 @ApplyOptions<InteractionHandler.Options>({
 	interactionHandlerType: InteractionHandlerTypes.Button
@@ -26,7 +26,7 @@ export class ButtonHandler extends InteractionHandler {
 
 		switch (crashType) {
 			case 'CP':
-				await interaction.channel.send('**Click the copy button and paste it here.**');
+				await interaction.channel.send(`**Click the copy button and paste it here.**\n${plsBePatientTY}`);
 				break;
 			case 'launcher':
 				await interaction.channel.send(`1. Open your SkyClient folder. See this: https://youtu.be/BHIM2htfMk8
@@ -34,10 +34,12 @@ export class ButtonHandler extends InteractionHandler {
 **If you see a "View Crash Report" button:**
 Go to the \`crash-reports\` folder and upload the most recent file here.
 **If you don't:**
-Go to the \`logs\` folder and upload the file called \`latest.log\`.`);
+Go to the \`logs\` folder and upload the file called \`latest.log\`.
+
+${plsBePatientTY}`);
 				break;
 			case 'other':
-				await interaction.channel.send('Describe how you crashed so we can help you.');
+				await interaction.channel.send(`Go ahead and describe your crash so we can help you.\n${plsBePatientTY}`);
 				break;
 		}
 		await setTicketOpen(interaction.channel, true);
