@@ -1,0 +1,134 @@
+import { ApplyOptions } from '@sapphire/decorators';
+import { Command } from '@sapphire/framework';
+import { createHash } from 'crypto';
+import { ButtonStyle, ComponentType } from 'discord.js';
+import JSZip from 'jszip';
+import { Mod, getTrackedData } from '../../data.js';
+import { checkMember, pendingUpdates } from '../../lib/update.js';
+import { Channels, Emojis, Servers } from '../../const.js';
+import z from 'zod';
+import { basename } from '@std/url';
+
+@ApplyOptions<Command.Options>({
+	description: 'Updates a mod to the latest version supplied'
+})
+export class UserCommand extends Command {
+	public override registerApplicationCommands(registry: Command.Registry) {
+		registry.registerChatInputCommand((builder) =>
+			builder //
+				.setName(this.name)
+				.setDescription(this.description)
+				.addStringOption((option) =>
+					option //
+						.setName('url')
+						.setDescription('Download URL')
+						.setRequired(true)
+				)
+				.addBooleanOption((option) =>
+					option //
+						.setName('beta')
+						.setDescription('Beta')
+						.setRequired(false)
+				)
+		);
+	}
+
+	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+		const { guild, channel } = interaction;
+		if (!guild || !channel) return;
+		const member = interaction.guild?.members.resolve(interaction.user);
+		if (!member) return;
+		const perms = await checkMember(member);
+		if (!perms.all && !perms.perms) {
+			if (member.permissions.has('Administrator')) return interaction.reply('💡 assign yourself Github Keeper');
+			return interaction.reply(`${Emojis.YouWhat} you can't update any mods`);
+		}
+
+		const isProper = guild.id != Servers.SkyClient || channel.id == Channels.ModUpdating;
+		if (!isProper) return interaction.reply(`💡 this command is only available in <#${Channels.ModUpdating}>`);
+
+		const msg = await interaction.reply('👀 loading this mod...');
+
+		const url = interaction.options.getString('url', true);
+		if (!z.string().url().safeParse(url).success) return interaction.reply("this doesn't look like a URL to me 🤔");
+		const modResp = await fetch(url, {
+			headers: { 'User-Agent': 'github.com/SkyblockClient/SkyAnswers' }
+		});
+		if (!modResp.ok) {
+			console.error(await modResp.text());
+			throw new Error(`${modResp.statusText} while fetching ${url}`);
+		}
+		const modFile = await modResp.arrayBuffer();
+
+		const modZip = await JSZip.loadAsync(modFile);
+		const modInfoFile = modZip.file('mcmod.info');
+		let modId: string | undefined;
+		if (modInfoFile) {
+			const modInfoStr = await modInfoFile.async('text');
+			const modInfo = JSON.parse(modInfoStr);
+			modId = modInfo[0].modid;
+		}
+
+		if (!modId) {
+			await msg.edit("🫨 this mod doesn't have a mod id");
+			return;
+		}
+		if (!perms.all && (perms.perms ? perms.perms[modId] != 'update' : false)) {
+			await msg.edit(`🫨 you can't update that mod`);
+			return;
+		}
+
+		//const file = decodeURI(url).split('/').pop().split('?')[0];
+		const data = {
+			forge_id: modId,
+			url,
+			file: basename(url),
+			hash: createHash('md5').update(new Uint8Array(modFile)).digest('hex')
+		};
+		const isBeta = interaction.options.getBoolean('beta') || false;
+
+		const modsRef = Mod.array().parse(await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods.json'));
+		const mods = isBeta
+			? Mod.array().parse(await getTrackedData('https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods_beta.json'))
+			: modsRef;
+
+		if (!modsRef.find((mod) => mod.forge_id == modId)) {
+			return msg.edit("🤔 that mod doesn't exist");
+		}
+
+		const existingMod = mods.find((mod) => mod.forge_id == modId);
+
+		if (existingMod && existingMod.url == data.url && existingMod.file == data.file && existingMod.hash == data.hash)
+			return msg.edit('🤔 nothing to change');
+
+		pendingUpdates[msg.id] = {
+			...data,
+			initiator: member.id,
+			type: isBeta ? 'beta' : 'normal'
+		};
+		return msg.edit({
+			content: '👀 does this look alright?',
+			embeds: [
+				{
+					description: `forge_id: ${data.forge_id}
+url: ${data.url}
+file: ${data.file}
+md5: ${data.hash}`
+				}
+			],
+			components: [
+				{
+					type: ComponentType.ActionRow,
+					components: [
+						{
+							type: ComponentType.Button,
+							customId: 'updateCheck1',
+							label: 'Start double-check',
+							style: ButtonStyle.Success
+						}
+					]
+				}
+			]
+		});
+	}
+}
