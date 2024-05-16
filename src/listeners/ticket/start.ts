@@ -13,7 +13,7 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
 		if (!(channel instanceof TextChannel)) return;
 		if (!channel.name.startsWith('ticket-')) return;
 
-		await delay(500);
+		await delay(1000);
 		await channel.send({
 			content: 'What is your ticket about? You must click on one to continue.',
 			components: [

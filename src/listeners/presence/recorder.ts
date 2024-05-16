@@ -1,8 +1,8 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { createClient } from '@supabase/supabase-js';
-import { inPrivate } from '../../preconditions/notPublic.js';
 import { Message } from 'discord.js';
+import { SkyClientOnly } from '../../lib/SkyClientOnly.js';
 
 export const db = process.env.SB_KEY && createClient('https://fkjmuugisxgmrklcfyaj.supabase.co', process.env.SB_KEY);
 
@@ -11,8 +11,8 @@ export const db = process.env.SB_KEY && createClient('https://fkjmuugisxgmrklcfy
 	event: Events.MessageCreate
 })
 export class MessageListener extends Listener<typeof Events.MessageCreate> {
+	@SkyClientOnly()
 	public override async run(message: Message) {
-		if (inPrivate(message.guildId)) return;
 		if (!message.member) return;
 		if (!db) {
 			console.warn('you should set up the db');

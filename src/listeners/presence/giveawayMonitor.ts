@@ -2,7 +2,7 @@ import { Message, TextChannel, escapeMarkdown, unorderedList } from 'discord.js'
 import { Channels, Roles } from '../../const.js';
 import { Events, Listener } from '@sapphire/framework';
 import { ApplyOptions } from '@sapphire/decorators';
-import { inPrivate } from '../../preconditions/notPublic.js';
+import { SkyClientOnly } from '../../lib/SkyClientOnly.js';
 
 const streaks: Record<string, string[]> = {};
 
@@ -11,9 +11,8 @@ const streaks: Record<string, string[]> = {};
 	event: Events.MessageCreate
 })
 export class MessageListener extends Listener<typeof Events.MessageCreate> {
+	@SkyClientOnly()
 	public override async run(message: Message) {
-		if (inPrivate(message.guildId)) return;
-
 		const { author, guild, content, channel, client } = message;
 		if (author.bot || !guild) return;
 		const member = guild.members.cache.get(author.id);
@@ -50,7 +49,10 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
 			if (!verboseBotLogs) return;
 
 			const list = unorderedList(streak.map((v) => escapeMarkdown(v)));
-			await verboseBotLogs.send(`${message}\n${list}`);
+			await verboseBotLogs.send({
+				content: `${message}\n${list}`,
+				allowedMentions: { parse: [] }
+			});
 		} catch (e) {
 			console.log(e);
 		}

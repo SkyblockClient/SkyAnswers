@@ -1,17 +1,17 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { db } from './recorder.js';
-import { inPrivate } from '../../preconditions/notPublic.js';
 import { Message, MessageReplyOptions, time } from 'discord.js';
+import { SkyClientOnly } from '../../lib/SkyClientOnly.js';
 
 /** Tells you when the person you're trying to reach is probably asleep */
 @ApplyOptions<Listener.Options>({
 	event: Events.MessageCreate
 })
 export class MessageListener extends Listener<typeof Events.MessageCreate> {
+	@SkyClientOnly()
 	public override async run(message: Message) {
 		if (!db) return;
-		if (inPrivate(message.guildId)) return;
 
 		for (const m of message.content.matchAll(/<@([0-9]+)>/g)) {
 			const cooldown = cooldowns.get(m[1]);
