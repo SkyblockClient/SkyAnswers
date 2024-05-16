@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { Pack, getTrackedData, queryDownloadable } from '../../data.js';
-import { getDistance, getDownloadableEmbed } from './mod.js';
+import { getDistance, getDownloadableMessage } from './mod.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Gives info about a pack'
@@ -29,12 +29,8 @@ export class UserCommand extends Command {
 			const sortedOptions = items.sort((a, b) => getDistance(a, query) - getDistance(b, query));
 			const bestOption = sortedOptions[0];
 			const bestDistance = getDistance(bestOption, query);
-			return interaction.reply({
-				content: `No pack found` + (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : '')
-			});
+			return interaction.reply('No pack found' + (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ''));
 		}
-		return interaction.reply({
-			embeds: [getDownloadableEmbed(item)]
-		});
+		return interaction.reply(getDownloadableMessage(item));
 	}
 }
