@@ -52,11 +52,12 @@ export class ButtonHandler extends InteractionHandler {
 			});
 		else {
 			await setTicketOpen(channel, true);
-			return interaction.update(
-				`${ticketTypeDesc}
+			return interaction.update({
+				content: `${ticketTypeDesc}
 Go ahead and describe your problem so we can help you.
-${plsBePatientTY}`
-			);
+${plsBePatientTY}`,
+				components: [] // components stay behind without this
+			});
 		}
 	}
 

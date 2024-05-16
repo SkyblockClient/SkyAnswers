@@ -21,7 +21,7 @@ export class ButtonHandler extends InteractionHandler {
 		await interaction.update({
 			content: `${origContent.split('\n')[0]}
 **Crash type**: ${crashTypeName}`,
-			components: []
+			components: [] // components stay behind without this
 		});
 
 		switch (crashType) {
