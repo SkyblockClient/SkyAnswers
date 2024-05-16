@@ -15,7 +15,7 @@ export class UserCommand extends Command {
 				.addStringOption((option) =>
 					option //
 						.setName('query')
-						.setDescription('the query')
+						.setDescription('Pack to search for')
 						.setRequired(true)
 				)
 		);

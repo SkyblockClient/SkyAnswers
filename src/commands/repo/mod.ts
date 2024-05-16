@@ -16,7 +16,7 @@ export class UserCommand extends Command {
 				.addStringOption((option) =>
 					option //
 						.setName('query')
-						.setDescription('the query')
+						.setDescription('Mod to search for')
 						.setRequired(true)
 				)
 		);
@@ -65,7 +65,7 @@ export function getDownloadableEmbed(downloadable: DownloadableMod | Downloadabl
 			url: `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/icons/${encodeURIComponent(downloadable.icon)}`
 		};
 	if (isPack(downloadable) && downloadable.screenshot) embed.image = { url: encodeURI(downloadable.screenshot) };
-	if (isMod(downloadable) && downloadable.command) embed.fields.unshift({ name: 'Command', value: downloadable.command });
+	if (isMod(downloadable) && downloadable.command) embed.fields.unshift({ name: 'In-Game Command', value: downloadable.command });
 	if (downloadable.hidden)
 		embed.fields.unshift({
 			name: 'Note',
