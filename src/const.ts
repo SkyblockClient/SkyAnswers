@@ -28,5 +28,6 @@ export enum Users {
 }
 
 export enum Emojis {
-	YouWhat = '<:youwhat:889306727953104936>'
+	YouWhat = '<:youwhat:889306727953104936>',
+	BlameWyvest = '<:blamewyvest:1001055682289741864>'
 }

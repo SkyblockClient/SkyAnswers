@@ -35,6 +35,8 @@ export class UserCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+		if (!process.env.GH_KEY) return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
+
 		const { guild, channel } = interaction;
 		if (!guild || !channel) return;
 		const member = interaction.guild?.members.resolve(interaction.user);
