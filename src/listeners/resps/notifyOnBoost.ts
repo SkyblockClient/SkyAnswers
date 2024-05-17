@@ -18,5 +18,6 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
 			return verboseBotLogs.send(`${user.id} (${user.user.username}) stopped boosting`);
 		if (!oldUser.roles.cache.has(role) && user.roles.cache.has(role))
 			return verboseBotLogs.send(`${user.id} (${user.user.username}) started boosting`);
+		return;
 	}
 }
