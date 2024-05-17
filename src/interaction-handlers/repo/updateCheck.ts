@@ -3,14 +3,14 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import type { ButtonInteraction } from 'discord.js';
 import { ButtonStyle, ComponentType } from 'discord.js';
 import { pendingUpdates } from '../../lib/update.js';
-import { inPrivate } from '../../preconditions/notPublic.js';
+import { notSkyClient } from '../../preconditions/notPublic.js';
 
 @ApplyOptions<InteractionHandler.Options>({
 	interactionHandlerType: InteractionHandlerTypes.Button
 })
 export class ButtonHandler extends InteractionHandler {
 	public async run(interaction: ButtonInteraction) {
-		if (inPrivate(interaction.guildId)) return;
+		if (notSkyClient(interaction.guildId)) return;
 
 		const data = pendingUpdates[interaction.message.id];
 		if (!data)

@@ -7,7 +7,7 @@ import http from 'isomorphic-git/http/node/index.js';
 import { format } from 'prettier';
 import { checkMember, pendingUpdates } from '../../lib/update.js';
 import { Emojis, isDevUser } from '../../const.js';
-import { inPrivate } from '../../preconditions/notPublic.js';
+import { notSkyClient } from '../../preconditions/notPublic.js';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Mod } from '../../data.js';
@@ -18,7 +18,7 @@ import { Mod } from '../../data.js';
 export class ButtonHandler extends InteractionHandler {
 	public async run(interaction: ButtonInteraction) {
 		if (!process.env.GH_KEY) return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
-		if (inPrivate(interaction.guildId)) return;
+		if (notSkyClient(interaction.guildId)) return;
 
 		const data = pendingUpdates[interaction.message.id];
 		if (!data)

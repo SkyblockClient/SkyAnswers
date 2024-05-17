@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { hyperlink, time } from 'discord.js';
-import { inPrivate } from '../../preconditions/notPublic.js';
+import { notSkyClient } from '../../preconditions/notPublic.js';
 import { getOwnerPin, getTicketOwner } from '../../lib/ticket.js';
 import { MessageBuilder } from '@sapphire/discord.js-utilities';
 
@@ -18,7 +18,7 @@ export class UserCommand extends Command {
 	}
 
 	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		if (inPrivate(interaction.guildId)) return;
+		if (notSkyClient(interaction.guildId)) return;
 		if (!interaction.channel) return;
 
 		const pinMsg = await getOwnerPin(interaction.channel);

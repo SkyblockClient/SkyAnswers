@@ -3,6 +3,7 @@ import { Events, Listener } from '@sapphire/framework';
 import { ComponentType, ButtonStyle, GuildChannel, TextChannel } from 'discord.js';
 import { delay } from '@std/async/delay';
 import { setTicketOpen } from '../../lib/ticket.js';
+import { notSkyClient } from '../../preconditions/notPublic.js';
 
 /** Requires the user to choose a category for their ticket */
 @ApplyOptions<Listener.Options>({
@@ -12,6 +13,7 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
 	public override async run(channel: GuildChannel) {
 		if (!(channel instanceof TextChannel)) return;
 		if (!channel.name.startsWith('ticket-')) return;
+		if (notSkyClient(channel.guildId)) return;
 
 		await delay(1000);
 		await channel.send({

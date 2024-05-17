@@ -16,11 +16,11 @@ export class UserPrecondition extends Precondition {
 	}
 
 	private inPrivate(guildId: string | null) {
-		return inPrivate(guildId) ? this.error() : this.ok();
+		return notSkyClient(guildId) ? this.error() : this.ok();
 	}
 }
 
-export const inPrivate = (guildId: string | null) => !(guildId == Servers.SkyClient || (guildId == Servers.Dev && isDevUser));
+export const notSkyClient = (guildId: string | null) => !(guildId == Servers.SkyClient || (guildId == Servers.Dev && isDevUser));
 
 declare module '@sapphire/framework' {
 	interface Preconditions {
