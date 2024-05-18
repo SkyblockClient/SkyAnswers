@@ -1,4 +1,4 @@
-import { OverwriteType, GuildChannel, TextBasedChannel } from 'discord.js';
+import { OverwriteType, GuildChannel, TextBasedChannel, Message, TextChannel } from 'discord.js';
 
 export const plsBePatientTY = 'Expect a response within the next day. Support Team has already been pinged.';
 
@@ -14,16 +14,21 @@ export async function setTicketOpen(channel: GuildChannel, open: boolean) {
 }
 
 const mentionRegex = /<@!?(?<id>\d{17,20})>/;
-const ownerCache: Record<string, string | null> = {};
-export async function getOwnerPin(ticket: TextBasedChannel) {
+const ownerPinCache: Record<string, Message | null> = {};
+export async function getOwnerPin(ticket: TextBasedChannel): Promise<Message | undefined> {
+	if (!(ticket instanceof TextChannel)) return;
+	if (!ticket.name.startsWith('ticket-')) return;
+	if (ownerPinCache[ticket.id]) return ownerPinCache[ticket.id] || undefined;
+
 	const pins = await ticket.messages.fetchPinned();
-	return pins.filter((message) => message.author.bot).find((v) => mentionRegex.test(v.content));
+	const pin = pins.filter((message) => message.author.bot).find((v) => mentionRegex.test(v.content));
+	ownerPinCache[ticket.id] = pin || null;
+	return pin;
 }
-export async function getTicketOwner(ticket: TextBasedChannel) {
-	if (ownerCache[ticket.id]) return ownerCache[ticket.id];
+export async function getTicketOwner(ticket: TextBasedChannel): Promise<string | undefined> {
+	if (!(ticket instanceof TextChannel)) return;
+	if (!ticket.name.startsWith('ticket-')) return;
 
 	const pin = await getOwnerPin(ticket);
-	const owner = pin?.content.match(mentionRegex)?.at(1);
-	ownerCache[ticket.id] = owner || null;
-	return owner;
+	return pin?.content.match(mentionRegex)?.at(1);
 }

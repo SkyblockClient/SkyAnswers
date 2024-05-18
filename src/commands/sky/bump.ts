@@ -41,6 +41,6 @@ If you do not respond ${twoDaysStamp}, your ticket will be closed.`,
 			]
 		});
 		if (owner) message.setContent(`Hey <@${owner}>:`);
-		await interaction.reply(message);
+		return interaction.reply(message);
 	}
 }
