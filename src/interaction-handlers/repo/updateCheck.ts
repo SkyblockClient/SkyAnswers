@@ -26,7 +26,7 @@ export class ButtonHandler extends InteractionHandler {
 
 		return interaction.update({
 			content: `first, double-check that this mod doesn't have a rat in it.
-(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)`,
+**(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)**`,
 			components: [
 				{
 					type: ComponentType.ActionRow,
