@@ -31,13 +31,13 @@ export class ButtonHandler extends InteractionHandler {
 							{
 								type: ComponentType.Button,
 								customId: 'ticketCategorizeCrash|CP',
-								label: 'Skyclient says "Minecraft has crashed!"',
+								label: 'The game says "Minecraft has crashed!"',
 								style: ButtonStyle.Primary
 							},
 							{
 								type: ComponentType.Button,
 								customId: 'ticketCategorizeCrash|launcher',
-								label: 'The launcher says "Game crashed"',
+								label: 'The launcher says "Game crashed!"',
 								style: ButtonStyle.Primary
 							},
 							{
@@ -54,7 +54,7 @@ export class ButtonHandler extends InteractionHandler {
 			await setTicketOpen(channel, true);
 			return interaction.update({
 				content: `${ticketTypeDesc}
-Go ahead and describe your problem so we can help you.
+Please describe your problem so we can help you.
 ${plsBePatientTY}`,
 				components: [] // components stay behind without this
 			});
