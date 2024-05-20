@@ -27,7 +27,7 @@ export class ButtonHandler extends InteractionHandler {
 		switch (crashType) {
 			case 'CP':
 				await interaction.channel.send(
-					`**Click the copy symbol (next to the symbol with an arrow pointing directly up) and paste it here.**\n${plsBePatientTY}`
+					`**Click the copy icon on the right side and paste the results here.**\n${plsBePatientTY}`
 				);
 				break;
 			case 'launcher':
