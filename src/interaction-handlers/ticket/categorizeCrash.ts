@@ -26,20 +26,23 @@ export class ButtonHandler extends InteractionHandler {
 
 		switch (crashType) {
 			case 'CP':
-				await interaction.channel.send(`**Click the copy button and paste it here.**\n${plsBePatientTY}`);
+				await interaction.channel.send(
+					`**Click the copy icon on the right side and paste the results here.**\n${plsBePatientTY}`
+				);
 				break;
 			case 'launcher':
-				await interaction.channel.send(`1. Open your SkyClient folder. See this: https://youtu.be/BHIM2htfMk8
+				await interaction.channel.send(`You'll need to send your crashlog. Here's how to do so.
+1. Open your SkyClient folder. See this: https://youtu.be/BHIM2htfMk8
 2.
-**If you see a "View Crash Report" button:**
+**If you saw a "View Crash Report" button in the launcher:**
 Go to the \`crash-reports\` folder and upload the most recent file here.
-**If you don't:**
-Go to the \`logs\` folder and upload the file called \`latest.log\`.
+**If you didn't see the button:**
+Go to the \`logs\` folder and upload the file called \`latest\` or \`latest.log\`.
 
 ${plsBePatientTY}`);
 				break;
 			case 'other':
-				await interaction.channel.send(`Go ahead and describe your crash so we can help you.\n${plsBePatientTY}`);
+				await interaction.channel.send(`Please describe your crash so we can help you.\n${plsBePatientTY}`);
 				break;
 		}
 		await setTicketOpen(interaction.channel, true);
