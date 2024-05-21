@@ -13,6 +13,7 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
 	public override async run(channel: GuildChannel) {
 		if (!(channel instanceof TextChannel)) return;
 		if (!channel.name.startsWith('ticket-')) return;
+		// TODO: Adapt for Polyforst
 		if (notSkyClient(channel.guildId)) return;
 
 		await delay(1000);

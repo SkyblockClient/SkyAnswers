@@ -3,6 +3,7 @@ import { Events, Listener } from '@sapphire/framework';
 import { getTrackedData } from '../../data.js';
 import { Message } from 'discord.js';
 import { z } from 'zod';
+import { Servers } from '../../const.js';
 
 const hastebinRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i;
 
@@ -12,6 +13,9 @@ const hastebinRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i;
 })
 export class UserEvent extends Listener<typeof Events.MessageCreate> {
 	public override async run(message: Message<true>) {
+		// TODO: Adapt for Polyforst
+		if (message.guildId != Servers.SkyClient) return;
+
 		const hasLogs = message.attachments.some((attachment) => /crash.+-client\.txt/.test(attachment.name) || attachment.name.endsWith('.log'));
 		if (hasLogs) message.channel.sendTyping();
 

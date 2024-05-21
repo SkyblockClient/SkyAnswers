@@ -17,13 +17,15 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 		const { member, channel } = message;
 		if (!member) return;
 		if (message.author.bot) return;
+		// TODO: Adapt for Polyforst
+		if (message.guildId != Servers.SkyClient) return;
 
 		let canAutoResp =
 			channel.id == '780181693553704973' || // general
 			channel.id == '1110717104757416027' || // skyblock talk
 			channel.id == '1001798063964303390' || // support
 			channel.id == '796546551878516766' || // bot commands
-			(channel.name.startsWith('ticket-') && channel.guildId == Servers.SkyClient);
+			channel.name.startsWith('ticket-');
 		if (member.roles.cache.has(Roles.NoAuto)) canAutoResp = false;
 
 		const responses = await findAutoresps(message.content, canAutoResp);
