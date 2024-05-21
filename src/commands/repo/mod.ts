@@ -1,15 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
 import { DownloadableMod, DownloadablePack, getDistance, getMods, queryDownloadable } from '../../data.js';
-import {
-	ActionRowBuilder,
-	ApplicationCommandOptionType,
-	ButtonBuilder,
-	ButtonStyle,
-	EmbedBuilder,
-	InteractionReplyOptions,
-	hyperlink
-} from 'discord.js';
+import { ApplicationCommandOptionType, EmbedBuilder, InteractionReplyOptions, hyperlink } from 'discord.js';
 import { repoFilesURL } from '../../const.js';
 import { MessageBuilder } from '@sapphire/discord.js-utilities';
 
@@ -78,30 +70,23 @@ export async function getDownloadableMessage(downloadable: DownloadableMod | Dow
 				"This item is hidden, so it won't show up in the normal installer. " +
 				(bundledIn ? `You can get it in the bundle ${bundledIn}.` : 'It might be internal or outdated.')
 		});
-	const componentRow = new ActionRowBuilder<ButtonBuilder>();
+
+	const mods = DownloadableMod.array().parse(await getMods());
+	const downloads: string[] = [hyperlink(downloadable.file, encodeURI(downloadable.download))];
 	if (isMod(downloadable) && downloadable.packages) {
-		const mods = DownloadableMod.array().parse(await getMods());
-		const downloads: string[] = [hyperlink(downloadable.file, encodeURI(downloadable.download))];
 		for (const pkgName of downloadable.packages) {
 			const mod = mods.find((mod) => mod.id == pkgName);
 			if (mod) downloads.push(hyperlink(mod.file, encodeURI(mod.download)));
 			else downloads.push(pkgName);
 		}
-		embed.addFields({
-			name: 'Downloads',
-			value: downloads.join('\n')
-		});
-	} else {
-		componentRow.addComponents(
-			new ButtonBuilder({
-				style: ButtonStyle.Link,
-				label: 'Download',
-				url: encodeURI(downloadable.download)
-			})
-		);
-		message.setComponents([componentRow]);
 	}
-	if (isMod(downloadable) && downloadable.command) embed.addFields({ name: 'Config Command', value: downloadable.command });
+	embed.addFields({
+		name: downloads.length > 1 ? 'Downloads' : 'Download',
+		value: downloads.join('\n'),
+		inline: downloads.length == 1
+	});
+
+	if (isMod(downloadable) && downloadable.command) embed.addFields({ name: 'Config Command', value: downloadable.command, inline: true });
 
 	message.setEmbeds([embed]);
 	return message;
