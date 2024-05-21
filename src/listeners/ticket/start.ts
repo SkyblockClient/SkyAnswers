@@ -1,9 +1,9 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { ComponentType, ButtonStyle, GuildChannel, TextChannel } from 'discord.js';
-import { delay } from '@std/async/delay';
 import { setTicketOpen } from '../../lib/ticket.js';
 import { notSkyClient } from '../../preconditions/notPublic.js';
+import { sleep } from '@sapphire/utilities';
 
 /** Requires the user to choose a category for their ticket */
 @ApplyOptions<Listener.Options>({
@@ -16,7 +16,7 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
 		// TODO: Adapt for Polyforst
 		if (notSkyClient(channel.guildId)) return;
 
-		await delay(1000);
+		await sleep(1000);
 		await channel.send({
 			content: 'What is your ticket about? You must click on one to continue.',
 			components: [

@@ -4,6 +4,7 @@ import { getTrackedData } from '../../data.js';
 import { Message } from 'discord.js';
 import { z } from 'zod';
 import { Servers } from '../../const.js';
+import { sleep } from '@sapphire/utilities';
 
 const hastebinRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i;
 
@@ -25,6 +26,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 		const hastebinMatch = message.content.match(hastebinRegex);
 		if (hastebinMatch) logsToCheck.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
 
+		await sleep(1000);
 		await Promise.all(
 			logsToCheck.map(async (log) => {
 				const resp = await fetch(log);
@@ -68,6 +70,10 @@ async function verbalizeCrash(log: string, isSkyclient?: boolean) {
 			else return false;
 		})
 	);
+
+	const cheater = relevantInfo.find((info) => info.fix.startsWith('Cheater'));
+	if (cheater) return `# ${cheater.fix}`;
+
 	const crashGroups = crashData.fixtypes.map((type, i) => {
 		const groupInfo = relevantInfo.filter((info) => (info.fixtype ?? crashData.default_fix_type) == i);
 		if (!groupInfo.length) return;
@@ -76,5 +82,5 @@ ${groupInfo
 	.map((info) => info.fix.replaceAll('%pathindicator%', pathIndicator).replaceAll('%gameroot%', gameRoot).replaceAll('%profileroot%', profileRoot))
 	.join('\n')}`;
 	});
-	return crashGroups.filter((group) => group).join('\n');
+	return crashGroups.filter(Boolean).join('\n');
 }
