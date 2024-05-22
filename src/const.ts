@@ -20,7 +20,8 @@ export enum Roles {
 	CoolPeople = '832754819588292679',
 	NoGiveaways = '832325812329906176',
 	GitHubKeeper = '799020944487612428',
-	NoAuto = '852016624605462589'
+	NoAuto = '852016624605462589',
+	GiveawayBypass = '1187979851706142793'
 }
 
 export enum Users {

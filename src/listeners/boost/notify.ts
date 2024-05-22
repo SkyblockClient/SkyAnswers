@@ -1,7 +1,7 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { TextChannel, PartialGuildMember, GuildMember, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
-import { Channels, Servers } from '../../const.js';
+import { Channels, Roles, Servers } from '../../const.js';
 
 /** Tracks when people (un)boost */
 @ApplyOptions<Listener.Options>({
@@ -15,9 +15,15 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
 		if (!(verboseBotLogs instanceof TextChannel)) return;
 
 		if (oldUser.premiumSince && !user.premiumSince) {
+			console.log('Boost stop', user.id);
 			await verboseBotLogs.send(`${user.id} (${user.user.username}) stopped boosting`);
+			await user.roles.remove(Roles.GiveawayBypass, 'User stopped boosting');
 		} else if (!oldUser.premiumSince && user.premiumSince) {
+			console.log('Boost start', user.id);
 			await verboseBotLogs.send(`${user.id} (${user.user.username}) started boosting`);
+
+			await user.roles.add(Roles.GiveawayBypass, 'User started boosting');
+
 			const general = await user.client.channels.fetch(Channels.General);
 			if (!general?.isTextBased()) return;
 
