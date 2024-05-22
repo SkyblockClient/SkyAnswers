@@ -31,7 +31,7 @@ export async function readDB(db: DB): Promise<unknown> {
 		try {
 			data = JSON.parse(await fs.readFile(path, 'utf-8'));
 		} catch (e) {
-			if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
+			if ((e as NodeJS.ErrnoException).code == 'ENOENT') {
 			} else throw e;
 		}
 		data = DBZods[db].parse(data);
@@ -61,7 +61,7 @@ async function _flush() {
 	}
 }
 
-process.on('SIGINT', function () {
+process.on('SIGINT', () => {
 	saveDB.flush();
 });
 
