@@ -4,7 +4,7 @@ import { getJSON } from '../../data.js';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Events, Listener } from '@sapphire/framework';
 import { Message } from 'discord.js';
-import { Roles, Servers } from '../../const.js';
+import { Channels, Roles, Servers } from '../../const.js';
 import { MessageBuilder } from '@sapphire/discord.js-utilities';
 import { z } from 'zod';
 
@@ -21,7 +21,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 		if (message.guildId != Servers.SkyClient) return;
 
 		let canAutoResp =
-			channel.id == '780181693553704973' || // general
+			channel.id == Channels.General || // general
 			channel.id == '1110717104757416027' || // skyblock talk
 			channel.id == '1001798063964303390' || // support
 			channel.id == '796546551878516766' || // bot commands

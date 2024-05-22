@@ -30,7 +30,8 @@ export async function run(client: Client<true>) {
 		.filter(isGuildChannel)
 		.filter(isTextChannel)
 		.filter((c) => c.name.startsWith('ticket-'));
-	await Promise.all(tickets.map(maintainTicket));
+	// await Promise.all(tickets.map(maintainTicket));
+	for (const ticket of tickets) await maintainTicket(ticket);
 }
 
 async function maintainTicket(ticket: TextChannel) {
@@ -54,8 +55,7 @@ async function maintainTicket(ticket: TextChannel) {
 			// last message was bump
 			const twoDays = new Date(lastMessage.createdTimestamp);
 			twoDays.setDate(twoDays.getDate() + 2);
-			if (twoDays < new Date()) console.log('close ticket', ticket);
-			// return pingStaff(ticket, 'time to close');
+			if (twoDays < new Date()) return pingStaff(ticket, 'time to close');
 		}
 		return;
 	} catch (e) {
@@ -63,6 +63,8 @@ async function maintainTicket(ticket: TextChannel) {
 		if (e instanceof DiscordAPIError) {
 			if (e.code == 50001) return;
 			console.log(header, e.code, e.message);
+		} else if (e instanceof Error && e.name == 'ConnectTimeoutError') {
+			console.log(header, 'Connect Timeout Error');
 		} else console.log(header, e);
 	}
 }

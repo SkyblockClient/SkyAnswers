@@ -9,6 +9,7 @@ export enum Servers {
 }
 
 export enum Channels {
+	General = '780181693553704973',
 	Trolling = '887818760126345246',
 	BotLogs = '934968221923168266',
 	Tickets = '1222344626325688330',
@@ -19,7 +20,6 @@ export enum Roles {
 	CoolPeople = '832754819588292679',
 	NoGiveaways = '832325812329906176',
 	GitHubKeeper = '799020944487612428',
-	NitroBooster = '829336516315971626',
 	NoAuto = '852016624605462589'
 }
 
