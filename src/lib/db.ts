@@ -1,5 +1,6 @@
 import { resolve, join } from 'path';
 import * as fs from 'fs/promises';
+import * as ofs from 'fs';
 import { debounce } from '@sapphire/utilities';
 import { z } from 'zod';
 const dbDir = resolve('./db');
@@ -45,24 +46,25 @@ export async function writeDB(db: DB.Boosters, data: BoostersDB): Promise<void>;
 export async function writeDB(db: DB, data: unknown) {
 	DBZods[db].parse(data);
 	cache.set(db, { data, outdated: true });
-	saveDB();
+	setImmediate(saveDB);
 }
 
 const getDBPath = (db: DB) => join(dbDir, `${db}.json`);
 
-async function _flush() {
+function _flush() {
 	console.log('Flushing DBs...');
 	for (const [db, cached] of cache) {
 		const path = getDBPath(db);
 		if (cached.outdated) {
 			cache.set(db, { ...cached, outdated: false });
-			await fs.writeFile(path, JSON.stringify(cached.data, undefined, 2));
+			ofs.writeFileSync(path, JSON.stringify(cached.data, undefined, 2));
 		}
 	}
 }
 
 process.on('SIGINT', () => {
 	saveDB.flush();
+	process.exit(0);
 });
 
 export const saveDB = debounce(_flush, { wait: 60_000 });
