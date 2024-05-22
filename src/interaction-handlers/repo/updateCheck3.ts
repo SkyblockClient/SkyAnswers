@@ -54,12 +54,11 @@ export class ButtonHandler extends InteractionHandler {
 		const tmp = await fs.mkdtemp(join(tmpdir(), 'skyanswers-'));
 
 		let tasks = [];
-		const kendell = isDevUser ? 'RuiNtD' : 'SkyblockClient';
 		tasks.push(
 			clone({
 				fs,
 				http,
-				url: `https://github.com/${kendell}/SkyblockClient-REPO`,
+				url: `https://github.com/SkyblockClient/SkyblockClient-REPO`,
 				dir: tmp,
 				depth: 1,
 				singleBranch: true
@@ -80,7 +79,7 @@ export class ButtonHandler extends InteractionHandler {
 			if (!modData) throw new Error("this shouldn't happen");
 
 			await fs.writeFile(`${tmp}/files/mods/${data.file}`, Buffer.from(modData));
-			data.url = `https://github.com/${kendell}/SkyblockClient-REPO/raw/main/files/mods/${data.file}`;
+			data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/${data.file}`;
 		} else {
 			await Promise.all(tasks);
 		}
