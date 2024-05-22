@@ -61,4 +61,8 @@ async function _flush() {
 	}
 }
 
+process.on('SIGINT', function () {
+	saveDB.flush();
+});
+
 export const saveDB = debounce(_flush, { wait: 60_000 });

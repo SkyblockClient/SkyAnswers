@@ -39,6 +39,7 @@ export class UserCommand extends Command {
 
 		const db = BoostersDB.parse(await readDB(DB.Boosters));
 		await writeDB(DB.Boosters, { ...db, [interaction.user.id]: uuid });
+		console.log('Saving Booster', hasNitro, interaction.user.id, uuid);
 		if (hasNitro)
 			return interaction.reply({
 				content: `**Thanks for the boost!** <3
