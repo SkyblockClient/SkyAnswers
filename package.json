@@ -13,7 +13,7 @@
 		"dev": "npm run build && npm run start",
 		"watch:start": "tsc-watch --onSuccess \"npm run start\"",
 		"format": "prettier --write .",
-		"clean": "del dist"
+		"clean": "del-cli dist"
 	},
 	"devDependencies": {
 		"@sapphire/cli": "^1.9.3",
