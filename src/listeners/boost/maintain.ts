@@ -31,7 +31,7 @@ export async function run(client: Client<true>) {
 	const members = client.guilds.cache.get(Servers.SkyClient)?.members;
 	if (!members) return;
 	const db = BoostersDB.parse(await readDB(DB.Boosters));
-	const boosters = [];
+	const boosters: string[] = [];
 	for (const [discordID, mcUUID] of Object.entries(db)) {
 		const member = members.resolve(discordID);
 		if (!member || !member.premiumSince) continue;

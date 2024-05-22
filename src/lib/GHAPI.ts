@@ -1,39 +1,43 @@
-import { z } from 'zod';
-import { Octokit } from '@octokit/core';
+import { Octokit } from '@octokit/rest';
 
-const octokit = new Octokit({
-	auth: process.env.GH_KEY
-});
+export const octokit = new Octokit({ auth: process.env.GH_KEY });
+export const committer = {
+	name: 'SkyClient-repo-bot',
+	email: 'SkyClient-repo-bot@users.noreply.github.com'
+};
 
-const GHContents = z
-	.object({
-		path: z.string(),
-		encoding: z.literal('base64'),
-		content: z.string(),
-		sha: z.string(),
-		html_url: z.string()
-	})
-	.transform((v) => ({ ...v, content: atob(v.content), encoding: undefined }));
-type GHContent = z.infer<typeof GHContents>;
+type GHContent = {
+	path: string;
+	repo: string;
+	content: string;
+	sha: string;
+};
 
-export async function readGHFile(repo: string, path: string) {
-	const { data } = await octokit.request(`GET /repos/${repo}/contents/${path}`);
-	return GHContents.parse(data);
+export async function readGHFile(repo: string, path: string): Promise<GHContent> {
+	let { data: rawData } = await octokit.rest.repos.getContent({
+		owner: repo.split('/')[0],
+		repo: repo.split('/')[1],
+		path
+	});
+
+	const data = Array.isArray(rawData) ? rawData[0] : rawData;
+
+	if (data.type != 'file') throw 'not a file';
+	if (!data.content) throw 'no content';
+
+	return { path, repo, content: atob(data.content), sha: data.sha };
 }
 
-const repoRegex = /^https:\/\/github\.com\/([^\/]+\/[^\/]+)/;
 export async function writeGHFile(oldFile: GHContent, content: string, commitMsg: string) {
 	if (oldFile.content == content) return;
 
-	const repo = oldFile.html_url.match(repoRegex)?.at(1);
-	if (!repo) throw "this shouldn't happen";
+	await octokit.rest.repos.createOrUpdateFileContents({
+		owner: oldFile.repo.split('/')[0],
+		repo: oldFile.repo.split('/')[1],
+		path: oldFile.path,
 
-	await octokit.request(`PUT /repos/${repo}/contents/${oldFile.path}`, {
+		committer,
 		message: commitMsg,
-		committer: {
-			name: 'SkyClient-repo-bot',
-			email: 'SkyClient-repo-bot@users.noreply.github.com'
-		},
 		content: btoa(content),
 		sha: oldFile.sha
 	});
