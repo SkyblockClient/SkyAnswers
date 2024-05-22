@@ -3,12 +3,9 @@ import { Client } from 'discord.js';
 import { ApplyOptions } from '@sapphire/decorators';
 import { BoostersDB, DB, readDB } from '../../lib/db.js';
 import { Servers } from '../../const.js';
-import { Octokit } from '@octokit/core';
 import { z } from 'zod';
-
-const octokit = new Octokit({
-	auth: process.env.GH_KEY
-});
+import { readGHFile, writeGHFile } from '../../lib/GHAPI.js';
+import { format } from 'prettier';
 
 @ApplyOptions<Listener.Options>({
 	name: 'boost-maintain',
@@ -30,11 +27,6 @@ const TagsJSON = z.object({
 	whitelisted: z.string().array()
 });
 
-const GHGetContents = z.object({
-	content: z.string().transform(atob),
-	sha: z.string()
-});
-
 export async function run(client: Client<true>) {
 	const members = client.guilds.cache.get(Servers.SkyClient)?.members;
 	if (!members) return;
@@ -47,20 +39,10 @@ export async function run(client: Client<true>) {
 	}
 	boosters.sort();
 
-	const rawData = (await octokit.request('GET /repos/SkyblockClient/SCC-Data/contents/features/tags.json')).data;
-	const data = GHGetContents.parse(rawData);
-	const tags = TagsJSON.parse(JSON.parse(data.content));
-
-	if (`${tags.perms.Booster}` == `${boosters}`) return;
+	const oldFile = await readGHFile('SkyblockClient/SCC-Data', 'features/tags.json');
+	const tags = TagsJSON.parse(JSON.parse(oldFile.content));
 	tags.perms.Booster = boosters;
 
-	await octokit.request('PUT /repos/SkyblockClient/SCC-Data/contents/features/tags.json', {
-		message: 'chore: update booster list',
-		committer: {
-			name: 'SkyClient-repo-bot',
-			email: 'SkyClient-repo-bot@users.noreply.github.com'
-		},
-		content: btoa(JSON.stringify(tags, null, 3)),
-		sha: data.sha
-	});
+	const content = await format(JSON.stringify(tags), { parser: 'json' });
+	await writeGHFile(oldFile, content, 'chore: update booster list');
 }
