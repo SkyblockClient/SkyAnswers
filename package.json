@@ -1,7 +1,7 @@
 {
 	"name": "skyanswers",
 	"main": "dist/index.js",
-	"author": "KTibow",
+	"author": "SkyClient",
 	"type": "module",
 	"prettier": "@sapphire/prettier-config",
 	"scripts": {
