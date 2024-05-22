@@ -16,7 +16,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
 	public override async run(client: Client<true>) {
 		if (!process.env.GH_KEY) return console.log('Missing GitHub API Key!');
 		await run(client);
-		setInterval(() => run(client), 60000);
+		setInterval(() => run(client), 60000 * 5);
 	}
 }
 
