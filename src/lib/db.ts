@@ -10,16 +10,31 @@ try {
 } catch {}
 
 export enum DB {
-	Boosters = 'boosters'
+	Boosters = 'boosters',
+	PendingUpdates = 'pendingUpdates'
 	// Presence = 'presence'
 }
 
 export const BoostersDB = z.record(z.string()).default({});
 export type BoostersDB = z.infer<typeof BoostersDB>;
+
+export const PendingUpdate = z.object({
+	forge_id: z.string(),
+	url: z.string(),
+	hash: z.string(),
+	file: z.string(),
+	initiator: z.string(),
+	beta: z.boolean()
+});
+export type PendingUpdate = z.infer<typeof PendingUpdate>;
+export const PendingUpdatesDB = z.record(PendingUpdate).default({});
+export type PendingUpdatesDB = z.infer<typeof PendingUpdatesDB>;
+
 // const PresenceDB = z.object({}).default({});
 
 const DBZods: Record<DB, z.ZodType<unknown>> = {
-	[DB.Boosters]: BoostersDB
+	[DB.Boosters]: BoostersDB,
+	[DB.PendingUpdates]: PendingUpdatesDB
 };
 
 type CachedDB = { data?: unknown; outdated?: boolean };
@@ -43,6 +58,7 @@ export async function readDB(db: DB): Promise<unknown> {
 }
 
 export async function writeDB(db: DB.Boosters, data: BoostersDB): Promise<void>;
+export async function writeDB(db: DB.PendingUpdates, data: PendingUpdatesDB): Promise<void>;
 export async function writeDB(db: DB, data: unknown) {
 	DBZods[db].parse(data);
 	cache.set(db, { data, outdated: true });

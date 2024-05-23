@@ -5,12 +5,13 @@ import fs from 'fs/promises';
 import { add, clone, commit, push } from 'isomorphic-git';
 import http from 'isomorphic-git/http/node/index.js';
 import { format } from 'prettier';
-import { checkMember, pendingUpdates } from '../../lib/update.js';
+import { checkMember } from '../../lib/update.js';
 import { Emojis, isDevUser } from '../../const.js';
 import { notSkyClient } from '../../preconditions/notPublic.js';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Mod } from '../../data.js';
+import { DB, PendingUpdatesDB, readDB, writeDB } from '../../lib/db.js';
 
 @ApplyOptions<InteractionHandler.Options>({
 	interactionHandlerType: InteractionHandlerTypes.Button
@@ -20,6 +21,7 @@ export class ButtonHandler extends InteractionHandler {
 		if (!process.env.GH_KEY) return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
 		if (notSkyClient(interaction.guildId)) return;
 
+		const pendingUpdates = PendingUpdatesDB.parse(await readDB(DB.PendingUpdates));
 		const data = pendingUpdates[interaction.message.id];
 		if (!data)
 			return interaction.reply({
@@ -93,7 +95,7 @@ export class ButtonHandler extends InteractionHandler {
 		mod.file = data.file;
 		mod.hash = data.hash;
 
-		if (data.type === 'beta') {
+		if (data.beta) {
 			const betaMods = JSON.parse((await fs.readFile(`${tmp}/files/mods_beta.json`)).toString());
 			const index = betaMods.findIndex((m: Mod) => m.forge_id === data.forge_id);
 
@@ -125,6 +127,10 @@ export class ButtonHandler extends InteractionHandler {
 			dir: tmp,
 			onAuth: () => ({ username: process.env.GH_KEY })
 		});
+
+		delete pendingUpdates[interaction.message.id];
+		await writeDB(DB.PendingUpdates, pendingUpdates);
+
 		return interaction.message.edit({
 			content: `✅ pushed it out`,
 			components: []

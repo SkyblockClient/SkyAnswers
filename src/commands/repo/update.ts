@@ -4,10 +4,11 @@ import { createHash } from 'crypto';
 import { ApplicationCommandOptionType, ButtonStyle, ComponentType } from 'discord.js';
 import JSZip from 'jszip';
 import { Mod, getJSON, getMods } from '../../data.js';
-import { checkMember, pendingUpdates } from '../../lib/update.js';
+import { checkMember } from '../../lib/update.js';
 import { Channels, Emojis, Servers } from '../../const.js';
 import z from 'zod';
 import { basename } from '@std/url';
+import { DB, PendingUpdatesDB, readDB, writeDB } from '../../lib/db.js';
 
 @ApplyOptions<Command.Options>({
 	description: 'Updates a mod to the latest version supplied'
@@ -102,11 +103,14 @@ export class UserCommand extends Command {
 		if (existingMod && existingMod.url == data.url && existingMod.file == data.file && existingMod.hash == data.hash)
 			return msg.edit('🤔 nothing to change');
 
+		const pendingUpdates = PendingUpdatesDB.parse(await readDB(DB.PendingUpdates));
 		pendingUpdates[msg.id] = {
 			...data,
 			initiator: member.id,
-			type: isBeta ? 'beta' : 'normal'
+			beta: isBeta
 		};
+		await writeDB(DB.PendingUpdates, pendingUpdates);
+
 		return msg.edit({
 			content: '👀 does this look alright?',
 			embeds: [
