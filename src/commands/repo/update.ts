@@ -49,7 +49,11 @@ export class UserCommand extends Command {
 		}
 
 		const isProper = guild.id != Servers.SkyClient || channel.id == Channels.ModUpdating;
-		if (!isProper) return interaction.reply(`💡 this command is only available in <#${Channels.ModUpdating}>`);
+		if (!isProper)
+			return interaction.reply({
+				content: `💡 this command is only available in <#${Channels.ModUpdating}>`,
+				ephemeral: true
+			});
 
 		const msg = await interaction.reply('👀 loading this mod...');
 
