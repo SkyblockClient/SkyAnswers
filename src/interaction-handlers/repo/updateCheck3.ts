@@ -13,7 +13,7 @@ import { Emojis, isDevUser } from "../../const.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
 import { tmpdir } from "os";
 import { join } from "path";
-import { Mod } from "../../data.js";
+import { Mod, invalidateTrackedData } from "../../data.js";
 import { DB, PendingUpdatesDB, readDB, writeDB } from "../../lib/db.js";
 
 @ApplyOptions<InteractionHandler.Options>({
@@ -152,6 +152,8 @@ export class ButtonHandler extends InteractionHandler {
 
     delete pendingUpdates[interaction.message.id];
     await writeDB(DB.PendingUpdates, pendingUpdates);
+
+    invalidateTrackedData();
 
     return interaction.message.edit({
       content: `✅ pushed it out`,

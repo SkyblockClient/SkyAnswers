@@ -127,7 +127,7 @@ export class UserCommand extends Command {
     const pendingUpdates = PendingUpdatesDB.parse(
       await readDB(DB.PendingUpdates),
     );
-    pendingUpdates[msg.id] = {
+    pendingUpdates[(await msg.fetch()).id] = {
       ...data,
       initiator: member.id,
       beta: isBeta,
