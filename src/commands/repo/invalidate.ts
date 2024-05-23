@@ -1,28 +1,36 @@
-import { ApplyOptions } from '@sapphire/decorators';
-import { Command } from '@sapphire/framework';
-import { invalidateTrackedData } from '../../data.js';
-import { Roles } from '../../const.js';
+import { ApplyOptions } from "@sapphire/decorators";
+import { Command } from "@sapphire/framework";
+import { invalidateTrackedData } from "../../data.js";
+import { Roles } from "../../const.js";
 
 @ApplyOptions<Command.Options>({
-	description: 'Clears the data (eg mods, autoresponses, etc) caches',
-	preconditions: ['notPublic']
+  description: "Clears the data (eg mods, autoresponses, etc) caches",
+  preconditions: ["notPublic"],
 })
 export class UserCommand extends Command {
-	public override registerApplicationCommands(registry: Command.Registry) {
-		registry.registerChatInputCommand({
-			name: this.name,
-			description: this.description
-		});
-	}
+  public override registerApplicationCommands(registry: Command.Registry) {
+    registry.registerChatInputCommand({
+      name: this.name,
+      description: this.description,
+    });
+  }
 
-	public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-		const member = interaction.guild?.members.resolve(interaction.user);
-		if (!member) return;
+  public override async chatInputRun(
+    interaction: Command.ChatInputCommandInteraction,
+  ) {
+    const member = interaction.guild?.members.resolve(interaction.user);
+    if (!member) return;
 
-		if (!member.roles.cache.has(Roles.GitHubKeeper) && !member.permissions.has('Administrator'))
-			return interaction.reply({ content: 'why do you think you can do this?', ephemeral: true });
+    if (
+      !member.roles.cache.has(Roles.GitHubKeeper) &&
+      !member.permissions.has("Administrator")
+    )
+      return interaction.reply({
+        content: "why do you think you can do this?",
+        ephemeral: true,
+      });
 
-		invalidateTrackedData();
-		return interaction.reply('cleared caches');
-	}
+    invalidateTrackedData();
+    return interaction.reply("cleared caches");
+  }
 }

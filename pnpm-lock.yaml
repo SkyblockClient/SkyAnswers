@@ -66,9 +66,6 @@ importers:
       '@sapphire/cli':
         specifier: ^1.9.3
         version: 1.9.3
-      '@sapphire/prettier-config':
-        specifier: ^2.0.0
-        version: 2.0.0
       '@sapphire/ts-config':
         specifier: ^5.0.1
         version: 5.0.1
@@ -309,10 +306,6 @@ packages:
 
   '@sapphire/pieces@4.2.2':
     resolution: {integrity: sha512-DvAC+zTgm5o41D6iX+jBjMp+rRmoHPKNYnav6v6vQLTxBJb+iFMmup9ZREiuXdrh1ejrmVRZojnnI59xQgezwQ==}
-    engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
-
-  '@sapphire/prettier-config@2.0.0':
-    resolution: {integrity: sha512-Vie8KR5zQ6sbEP4+biW/IR7k55saGfZkTSuRlgvxCBKb4SBJdRWcOBI80i+JxMVIDDZKgXlgYnXEST+FgZiWXA==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   '@sapphire/ratelimits@2.4.9':
@@ -1540,10 +1533,6 @@ snapshots:
       '@discordjs/collection': 1.5.3
       '@sapphire/utilities': 3.15.3
       tslib: 2.6.2
-
-  '@sapphire/prettier-config@2.0.0':
-    dependencies:
-      prettier: 3.1.1
 
   '@sapphire/ratelimits@2.4.9': {}
 

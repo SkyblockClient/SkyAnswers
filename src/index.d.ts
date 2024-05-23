@@ -1,5 +1,5 @@
-declare module '@sapphire/framework' {
-	interface Preconditions {
-		notPublic: never;
-	}
+declare module "@sapphire/framework" {
+  interface Preconditions {
+    notPublic: never;
+  }
 }
