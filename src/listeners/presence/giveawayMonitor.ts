@@ -23,6 +23,10 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     const member = guild.members.cache.get(author.id);
     if (!member) return;
 
+    if (!channel.isTextBased()) return;
+    if (channel.isDMBased()) return;
+    if (channel.name.startsWith("ticket-")) return;
+
     // if (content.startsWith("-") || content.toLowerCase().startsWith("sky "))
     //   return; // exclude bot commands
     if (channel.id == Channels.Trolling) return; // exclude trolling
