@@ -1,12 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
-import {
-  ComponentType,
-  ButtonStyle,
-  GuildChannel,
-  TextChannel,
-} from "discord.js";
-import { setTicketOpen } from "../../lib/ticket.js";
+import { ComponentType, ButtonStyle, GuildChannel } from "discord.js";
+import { isTicket, setTicketOpen } from "../../lib/ticket.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
 import { sleep } from "@sapphire/utilities";
 
@@ -16,8 +11,7 @@ import { sleep } from "@sapphire/utilities";
 })
 export class UserEvent extends Listener<typeof Events.ChannelCreate> {
   public override async run(channel: GuildChannel) {
-    if (!(channel instanceof TextChannel)) return;
-    if (!channel.name.startsWith("ticket-")) return;
+    if (!isTicket(channel)) return;
     // TODO: Adapt for Polyforst
     if (notSkyClient(channel.guildId)) return;
 

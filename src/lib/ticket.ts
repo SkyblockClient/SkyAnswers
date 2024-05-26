@@ -4,6 +4,8 @@ import {
   TextBasedChannel,
   Message,
   TextChannel,
+  Channel,
+  BaseChannel,
 } from "discord.js";
 
 export const plsBePatientTY =
@@ -37,8 +39,7 @@ const ownerPinCache: Record<string, Message | null> = {};
 export async function getTicketTop(
   ticket: TextBasedChannel,
 ): Promise<Message | undefined> {
-  if (!(ticket instanceof TextChannel)) return;
-  if (!ticket.name.startsWith("ticket-")) return;
+  if (!isTicket(ticket)) return;
   if (ownerPinCache[ticket.id]) return ownerPinCache[ticket.id] || undefined;
 
   const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
@@ -51,8 +52,7 @@ export async function getTicketTop(
 export async function getTicketOwner(
   ticket: TextBasedChannel,
 ): Promise<string | undefined> {
-  if (!(ticket instanceof TextChannel)) return;
-  if (!ticket.name.startsWith("ticket-")) return;
+  if (!isTicket(ticket)) return;
 
   const pin = await getTicketTop(ticket);
   if (!pin) return;
@@ -62,4 +62,15 @@ export async function getTicketOwner(
   if (contentMatch) return contentMatch[1];
   else if (embedMatch) return embedMatch[1];
   else return;
+}
+
+export function isTicket(
+  channel: BaseChannel | Channel | null,
+): channel is TextChannel {
+  return (
+    channel instanceof TextChannel &&
+    channel.name.startsWith("ticket-") &&
+    channel.name != "ticket-logs" &&
+    channel.name != "ticket-transcripts"
+  );
 }

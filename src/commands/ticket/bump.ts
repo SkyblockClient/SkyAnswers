@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { hyperlink, time } from "discord.js";
-import { getTicketTop, getTicketOwner } from "../../lib/ticket.js";
+import { getTicketTop, getTicketOwner, isTicket } from "../../lib/ticket.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 
 @ApplyOptions<Command.Options>({
@@ -18,10 +18,15 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    if (!interaction.channel) return;
+    const { channel } = interaction;
+    if (!isTicket(channel))
+      return interaction.reply({
+        content: "not a ticket lol",
+        ephemeral: true,
+      });
 
-    const pinMsg = await getTicketTop(interaction.channel);
-    const owner = await getTicketOwner(interaction.channel);
+    const pinMsg = await getTicketTop(channel);
+    const owner = await getTicketOwner(channel);
 
     const twoDays = new Date();
     twoDays.setDate(twoDays.getDate() + 2);

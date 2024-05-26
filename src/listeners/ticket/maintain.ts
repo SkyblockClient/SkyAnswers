@@ -1,9 +1,9 @@
 import { Events, Listener } from "@sapphire/framework";
-import { Channel, Client, DiscordAPIError, roleMention } from "discord.js";
+import { Client, DiscordAPIError, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Servers, Users } from "../../const.js";
-import { GuildBasedChannel, TextChannel } from "discord.js";
-import { getTicketOwner, getTicketTop } from "../../lib/ticket.js";
+import { TextChannel } from "discord.js";
+import { getTicketOwner, getTicketTop, isTicket } from "../../lib/ticket.js";
 
 const SupportTeams: Record<string, string> = {
   [Servers.SkyClient]: "931626562539909130",
@@ -22,16 +22,8 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
   }
 }
 
-const isTextChannel = (channel: GuildBasedChannel): channel is TextChannel =>
-  channel instanceof TextChannel;
-const isGuildChannel = (channel: Channel): channel is GuildBasedChannel =>
-  !channel.isDMBased();
-
 export async function run(client: Client<true>) {
-  const tickets = Array.from(client.channels.cache.values())
-    .filter(isGuildChannel)
-    .filter(isTextChannel)
-    .filter((c) => c.name.startsWith("ticket-"));
+  const tickets = Array.from(client.channels.cache.values()).filter(isTicket);
   // await Promise.all(tickets.map(maintainTicket));
   for (const ticket of tickets) await maintainTicket(ticket);
 

@@ -6,8 +6,6 @@ import { z } from "zod";
 import { Servers } from "../../const.js";
 import { sleep } from "@sapphire/utilities";
 
-const hastebinRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i;
-
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
   event: Events.MessageCreate,
@@ -17,30 +15,26 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     // TODO: Adapt for Polyforst
     if (message.guildId != Servers.SkyClient) return;
 
-    const hasLogs = message.attachments.some(
-      (attachment) =>
-        /crash.+-client\.txt/.test(attachment.name) ||
-        attachment.name.endsWith(".log"),
-    );
-    if (hasLogs) message.channel.sendTyping();
-
-    const logsToCheck = message.attachments
+    const msgLogs = message.attachments
       .filter(
         (attachment) =>
           attachment.name.endsWith(".txt") || attachment.name.endsWith(".log"),
       )
       .map((attachment) => attachment.url);
-    const hastebinMatch = message.content.match(hastebinRegex);
-    if (hastebinMatch)
-      logsToCheck.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
 
-    await sleep(1000);
+    const logsToCheck = [...msgLogs, ...findLogs(message.content)];
+    console.log(logsToCheck);
+    if (logsToCheck.length > 0) message.channel.sendTyping();
+
     await Promise.all(
       logsToCheck.map(async (log) => {
         const resp = await fetch(log);
         const text = await resp.text();
         const info = await verbalizeCrash(text);
-        if (info) await message.channel.send(info);
+        if (info) {
+          await sleep(1000);
+          await message.channel.send(info);
+        }
       }),
     );
   }
@@ -64,6 +58,18 @@ const Crashes = z.object({
   fixtypes: FixType.array(),
   default_fix_type: z.number(),
 });
+
+function findLogs(txt: string) {
+  const ret = [];
+
+  const hastebinMatch = txt.match(/https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i);
+  if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
+
+  const mclogsMatch = txt.match(/https:\/\/mclo\.gs\/([a-z0-9]*)/i);
+  if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
+
+  return ret;
+}
 
 async function verbalizeCrash(log: string, isSkyclient?: boolean) {
   const pathIndicator = "`";

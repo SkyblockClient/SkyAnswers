@@ -1,7 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { TextChannel } from "discord.js";
-import { setTicketOpen } from "../../lib/ticket.js";
+import { isTicket, setTicketOpen } from "../../lib/ticket.js";
 
 @ApplyOptions<Command.Options>({
   description: "Makes the person who made a ticket have send message perms",
@@ -18,13 +17,12 @@ export class UserCommand extends Command {
     interaction: Command.ChatInputCommandInteraction,
   ) {
     const { channel } = interaction;
-    if (!channel) return;
+    if (!isTicket(channel))
+      return interaction.reply({
+        content: "not a ticket lol",
+        ephemeral: true,
+      });
 
-    if (
-      !(channel instanceof TextChannel) ||
-      !channel.name.startsWith("ticket-")
-    )
-      return;
     await setTicketOpen(channel, true);
     return interaction.reply({ content: "ticket opened (in theory)" });
   }

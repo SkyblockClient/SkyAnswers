@@ -4,8 +4,8 @@ import {
   InteractionHandlerTypes,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
-import { ButtonStyle, ComponentType, TextChannel } from "discord.js";
-import { plsBePatientTY, setTicketOpen } from "../../lib/ticket.js";
+import { ButtonStyle, ComponentType } from "discord.js";
+import { isTicket, plsBePatientTY, setTicketOpen } from "../../lib/ticket.js";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
@@ -13,8 +13,7 @@ import { plsBePatientTY, setTicketOpen } from "../../lib/ticket.js";
 export class ButtonHandler extends InteractionHandler {
   public async run(interaction: ButtonInteraction) {
     const { channel } = interaction;
-    if (!channel) return;
-    if (!(channel instanceof TextChannel)) return;
+    if (!isTicket(channel)) return;
 
     const ticketType = interaction.customId.split("|")[1];
     const ticketTypeName = {
