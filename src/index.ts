@@ -1,6 +1,11 @@
 import { SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
 import "dotenv/config";
+import "@sapphire/plugin-logger/register";
+import "@sapphire/plugin-editable-commands/register";
+import { setup } from "@skyra/env-utilities";
+
+setup();
 
 const client = new SapphireClient({
   intents: [
@@ -15,5 +20,13 @@ const client = new SapphireClient({
   loadMessageCommandListeners: true,
 });
 
-console.log("Connecting...");
-client.login(process.env.BOT_TOKEN);
+client.logger.info("Connecting...");
+await client.login();
+client.logger.info("Connected");
+
+declare module "@skyra/env-utilities" {
+  interface Env {
+    GH_KEY: string;
+    SB_KEY: string;
+  }
+}

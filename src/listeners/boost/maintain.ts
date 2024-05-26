@@ -1,4 +1,4 @@
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { Client } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { BoostersDB, DB, readDB } from "../../lib/db.js";
@@ -6,6 +6,8 @@ import { Servers } from "../../const.js";
 import { z } from "zod";
 import { readGHFile, writeGHFile } from "../../lib/GHAPI.js";
 import { format } from "prettier";
+import { Time } from "@sapphire/time-utilities";
+import { envParseString } from "@skyra/env-utilities";
 
 @ApplyOptions<Listener.Options>({
   name: "boost-maintain",
@@ -14,9 +16,10 @@ import { format } from "prettier";
 })
 export class ReadyListener extends Listener<typeof Events.ClientReady> {
   public override async run(client: Client<true>) {
-    if (!process.env.GH_KEY) return console.log("Missing GitHub API Key!");
+    if (!envParseString("GH_KEY", null))
+      return container.logger.error("Missing GitHub API Key!");
     await run(client);
-    setInterval(() => run(client), 60000 * 5);
+    setInterval(() => run(client), Time.Minute * 5);
   }
 }
 

@@ -2,6 +2,7 @@ import { fetch, FetchResultTypes } from "@sapphire/fetch";
 import { z } from "zod";
 import { repoFilesURL } from "./const.js";
 import levenshtein from "js-levenshtein";
+import { container } from "@sapphire/framework";
 
 interface TrackedData {
   data: unknown;
@@ -12,7 +13,7 @@ export const invalidateTrackedData = () => (trackedData = {});
 export async function getTrackedData(url: string) {
   const lastUpdated = trackedData[url]?.lastUpdated;
   if (!lastUpdated || Date.now() - lastUpdated > 1000 * 60 * 60) {
-    console.log("refetching", url);
+    container.logger.info("refetching", url);
     let data;
     try {
       const resp = await fetch(url, FetchResultTypes.Result);

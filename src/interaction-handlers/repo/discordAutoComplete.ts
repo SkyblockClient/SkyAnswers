@@ -25,7 +25,6 @@ export class AutocompleteHandler extends InteractionHandler {
     const { value } = focusedOption;
     switch (focusedOption.name) {
       case "discord": {
-        console.log("discord", value);
         const items: ApplicationCommandOptionChoiceData[] = probableMatches(
           Discord.array().parse(await getJSON("discords")),
           value,

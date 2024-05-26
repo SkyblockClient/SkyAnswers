@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import {
   TextChannel,
   PartialGuildMember,
@@ -25,13 +25,13 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
     if (!(verboseBotLogs instanceof TextChannel)) return;
 
     if (oldUser.premiumSince && !user.premiumSince) {
-      console.log("Boost stop", user.id);
+      container.logger.info("Boost stop", user.id);
       await verboseBotLogs.send(
         `${user.id} (${user.user.username}) stopped boosting`,
       );
       await user.roles.remove(Roles.GiveawayBypass, "User stopped boosting");
     } else if (!oldUser.premiumSince && user.premiumSince) {
-      console.log("Boost start", user.id);
+      container.logger.info("Boost start", user.id);
       await verboseBotLogs.send(
         `${user.id} (${user.user.username}) started boosting`,
       );

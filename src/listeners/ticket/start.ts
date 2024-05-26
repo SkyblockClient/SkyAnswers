@@ -15,7 +15,7 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
     // TODO: Adapt for Polyforst
     if (notSkyClient(channel.guildId)) return;
 
-    await sleep(1000);
+    await sleep(500);
     await channel.send({
       content: "What is your ticket about? You must click on one to continue.",
       components: [

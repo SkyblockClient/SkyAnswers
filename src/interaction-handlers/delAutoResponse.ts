@@ -2,6 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import {
   InteractionHandler,
   InteractionHandlerTypes,
+  container,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
 
@@ -25,7 +26,7 @@ export class ButtonHandler extends InteractionHandler {
     try {
       return interaction.message.delete();
     } catch (e) {
-      console.log("could not delete", interaction.message, e);
+      container.logger.warn("could not delete", interaction.message, e);
       return interaction.reply({
         content: "could not delete",
         ephemeral: true,

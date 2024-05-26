@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import * as ofs from "fs";
 import { debounce } from "@sapphire/utilities";
 import { z } from "zod";
+import { container } from "@sapphire/framework";
 const dbDir = resolve("./db");
 
 try {
@@ -71,7 +72,7 @@ export async function writeDB(db: DB, data: unknown) {
 const getDBPath = (db: DB) => join(dbDir, `${db}.json`);
 
 function _flush() {
-  console.log("Flushing DBs...");
+  container.logger.info("Flushing DBs...");
   for (const [db, cached] of cache) {
     const path = getDBPath(db);
     if (cached.outdated) {

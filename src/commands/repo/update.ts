@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command } from "@sapphire/framework";
+import { Command, container } from "@sapphire/framework";
 import { createHash } from "crypto";
 import {
   ApplicationCommandOptionType,
@@ -13,6 +13,7 @@ import { Channels, Emojis, Servers } from "../../const.js";
 import z from "zod";
 import { basename } from "@std/url";
 import { DB, PendingUpdatesDB, readDB, writeDB } from "../../lib/db.js";
+import { envParseString } from "@skyra/env-utilities";
 
 @ApplyOptions<Command.Options>({
   description: "Updates a mod to the latest version supplied",
@@ -42,7 +43,7 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    if (!process.env.GH_KEY)
+    if (!envParseString("GH_KEY", null))
       return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
 
     const { guild, channel } = interaction;
@@ -73,7 +74,7 @@ export class UserCommand extends Command {
       headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
     });
     if (!modResp.ok) {
-      console.error(await modResp.text());
+      container.logger.error(await modResp.text());
       throw new Error(`${modResp.statusText} while fetching ${url}`);
     }
     const modFile = await modResp.arrayBuffer();

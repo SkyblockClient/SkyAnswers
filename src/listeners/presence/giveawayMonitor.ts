@@ -5,7 +5,7 @@ import {
   unorderedList,
 } from "discord.js";
 import { Channels, Roles } from "../../const.js";
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { ApplyOptions } from "@sapphire/decorators";
 import { SkyClientOnly } from "../../lib/SkyClientOnly.js";
 
@@ -65,7 +65,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
         allowedMentions: { parse: [] },
       });
     } catch (e) {
-      console.log(e);
+      container.logger.error(e);
     }
   }
 }

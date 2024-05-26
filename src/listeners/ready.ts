@@ -1,20 +1,24 @@
-import { Events, Listener } from "@sapphire/framework";
-import { type Client, type PresenceStatusData } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
+import { Listener } from "@sapphire/framework";
+import { blue, gray, yellow } from "colorette";
+import { Client } from "discord.js";
 
-@ApplyOptions<Listener.Options>({
-  once: true,
-  event: Events.ClientReady,
-})
-export class ReadyListener extends Listener<typeof Events.ClientReady> {
+const dev = process.env.NODE_ENV !== "production";
+const style = dev ? yellow : blue;
+
+@ApplyOptions<Listener.Options>({ once: true })
+export class UserEvent extends Listener {
   public override run(client: Client) {
-    console.log("Connected");
-    client.user?.setPresence({ activities: [] });
+    const { logger } = client;
+    const stores = [...client.stores.values()];
 
-    setInterval(() => {
-      const statuses: PresenceStatusData[] = ["online", "idle", "dnd"];
-      const index = Math.floor(Math.random() * statuses.length);
-      client.user?.setStatus(statuses[index]);
-    }, 3000);
+    for (const store of stores)
+      logger.info(
+        gray(
+          `Loaded ${style(store.size.toString().padEnd(3, " "))} ${
+            store.name
+          }.`,
+        ),
+      );
   }
 }

@@ -1,9 +1,10 @@
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { Client, DiscordAPIError, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Servers, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
 import { getTicketOwner, getTicketTop, isTicket } from "../../lib/ticket.js";
+import { Duration, Time } from "@sapphire/time-utilities";
 
 const SupportTeams: Record<string, string> = {
   [Servers.SkyClient]: "931626562539909130",
@@ -18,7 +19,7 @@ const SupportTeams: Record<string, string> = {
 export class ReadyListener extends Listener<typeof Events.ClientReady> {
   public override async run(client: Client<true>) {
     await run(client);
-    setInterval(() => run(client), 30000);
+    setInterval(() => run(client), Time.Second * 30);
   }
 }
 
@@ -36,10 +37,10 @@ export async function run(client: Client<true>) {
       const header = `Failed to pin ticket top in ${ticket.name} in ${ticket.guild.name}:`;
       if (e instanceof DiscordAPIError) {
         if (e.code == 50001) return;
-        console.log(header, e.code, e.message);
+        container.logger.error(header, e.code, e.message);
       } else if (e instanceof Error && e.name == "ConnectTimeoutError") {
-        console.log(header, "Connect Timeout Error");
-      } else console.log(header, e);
+        container.logger.error(header, "Connect Timeout Error");
+      } else container.logger.error(header, e);
     }
   }
 }
@@ -70,8 +71,7 @@ async function maintainTicket(ticket: TextChannel) {
       )
     ) {
       // last message was bump
-      const twoDays = new Date(lastMessage.createdTimestamp);
-      twoDays.setDate(twoDays.getDate() + 2);
+      const twoDays = new Duration("2d").dateFrom(lastMessage.createdAt);
       if (twoDays < new Date()) return pingStaff(ticket, "time to close");
     }
     return;
@@ -79,10 +79,10 @@ async function maintainTicket(ticket: TextChannel) {
     const header = `Failed to maintain ticket in ${ticket.name} in ${ticket.guild.name}:`;
     if (e instanceof DiscordAPIError) {
       if (e.code == 50001) return;
-      console.log(header, e.code, e.message);
+      container.logger.error(header, e.code, e.message);
     } else if (e instanceof Error && e.name == "ConnectTimeoutError") {
-      console.log(header, "Connect Timeout Error");
-    } else console.log(header, e);
+      container.logger.error(header, "Connect Timeout Error");
+    } else container.logger.error(header, e);
   }
 }
 

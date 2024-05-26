@@ -1,6 +1,7 @@
 import { Octokit } from "@octokit/rest";
+import { envParseString } from "@skyra/env-utilities";
 
-export const octokit = new Octokit({ auth: process.env.GH_KEY });
+export const octokit = new Octokit({ auth: envParseString("GH_KEY", null) });
 export const committer = {
   name: "SkyClient-repo-bot",
   email: "SkyClient-repo-bot@users.noreply.github.com",

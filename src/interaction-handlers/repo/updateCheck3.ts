@@ -15,13 +15,14 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { Mod, invalidateTrackedData } from "../../data.js";
 import { DB, PendingUpdatesDB, readDB, writeDB } from "../../lib/db.js";
+import { envParseString } from "@skyra/env-utilities";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
 })
 export class ButtonHandler extends InteractionHandler {
   public async run(interaction: ButtonInteraction) {
-    if (!process.env.GH_KEY)
+    if (!envParseString("GH_KEY", null))
       return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
     if (notSkyClient(interaction.guildId)) return;
 
@@ -147,7 +148,7 @@ export class ButtonHandler extends InteractionHandler {
       fs,
       http,
       dir: tmp,
-      onAuth: () => ({ username: process.env.GH_KEY }),
+      onAuth: () => ({ username: envParseString("GH_KEY") }),
     });
 
     delete pendingUpdates[interaction.message.id];

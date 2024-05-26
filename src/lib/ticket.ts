@@ -1,3 +1,4 @@
+import { container } from "@sapphire/framework";
 import {
   OverwriteType,
   GuildChannel,
@@ -19,7 +20,7 @@ export async function setTicketOpen(channel: GuildChannel, open: boolean) {
       perm.allow.equals(open ? 1024n : 3072n) &&
       perm.deny.equals(open ? 2048n : 0n),
   );
-  console.log(
+  container.logger.info(
     open ? "opening" : "closing",
     `#${channel.name} (${channel.id})`,
     "for",
@@ -28,7 +29,7 @@ export async function setTicketOpen(channel: GuildChannel, open: boolean) {
   if (creator) {
     await channel.permissionOverwrites.edit(creator.id, { SendMessages: open });
   } else
-    console.warn(
+    container.logger.warn(
       `While ${open ? "opening" : "closing"} ticket, failed to find member in`,
       perms,
     );

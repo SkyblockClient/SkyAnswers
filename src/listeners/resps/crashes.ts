@@ -23,7 +23,6 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       .map((attachment) => attachment.url);
 
     const logsToCheck = [...msgLogs, ...findLogs(message.content)];
-    console.log(logsToCheck);
     if (logsToCheck.length > 0) message.channel.sendTyping();
 
     await Promise.all(
@@ -32,7 +31,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         const text = await resp.text();
         const info = await verbalizeCrash(text);
         if (info) {
-          await sleep(1000);
+          await sleep(500);
           await message.channel.send(info);
         }
       }),

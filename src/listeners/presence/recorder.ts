@@ -1,12 +1,16 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { createClient } from "@supabase/supabase-js";
 import { Message } from "discord.js";
 import { SkyClientOnly } from "../../lib/SkyClientOnly.js";
+import { envParseString } from "@skyra/env-utilities";
 
 export const db =
-  process.env.SB_KEY &&
-  createClient("https://fkjmuugisxgmrklcfyaj.supabase.co", process.env.SB_KEY);
+  envParseString("SB_KEY", null) &&
+  createClient(
+    "https://fkjmuugisxgmrklcfyaj.supabase.co",
+    envParseString("SB_KEY"),
+  );
 
 /** Notes message times to figure out when people are online */
 @ApplyOptions<Listener.Options>({
@@ -17,7 +21,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
   public override async run(message: Message) {
     if (!message.member) return;
     if (!db) {
-      console.warn("you should set up the db");
+      container.logger.warn("you should set up the db");
       return;
     }
 

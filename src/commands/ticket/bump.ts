@@ -3,6 +3,7 @@ import { Command } from "@sapphire/framework";
 import { hyperlink, time } from "discord.js";
 import { getTicketTop, getTicketOwner, isTicket } from "../../lib/ticket.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
+import { Duration } from "@sapphire/time-utilities";
 
 @ApplyOptions<Command.Options>({
   description: "Bumps a ticket to encourage closing",
@@ -28,8 +29,7 @@ export class UserCommand extends Command {
     const pinMsg = await getTicketTop(channel);
     const owner = await getTicketOwner(channel);
 
-    const twoDays = new Date();
-    twoDays.setDate(twoDays.getDate() + 2);
+    const twoDays = new Duration("2d").fromNow;
     const twoDaysStamp = time(twoDays, "R");
 
     const pinnedMsg = pinMsg

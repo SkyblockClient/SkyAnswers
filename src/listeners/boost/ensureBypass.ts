@@ -1,4 +1,4 @@
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { Client } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Roles, Servers } from "../../const.js";
@@ -16,7 +16,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
       if (!member.premiumSince) continue;
       if (member.roles.cache.has(Roles.GiveawayBypass)) continue;
 
-      console.log("Giving bypass", id);
+      container.logger.info("Giving bypass", id);
       await member.roles.add(Roles.GiveawayBypass, "User started boosting");
     }
   }
