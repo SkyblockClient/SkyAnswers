@@ -1,13 +1,11 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { hyperlink, time } from "discord.js";
-import { notSkyClient } from "../../preconditions/notPublic.js";
-import { getOwnerPin, getTicketOwner } from "../../lib/ticket.js";
+import { getTicketTop, getTicketOwner } from "../../lib/ticket.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 
 @ApplyOptions<Command.Options>({
   description: "Bumps a ticket to encourage closing",
-  preconditions: ["notPublic"],
 })
 export class UserCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
@@ -20,10 +18,9 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    if (notSkyClient(interaction.guildId)) return;
     if (!interaction.channel) return;
 
-    const pinMsg = await getOwnerPin(interaction.channel);
+    const pinMsg = await getTicketTop(interaction.channel);
     const owner = await getTicketOwner(interaction.channel);
 
     const twoDays = new Date();

@@ -34,17 +34,17 @@ export async function setTicketOpen(channel: GuildChannel, open: boolean) {
 
 const mentionRegex = /<@!?(?<id>\d{17,20})>/;
 const ownerPinCache: Record<string, Message | null> = {};
-export async function getOwnerPin(
+export async function getTicketTop(
   ticket: TextBasedChannel,
 ): Promise<Message | undefined> {
   if (!(ticket instanceof TextChannel)) return;
   if (!ticket.name.startsWith("ticket-")) return;
   if (ownerPinCache[ticket.id]) return ownerPinCache[ticket.id] || undefined;
 
-  const pins = await ticket.messages.fetchPinned();
-  const pin = pins
-    .filter((message) => message.author.bot)
-    .find((v) => mentionRegex.test(v.content));
+  const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
+  const msg = msgs.first();
+  let pin: Message<true> | undefined;
+  if (msg && msg.author.bot) pin = msg;
   ownerPinCache[ticket.id] = pin || null;
   return pin;
 }
@@ -54,6 +54,12 @@ export async function getTicketOwner(
   if (!(ticket instanceof TextChannel)) return;
   if (!ticket.name.startsWith("ticket-")) return;
 
-  const pin = await getOwnerPin(ticket);
-  return pin?.content.match(mentionRegex)?.at(1);
+  const pin = await getTicketTop(ticket);
+  if (!pin) return;
+
+  const contentMatch = pin.content.match(mentionRegex);
+  const embedMatch = pin.embeds[0]?.description?.match(mentionRegex);
+  if (contentMatch) return contentMatch[1];
+  else if (embedMatch) return embedMatch[1];
+  else return;
 }
