@@ -56,18 +56,9 @@ importers:
       chart.js:
         specifier: ^4.4.1
         version: 4.4.1
-      cross-fetch:
-        specifier: ^4.0.0
-        version: 4.0.0
       discord.js:
         specifier: ^14.14.1
         version: 14.14.1
-      dotenv:
-        specifier: ^16.3.1
-        version: 16.3.1
-      fast-glob:
-        specifier: ^3.3.2
-        version: 3.3.2
       js-levenshtein:
         specifier: ^1.1.6
         version: 1.1.6
@@ -552,9 +543,6 @@ packages:
     resolution: {integrity: sha512-ROmzCKrTnOwybPcJApAA6WBWij23HVfGVNKqqrZpuyZOHqK2CwHSvpGuyt/UNNvaIjEd8X5IFGp4Mh+Ie1IHJQ==}
     engines: {node: '>=0.8'}
     hasBin: true
-
-  cross-fetch@4.0.0:
-    resolution: {integrity: sha512-e4a5N8lVvuLgAWgnCrLr2PP0YyDOTHa9H/Rj54dirp61qXnNq46m82bRhNqIA5VccJtWBvPTFRV3TtvHUKPB1g==}
 
   cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
@@ -1836,12 +1824,6 @@ snapshots:
   core-util-is@1.0.3: {}
 
   crc-32@1.2.2: {}
-
-  cross-fetch@4.0.0:
-    dependencies:
-      node-fetch: 2.7.0
-    transitivePeerDependencies:
-      - encoding
 
   cross-spawn@7.0.3:
     dependencies:

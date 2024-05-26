@@ -1,6 +1,5 @@
 import { SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
-import "dotenv/config";
 import "@sapphire/plugin-logger/register";
 import "@sapphire/plugin-editable-commands/register";
 import { setup } from "@skyra/env-utilities";
