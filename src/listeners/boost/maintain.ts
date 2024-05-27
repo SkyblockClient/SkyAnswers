@@ -31,24 +31,28 @@ const TagsJSON = z.object({
 });
 
 export async function run(client: Client<true>) {
-  const members = client.guilds.cache.get(Servers.SkyClient)?.members;
-  if (!members) return;
-  const db = BoostersDB.parse(await readDB(DB.Boosters));
-  const boosters: string[] = [];
-  for (const [discordID, mcUUID] of Object.entries(db)) {
-    const member = members.resolve(discordID);
-    if (!member || !member.premiumSince) continue;
-    boosters.push(mcUUID);
+  try {
+    const members = client.guilds.cache.get(Servers.SkyClient)?.members;
+    if (!members) return;
+    const db = BoostersDB.parse(await readDB(DB.Boosters));
+    const boosters: string[] = [];
+    for (const [discordID, mcUUID] of Object.entries(db)) {
+      const member = members.resolve(discordID);
+      if (!member || !member.premiumSince) continue;
+      boosters.push(mcUUID);
+    }
+    boosters.sort();
+
+    const oldFile = await readGHFile(
+      "SkyblockClient/SCC-Data",
+      "features/tags.json",
+    );
+    const tags = TagsJSON.parse(JSON.parse(oldFile.content));
+    tags.perms.Booster = boosters;
+
+    const content = await format(JSON.stringify(tags), { parser: "json" });
+    await writeGHFile(oldFile, content, "chore: update booster list");
+  } catch (e) {
+    container.logger.error("Failed to update boosters", e);
   }
-  boosters.sort();
-
-  const oldFile = await readGHFile(
-    "SkyblockClient/SCC-Data",
-    "features/tags.json",
-  );
-  const tags = TagsJSON.parse(JSON.parse(oldFile.content));
-  tags.perms.Booster = boosters;
-
-  const content = await format(JSON.stringify(tags), { parser: "json" });
-  await writeGHFile(oldFile, content, "chore: update booster list");
 }
