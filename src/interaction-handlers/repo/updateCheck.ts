@@ -6,7 +6,7 @@ import {
 import type { ButtonInteraction } from "discord.js";
 import { ButtonStyle, ComponentType } from "discord.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
-import { DB, PendingUpdatesDB, readDB } from "../../lib/db.js";
+import { PendingUpdatesDB } from "../../lib/db.js";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
@@ -15,9 +15,7 @@ export class ButtonHandler extends InteractionHandler {
   public async run(interaction: ButtonInteraction) {
     if (notSkyClient(interaction.guildId)) return;
 
-    const pendingUpdates = PendingUpdatesDB.parse(
-      await readDB(DB.PendingUpdates),
-    );
+    const pendingUpdates = PendingUpdatesDB.data;
     const data = pendingUpdates[interaction.message.id];
     if (!data)
       return interaction.reply({

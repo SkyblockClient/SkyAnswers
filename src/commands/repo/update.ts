@@ -12,7 +12,7 @@ import { checkMember } from "../../lib/update.js";
 import { Channels, Emojis, Servers } from "../../const.js";
 import z from "zod";
 import { basename } from "@std/url";
-import { DB, PendingUpdatesDB, readDB, writeDB } from "../../lib/db.js";
+import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 
 @ApplyOptions<Command.Options>({
@@ -125,15 +125,14 @@ export class UserCommand extends Command {
     )
       return msg.edit("🤔 nothing to change");
 
-    const pendingUpdates = PendingUpdatesDB.parse(
-      await readDB(DB.PendingUpdates),
-    );
-    pendingUpdates[(await msg.fetch()).id] = {
-      ...data,
-      initiator: member.id,
-      beta: isBeta,
-    };
-    await writeDB(DB.PendingUpdates, pendingUpdates);
+    const { id } = await msg.fetch();
+    await PendingUpdatesDB.update((pending) => {
+      pending[id] = {
+        ...data,
+        initiator: member.id,
+        beta: isBeta,
+      };
+    });
 
     return msg.edit({
       content: "👀 does this look alright?",

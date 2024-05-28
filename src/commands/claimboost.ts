@@ -3,7 +3,7 @@ import { Command, container } from "@sapphire/framework";
 import { ApplicationCommandOptionType } from "discord.js";
 import { Servers } from "../const.js";
 import { getMCName } from "../lib/mcAPI.js";
-import { BoostersDB, DB, readDB, writeDB } from "../lib/db.js";
+import { BoostersDB } from "../lib/db.js";
 
 @ApplyOptions<Command.Options>({
   description: "Claims your in-game rank for boosting",
@@ -43,8 +43,9 @@ export class UserCommand extends Command {
         ephemeral: true,
       });
 
-    const db = BoostersDB.parse(await readDB(DB.Boosters));
-    await writeDB(DB.Boosters, { ...db, [interaction.user.id]: uuid });
+    await BoostersDB.update((data) => {
+      data[interaction.user.id] = uuid;
+    });
     container.logger.info(
       "Saving Booster",
       hasNitro,

@@ -14,7 +14,7 @@ import { notSkyClient } from "../../preconditions/notPublic.js";
 import { tmpdir } from "os";
 import { join } from "path";
 import { Mod, invalidateTrackedData } from "../../data.js";
-import { DB, PendingUpdatesDB, readDB, writeDB } from "../../lib/db.js";
+import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 
 @ApplyOptions<InteractionHandler.Options>({
@@ -26,9 +26,7 @@ export class ButtonHandler extends InteractionHandler {
       return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
     if (notSkyClient(interaction.guildId)) return;
 
-    const pendingUpdates = PendingUpdatesDB.parse(
-      await readDB(DB.PendingUpdates),
-    );
+    const pendingUpdates = PendingUpdatesDB.data;
     const data = pendingUpdates[interaction.message.id];
     if (!data)
       return interaction.reply({
@@ -151,8 +149,9 @@ export class ButtonHandler extends InteractionHandler {
       onAuth: () => ({ username: envParseString("GH_KEY") }),
     });
 
-    delete pendingUpdates[interaction.message.id];
-    await writeDB(DB.PendingUpdates, pendingUpdates);
+    await PendingUpdatesDB.update((data) => {
+      delete data[interaction.message.id];
+    });
 
     invalidateTrackedData();
 
