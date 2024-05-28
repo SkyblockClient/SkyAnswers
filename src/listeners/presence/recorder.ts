@@ -4,6 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import { Message } from "discord.js";
 import { SkyClientOnly } from "../../lib/SkyClientOnly.js";
 import { envParseString } from "@skyra/env-utilities";
+import { throttle } from "@sapphire/utilities";
+import { Time } from "@sapphire/time-utilities";
 
 export const db =
   envParseString("SB_KEY", null) &&
@@ -11,6 +13,10 @@ export const db =
     "https://fkjmuugisxgmrklcfyaj.supabase.co",
     envParseString("SB_KEY"),
   );
+
+const setuplol = throttle(() => {
+  container.logger.warn("you should set up the db");
+}, Time.Minute * 5);
 
 /** Notes message times to figure out when people are online */
 @ApplyOptions<Listener.Options>({
@@ -21,7 +27,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
   public override async run(message: Message) {
     if (!message.member) return;
     if (!db) {
-      container.logger.warn("you should set up the db");
+      setuplol();
       return;
     }
 
