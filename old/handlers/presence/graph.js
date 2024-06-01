@@ -33,7 +33,7 @@ export const command = async ({ respond, channel }, query) => {
   });
   if (error) throw error;
   const allStatuses = ["online", "dnd", "idle", "offline", null].filter(
-    (status) => data.some((group) => group.status == status)
+    (status) => data.some((group) => group.status === status)
   );
   const silentTimes = Array.from({ length: 24 }, (v, i) => i).filter((hour) =>
     data.every((group) => group.date_part != hour || group.count < 5)
@@ -65,17 +65,17 @@ export const command = async ({ respond, channel }, query) => {
         data: Array.from(
           { length: 24 },
           (v, i) =>
-            data.find((group) => group.status == status && group.date_part == i)
+            data.find((group) => group.status === status && group.date_part === i)
               ?.count || 0
         ),
         backgroundColor:
-          status == "dnd"
+          status === "dnd"
             ? "#bf616a"
-            : status == "online"
+            : status === "online"
             ? "#a3be8c"
-            : status == "idle"
+            : status === "idle"
             ? "#ebcb8b"
-            : status == "offline"
+            : status === "offline"
             ? "#434c5e"
             : "#b48ead",
       })),
