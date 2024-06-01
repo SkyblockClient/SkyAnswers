@@ -14,6 +14,6 @@ to only answer tickets, but extended to replace another bot
 
 ## syncing
 
-```
+```bash
 rsync -a -v --filter=':- .gitignore' -e "ssh -i $HOME/[key path]" . [host]:~/skyanswersrsync
 ```

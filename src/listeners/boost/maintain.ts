@@ -1,58 +1,61 @@
-import { Events, Listener, container } from "@sapphire/framework";
-import { Client } from "discord.js";
-import { ApplyOptions } from "@sapphire/decorators";
-import { BoostersDB } from "../../lib/db.js";
-import { Servers } from "../../const.js";
-import { z } from "zod";
-import { readGHFile, writeGHFile } from "../../lib/GHAPI.js";
-import { format } from "prettier";
-import { Time } from "@sapphire/time-utilities";
-import { envParseString } from "@skyra/env-utilities";
+import { Events, Listener, container } from '@sapphire/framework';
+import type { Client } from 'discord.js';
+import { ApplyOptions } from '@sapphire/decorators';
+import { z } from 'zod';
+import { format } from 'prettier';
+import { Time } from '@sapphire/time-utilities';
+import { envParseString } from '@skyra/env-utilities';
+import { readGHFile, writeGHFile } from '../../lib/GHAPI.js';
+import { Servers } from '../../const.js';
+import { BoostersDB } from '../../lib/db.js';
 
 @ApplyOptions<Listener.Options>({
-  name: "boost-maintain",
-  once: true,
-  event: Events.ClientReady,
+	name: 'boost-maintain',
+	once: true,
+	event: Events.ClientReady,
 })
 export class ReadyListener extends Listener<typeof Events.ClientReady> {
-  public override async run(client: Client<true>) {
-    if (!envParseString("GH_KEY", null))
-      return container.logger.error("Missing GitHub API Key!");
-    await run(client);
-    setInterval(() => run(client), Time.Minute * 5);
-  }
+	public override async run(client: Client<true>) {
+		if (!envParseString('GH_KEY', null))
+			return container.logger.error('Missing GitHub API Key!');
+		await run(client);
+		setInterval(() => run(client), Time.Minute * 5);
+	}
 }
 
 const TagsJSON = z.object({
-  tags: z.record(z.tuple([z.string(), z.string()])),
-  perms: z.record(z.string().array()),
-  whitelist: z.boolean(),
-  whitelisted: z.string().array(),
+	tags: z.record(z.tuple([z.string(), z.string()])),
+	perms: z.record(z.string().array()),
+	whitelist: z.boolean(),
+	whitelisted: z.string().array(),
 });
 
 export async function run(client: Client<true>) {
-  try {
-    const members = client.guilds.cache.get(Servers.SkyClient)?.members;
-    if (!members) return;
-    const db = BoostersDB.data;
-    const boosters: string[] = [];
-    for (const [discordID, mcUUID] of Object.entries(db)) {
-      const member = members.resolve(discordID);
-      if (!member || !member.premiumSince) continue;
-      boosters.push(mcUUID);
-    }
-    boosters.sort();
+	try {
+		const members = client.guilds.cache.get(Servers.SkyClient)?.members;
+		if (!members)
+			return;
+		const db = BoostersDB.data;
+		const boosters: string[] = [];
+		for (const [discordID, mcUUID] of Object.entries(db)) {
+			const member = members.resolve(discordID);
+			if (!member || !member.premiumSince)
+				continue;
+			boosters.push(mcUUID);
+		}
+		boosters.sort();
 
-    const oldFile = await readGHFile(
-      "SkyblockClient/SCC-Data",
-      "features/tags.json",
-    );
-    const tags = TagsJSON.parse(JSON.parse(oldFile.content));
-    tags.perms.Booster = boosters;
+		const oldFile = await readGHFile(
+			'SkyblockClient/SCC-Data',
+			'features/tags.json',
+		);
+		const tags = TagsJSON.parse(JSON.parse(oldFile.content));
+		tags.perms.Booster = boosters;
 
-    const content = await format(JSON.stringify(tags), { parser: "json" });
-    await writeGHFile(oldFile, content, "chore: update booster list");
-  } catch (e) {
-    container.logger.error("Failed to update boosters", e);
-  }
+		const content = await format(JSON.stringify(tags), { parser: 'json' });
+		await writeGHFile(oldFile, content, 'chore: update booster list');
+	}
+	catch (e) {
+		container.logger.error('Failed to update boosters', e);
+	}
 }

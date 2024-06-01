@@ -1,11 +1,17 @@
 {
-  "extends": ["@sapphire/ts-config", "@sapphire/ts-config/decorators"],
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "declaration": false,
-    "declarationMap": false,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
-  },
-  "include": ["src"]
+	"extends": [
+		"@sapphire/ts-config"
+	],
+	"compilerOptions": {
+		"tsBuildInfoFile": "dist/.tsbuildinfo",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"rootDir": "src",
+		"declaration": false,
+		"declarationMap": false,
+		"outDir": "dist"
+	},
+	"include": [
+		"src"
+	]
 }
