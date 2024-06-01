@@ -3,7 +3,9 @@ import { JSONFilePreset } from "lowdb/node";
 
 try {
   await fs.mkdir("db");
-} catch {}
+} catch {
+  // Directory already exists
+}
 
 type BoostersDB = Record<string, string>;
 export const BoostersDB = await JSONFilePreset<BoostersDB>(

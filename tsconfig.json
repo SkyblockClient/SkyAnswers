@@ -5,7 +5,8 @@
     "outDir": "dist",
     "declaration": false,
     "declarationMap": false,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "importHelpers": true
   },
   "include": ["src"]
 }

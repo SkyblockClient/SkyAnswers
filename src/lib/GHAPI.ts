@@ -18,7 +18,7 @@ export async function readGHFile(
   repo: string,
   path: string,
 ): Promise<GHContent> {
-  let { data: rawData } = await octokit.rest.repos.getContent({
+  const { data: rawData } = await octokit.rest.repos.getContent({
     owner: repo.split("/")[0],
     repo: repo.split("/")[1],
     path,

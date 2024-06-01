@@ -4,6 +4,9 @@ import { db } from "./recorder.js";
 import { Message, MessageReplyOptions, time } from "discord.js";
 import { SkyClientOnly } from "../../lib/SkyClientOnly.js";
 
+// TODO: Typings
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /** Tells you when the person you're trying to reach is probably asleep */
 @ApplyOptions<Listener.Options>({
   event: Events.MessageCreate,

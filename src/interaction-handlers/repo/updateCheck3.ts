@@ -60,7 +60,7 @@ export class ButtonHandler extends InteractionHandler {
 
     const tmp = await fs.mkdtemp(join(tmpdir(), "skyanswers-"));
 
-    let tasks = [];
+    const tasks = [];
     tasks.push(
       clone({
         fs,
