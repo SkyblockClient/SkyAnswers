@@ -1,3 +1,4 @@
+import { Snowflake } from "discord.js";
 import * as fs from "fs/promises";
 import { JSONFilePreset } from "lowdb/node";
 
@@ -7,7 +8,7 @@ try {
   // Directory already exists
 }
 
-type BoostersDB = Record<string, string>;
+type BoostersDB = Record<Snowflake, string>;
 export const BoostersDB = await JSONFilePreset<BoostersDB>(
   "db/boosters.json",
   {},
