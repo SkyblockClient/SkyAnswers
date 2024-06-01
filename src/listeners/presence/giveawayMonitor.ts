@@ -4,7 +4,7 @@ import {
   escapeMarkdown,
   unorderedList,
 } from "discord.js";
-import { Channels, Roles } from "../../const.js";
+import { Channels, Roles, Servers } from "../../const.js";
 import { Events, Listener, container } from "@sapphire/framework";
 import { ApplyOptions } from "@sapphire/decorators";
 import { SkyClientOnly } from "../../lib/SkyClientOnly.js";
@@ -23,6 +23,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     const member = guild.members.cache.get(author.id);
     if (!member) return;
 
+    if (guild.id != Servers.SkyClient) return;
     if (!channel.isTextBased()) return;
     if (channel.isDMBased()) return;
     if (channel.name.startsWith("ticket-")) return;
