@@ -101,7 +101,7 @@ export class UserCommand extends Command {
     const data = {
       forge_id: modId,
       url,
-      file: basename(url),
+      file: decodeURI(basename(url)),
       hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
     };
     const isBeta = interaction.options.getBoolean("beta") || false;
