@@ -11,19 +11,19 @@ import type { ButtonInteraction } from "discord.js";
 })
 export class ButtonHandler extends InteractionHandler {
   public async run(interaction: ButtonInteraction) {
-    if (!interaction.inCachedGuild()) return;
-    const respondedTo = interaction.customId.split("|")[1];
-    if (
-      respondedTo != interaction.member.id &&
-      !interaction.member.permissions.has("ManageMessages") &&
-      !interaction.member.roles.cache.has("931626562539909130") // support person
-    ) {
-      return interaction.reply({
-        content: "not your autoresponse",
-        ephemeral: true,
-      });
-    }
     try {
+      if (!interaction.inCachedGuild()) return;
+      const respondedTo = interaction.customId.split("|")[1];
+      if (
+        respondedTo != interaction.member.id &&
+        !interaction.member.permissions.has("ManageMessages") &&
+        !interaction.member.roles.cache.has("931626562539909130") // support person
+      ) {
+        return interaction.reply({
+          content: "not your autoresponse",
+          ephemeral: true,
+        });
+      }
       return interaction.message.delete();
     } catch (e) {
       container.logger.warn("could not delete", interaction.message, e);
