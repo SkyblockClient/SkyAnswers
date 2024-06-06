@@ -35,34 +35,46 @@ export async function setTicketOpen(channel: GuildChannel, open: boolean) {
     );
 }
 
-const mentionRegex = /<@!?(?<id>\d{17,20})>/;
-const ownerPinCache: Record<string, Message | null> = {};
-export async function getTicketTop(
-  ticket: TextBasedChannel,
-): Promise<Message | undefined> {
+const topCache: Record<string, Message<true> | null> = {};
+export async function getTicketTop(ticket: TextBasedChannel) {
+  if (topCache[ticket.id]) return topCache[ticket.id] || undefined;
+  const ret = await _getTop(ticket);
+  topCache[ticket.id] = ret || null;
+  return ret;
+}
+
+async function _getTop(ticket: TextBasedChannel) {
   if (!isTicket(ticket)) return;
-  if (ownerPinCache[ticket.id]) return ownerPinCache[ticket.id] || undefined;
 
   const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
   const msg = msgs.first();
-  let pin: Message<true> | undefined;
-  if (msg && msg.author.bot) pin = msg;
-  ownerPinCache[ticket.id] = pin || null;
-  return pin;
+  if (msg && msg.author.bot) return msg;
+
+  return;
 }
-export async function getTicketOwner(
-  ticket: TextBasedChannel,
-): Promise<string | undefined> {
+
+const ownerCache: Record<string, string | null> = {};
+export async function getTicketOwner(ticket: TextBasedChannel) {
+  if (ownerCache[ticket.id]) return ownerCache[ticket.id] || undefined;
+  const ret = await _getOwner(ticket);
+  ownerCache[ticket.id] = ret || null;
+  return ret;
+}
+
+const mentionRegex = /<@!?(?<id>\d{17,20})>/;
+async function _getOwner(ticket: TextBasedChannel) {
   if (!isTicket(ticket)) return;
 
   const pin = await getTicketTop(ticket);
   if (!pin) return;
 
   const contentMatch = pin.content.match(mentionRegex);
-  const embedMatch = pin.embeds[0]?.description?.match(mentionRegex);
   if (contentMatch) return contentMatch[1];
-  else if (embedMatch) return embedMatch[1];
-  else return;
+
+  const embedMatch = pin.embeds[0]?.description?.match(mentionRegex);
+  if (embedMatch) return embedMatch[1];
+
+  return;
 }
 
 export function isTicket(
