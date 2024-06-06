@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Discord, getJSON, queryData } from "../../data.js";
+import { Discord, getJSON, queryData } from "../../lib/data.js";
 import {
   ApplicationCommandOptionType,
   EmbedBuilder,

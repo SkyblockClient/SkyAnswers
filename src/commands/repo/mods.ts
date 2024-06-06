@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Mod, getMods } from "../../data.js";
+import { Mod, getMods } from "../../lib/data.js";
 import { inlineCode, unorderedList } from "discord.js";
 
 enum ModType {

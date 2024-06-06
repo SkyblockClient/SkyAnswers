@@ -1,6 +1,6 @@
 import { fetch, FetchResultTypes } from "@sapphire/fetch";
 import { z } from "zod";
-import { repoFilesURL } from "./const.js";
+import { repoFilesURL } from "../const.js";
 import levenshtein from "js-levenshtein";
 import { container } from "@sapphire/framework";
 import pMemoize, { pMemoizeClear } from "p-memoize";
@@ -99,16 +99,12 @@ export type Pack = z.infer<typeof Mod>;
 
 export const DownloadableMod = Mod.transform((v) => ({
   ...v,
-  download:
-    v.url ||
-    `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/${v.file}`,
+  download: v.url || `${repoFilesURL}/mods/${v.file}`,
 }));
 export type DownloadableMod = z.infer<typeof DownloadableMod>;
 export const DownloadablePack = Pack.transform((v) => ({
   ...v,
-  download:
-    v.url ||
-    `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/packs/${v.file}`,
+  download: v.url || `${repoFilesURL}/packs/${v.file}`,
 }));
 export type DownloadablePack = z.infer<typeof DownloadablePack>;
 

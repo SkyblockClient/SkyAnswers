@@ -7,7 +7,7 @@ import {
   AutocompleteInteraction,
   type ApplicationCommandOptionChoiceData,
 } from "discord.js";
-import { getPacks, probableMatches } from "../../data.js";
+import { getPacks, probableMatches } from "../../lib/data.js";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Autocomplete,

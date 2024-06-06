@@ -7,7 +7,7 @@ import {
   ComponentType,
 } from "discord.js";
 import JSZip from "jszip";
-import { Mod, getJSON, getMods } from "../../data.js";
+import { Mod, getJSON, getMods } from "../../lib/data.js";
 import { checkMember } from "../../lib/update.js";
 import { Channels, Emojis, Servers } from "../../const.js";
 import z from "zod";

@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { invalidateTrackedData } from "../../data.js";
+import { invalidateTrackedData } from "../../lib/data.js";
 import { Roles } from "../../const.js";
 
 @ApplyOptions<Command.Options>({

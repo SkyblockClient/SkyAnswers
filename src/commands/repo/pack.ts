@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { getDistance, getPacks, queryDownloadable } from "../../data.js";
+import { getDistance, getPacks, queryDownloadable } from "../../lib/data.js";
 import { getDownloadableMessage } from "./mod.js";
 import { ApplicationCommandOptionType } from "discord.js";
 

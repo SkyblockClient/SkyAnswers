@@ -6,7 +6,7 @@ import {
   getDistance,
   getMods,
   queryDownloadable,
-} from "../../data.js";
+} from "../../lib/data.js";
 import {
   ApplicationCommandOptionType,
   EmbedBuilder,

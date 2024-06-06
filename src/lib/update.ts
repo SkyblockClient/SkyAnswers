@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import { getJSON } from "../data.js";
+import { getJSON } from "./data.js";
 import z from "zod";
 import { isDevUser, Roles, Users } from "../const.js";
 

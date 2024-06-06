@@ -13,7 +13,7 @@ import { Emojis, isDevUser } from "../../const.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
 import { tmpdir } from "os";
 import { join } from "path";
-import { Mod, invalidateTrackedData } from "../../data.js";
+import { Mod, invalidateTrackedData } from "../../lib/data.js";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 

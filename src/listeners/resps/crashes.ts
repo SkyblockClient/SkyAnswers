@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
-import { getTrackedData } from "../../data.js";
+import { getTrackedData } from "../../lib/data.js";
 import { Message } from "discord.js";
 import { z } from "zod";
 import { Servers } from "../../const.js";

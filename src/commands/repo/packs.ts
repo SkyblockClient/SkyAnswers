@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Pack, getPacks } from "../../data.js";
+import { Pack, getPacks } from "../../lib/data.js";
 import { unorderedList } from "discord.js";
 
 enum PackType {
