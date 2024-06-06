@@ -48,9 +48,10 @@ export class UserCommand extends Command {
   ) {
     if (flags.async) code = `(async () => {\n${code}\n})();`;
 
-    // @ts-expect-error value is never read, this is so `msg` is possible as an alias when sending the eval.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const msg = message;
+    // @ts-expect-error shortcuts for eval
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { channel, guild, client, author } = msg;
 
     let success = true;
     let result = null;
