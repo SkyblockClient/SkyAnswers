@@ -3,11 +3,11 @@ import {
   OverwriteType,
   GuildChannel,
   TextBasedChannel,
-  Message,
   TextChannel,
   Channel,
   BaseChannel,
 } from "discord.js";
+import pMemoize from "p-memoize";
 
 export const plsBePatientTY =
   "Expect a response within the next day. Support Team has already been pinged.";
@@ -35,47 +35,37 @@ export async function setTicketOpen(channel: GuildChannel, open: boolean) {
     );
 }
 
-const topCache: Record<string, Message<true> | null> = {};
-export async function getTicketTop(ticket: TextBasedChannel) {
-  if (topCache[ticket.id]) return topCache[ticket.id] || undefined;
-  const ret = await _getTop(ticket);
-  topCache[ticket.id] = ret || null;
-  return ret;
-}
+export const getTicketTop = pMemoize(
+  async (ticket: TextBasedChannel) => {
+    if (!isTicket(ticket)) return;
 
-async function _getTop(ticket: TextBasedChannel) {
-  if (!isTicket(ticket)) return;
+    const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
+    const msg = msgs.first();
+    if (msg && msg.author.bot) return msg;
 
-  const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
-  const msg = msgs.first();
-  if (msg && msg.author.bot) return msg;
-
-  return;
-}
-
-const ownerCache: Record<string, string | null> = {};
-export async function getTicketOwner(ticket: TextBasedChannel) {
-  if (ownerCache[ticket.id]) return ownerCache[ticket.id] || undefined;
-  const ret = await _getOwner(ticket);
-  ownerCache[ticket.id] = ret || null;
-  return ret;
-}
+    return;
+  },
+  { cacheKey: ([channel]) => channel.id },
+);
 
 const mentionRegex = /<@!?(?<id>\d{17,20})>/;
-async function _getOwner(ticket: TextBasedChannel) {
-  if (!isTicket(ticket)) return;
+export const getTicketOwner = pMemoize(
+  async (ticket: TextBasedChannel) => {
+    if (!isTicket(ticket)) return;
 
-  const pin = await getTicketTop(ticket);
-  if (!pin) return;
+    const pin = await getTicketTop(ticket);
+    if (!pin) return;
 
-  const contentMatch = pin.content.match(mentionRegex);
-  if (contentMatch) return contentMatch[1];
+    const contentMatch = pin.content.match(mentionRegex);
+    if (contentMatch) return contentMatch[1];
 
-  const embedMatch = pin.embeds[0]?.description?.match(mentionRegex);
-  if (embedMatch) return embedMatch[1];
+    const embedMatch = pin.embeds[0]?.description?.match(mentionRegex);
+    if (embedMatch) return embedMatch[1];
 
-  return;
-}
+    return;
+  },
+  { cacheKey: ([channel]) => channel.id },
+);
 
 export function isTicket(
   channel: BaseChannel | Channel | null,

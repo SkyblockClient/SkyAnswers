@@ -3,31 +3,26 @@ import { z } from "zod";
 import { repoFilesURL } from "./const.js";
 import levenshtein from "js-levenshtein";
 import { container } from "@sapphire/framework";
+import pMemoize, { pMemoizeClear } from "p-memoize";
+import ExpiryMap from "expiry-map";
+import { Time } from "@sapphire/time-utilities";
 
-interface TrackedData {
-  data: unknown;
-  lastUpdated: number;
-}
-let trackedData: Record<string, TrackedData> = {};
-export const invalidateTrackedData = () => (trackedData = {});
-export async function getTrackedData(url: string) {
-  const lastUpdated = trackedData[url]?.lastUpdated;
-  if (!lastUpdated || Date.now() - lastUpdated > 1000 * 60 * 60) {
+export const getTrackedData = pMemoize(
+  async (url: string) => {
     container.logger.info("refetching", url);
-    let data;
     try {
       const resp = await fetch(url, FetchResultTypes.Result);
-      if (!resp.ok) {
+      if (!resp.ok)
         throw new Error(`http error ${resp.statusText} while fetching ${url}`);
-      }
-      data = await resp.json();
+      return await resp.json();
     } catch (e) {
       throw new Error(`exception ${e} while fetching ${url}`);
     }
-    trackedData[url] = { data, lastUpdated: Date.now() };
-  }
-  return trackedData[url].data;
-}
+  },
+  { cache: new ExpiryMap(Time.Hour) },
+);
+export const invalidateTrackedData = () => pMemoizeClear(getTrackedData);
+
 export const getJSON = (jsonFilename: string) =>
   getTrackedData(`${repoFilesURL}/${jsonFilename}.json`);
 export const getMods = async () => Mod.array().parse(await getJSON("mods"));
