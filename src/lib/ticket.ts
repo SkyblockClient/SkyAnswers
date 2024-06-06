@@ -1,41 +1,28 @@
 import { ChannelTypes, isTextChannel } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
-import {
-  OverwriteType,
-  GuildChannel,
-  TextBasedChannel,
-  TextChannel,
-} from "discord.js";
+import { Nullish } from "@sapphire/utilities";
+import { TextChannel } from "discord.js";
 import pMemoize from "p-memoize";
 
 export const plsBePatientTY =
   "Expect a response within the next day. Support Team has already been pinged.";
 
-export async function setTicketOpen(channel: GuildChannel, open: boolean) {
-  const perms = Array.from(channel.permissionOverwrites.cache.values());
-  const creator = perms.find(
-    (perm) =>
-      perm.type == OverwriteType.Member &&
-      perm.allow.equals(open ? 1024n : 3072n) &&
-      perm.deny.equals(open ? 2048n : 0n),
-  );
+export async function setTicketOpen(channel: ChannelTypes, open: boolean) {
+  if (!isTicket(channel)) return;
+
+  const owner = await getTicketOwner(channel);
   container.logger.info(
-    open ? "opening" : "closing",
+    open ? "Opening" : "Closing",
     `#${channel.name} (${channel.id})`,
-    "for",
-    creator,
+    `for ${owner}`,
   );
-  if (creator) {
-    await channel.permissionOverwrites.edit(creator.id, { SendMessages: open });
-  } else
-    container.logger.warn(
-      `While ${open ? "opening" : "closing"} ticket, failed to find member in`,
-      perms,
-    );
+  if (owner)
+    await channel.permissionOverwrites.edit(owner, { SendMessages: open });
+  else container.logger.warn(`Failed to find owner`);
 }
 
 export const getTicketTop = pMemoize(
-  async (ticket: TextBasedChannel) => {
+  async (ticket: ChannelTypes) => {
     if (!isTicket(ticket)) return;
 
     const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
@@ -49,7 +36,7 @@ export const getTicketTop = pMemoize(
 
 const mentionRegex = /<@!?(?<id>\d{17,20})>/;
 export const getTicketOwner = pMemoize(
-  async (ticket: TextBasedChannel) => {
+  async (ticket: ChannelTypes) => {
     if (!isTicket(ticket)) return;
 
     const pin = await getTicketTop(ticket);
@@ -66,7 +53,9 @@ export const getTicketOwner = pMemoize(
   { cacheKey: ([channel]) => channel.id },
 );
 
-export function isTicket(channel: ChannelTypes | null): channel is TextChannel {
+export function isTicket(
+  channel: ChannelTypes | Nullish,
+): channel is TextChannel {
   return (
     isTextChannel(channel) &&
     channel.name.startsWith("ticket-") &&
