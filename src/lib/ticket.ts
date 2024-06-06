@@ -1,11 +1,10 @@
+import { ChannelTypes, isTextChannel } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
 import {
   OverwriteType,
   GuildChannel,
   TextBasedChannel,
   TextChannel,
-  Channel,
-  BaseChannel,
 } from "discord.js";
 import pMemoize from "p-memoize";
 
@@ -67,11 +66,9 @@ export const getTicketOwner = pMemoize(
   { cacheKey: ([channel]) => channel.id },
 );
 
-export function isTicket(
-  channel: BaseChannel | Channel | null,
-): channel is TextChannel {
+export function isTicket(channel: ChannelTypes | null): channel is TextChannel {
   return (
-    channel instanceof TextChannel &&
+    isTextChannel(channel) &&
     channel.name.startsWith("ticket-") &&
     channel.name != "ticket-logs" &&
     channel.name != "ticket-transcripts"
