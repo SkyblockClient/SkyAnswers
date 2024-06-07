@@ -1,8 +1,10 @@
 import { ChannelTypes, isTextChannel } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
+import { Time } from "@sapphire/time-utilities";
 import { Nullish } from "@sapphire/utilities";
 import { TextChannel } from "discord.js";
 import pMemoize from "p-memoize";
+import pRetry from "p-retry";
 
 export const plsBePatientTY =
   "Expect a response within the next day. Support Team has already been pinged.";
@@ -25,11 +27,28 @@ export const getTicketTop = pMemoize(
   async (ticket: ChannelTypes) => {
     if (!isTicket(ticket)) return;
 
-    const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
-    const msg = msgs.first();
-    if (msg && msg.author.bot) return msg;
-
-    return;
+    try {
+      return await pRetry(
+        async () => {
+          const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
+          const msg = msgs.first();
+          if (!msg) throw "no msg";
+          if (!msg.author.bot) return;
+          return msg;
+        },
+        {
+          minTimeout: Time.Second * 1,
+          retries: 3,
+        },
+      );
+    } catch (e) {
+      container.logger.error(
+        "Failed to get ticket top",
+        `#${ticket.name} (${ticket.id})`,
+        e,
+      );
+      return;
+    }
   },
   { cacheKey: ([channel]) => channel.id },
 );

@@ -1,10 +1,12 @@
 import { Events, Listener, container } from "@sapphire/framework";
-import { Client, DiscordAPIError, roleMention } from "discord.js";
+import { DiscordAPIError, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Servers, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
 import { getTicketOwner, getTicketTop, isTicket } from "../../lib/ticket.js";
 import { Duration, Time } from "@sapphire/time-utilities";
+import { Stopwatch } from "@sapphire/stopwatch";
+import pMap from "p-map";
 
 const SupportTeams: Record<string, string> = {
   [Servers.SkyClient]: "931626562539909130",
@@ -17,35 +19,29 @@ const SupportTeams: Record<string, string> = {
   event: Events.ClientReady,
 })
 export class ReadyListener extends Listener<typeof Events.ClientReady> {
-  public override async run(client: Client<true>) {
-    await run(client);
-    setInterval(() => run(client), Time.Second * 30);
+  public override async run() {
+    const tickets = getTickets();
+
+    const stopwatch = new Stopwatch();
+    // We want the bot to prefetch and cache ticket information.
+    await pMap(tickets, getTicketOwner, { concurrency: 5 });
+    container.logger.info(
+      `Pre-cached ${tickets.length} tickets.`,
+      `Took ${stopwatch.stop()}`,
+    );
+
+    await pMap(getTickets(), pinTop);
+    setInterval(
+      () => pMap(getTickets(), maintain, { concurrency: 3 }),
+      Time.Second * 30,
+    );
   }
 }
 
-export async function run(client: Client<true>) {
-  const tickets = Array.from(client.channels.cache.values()).filter(isTicket);
-  // await Promise.all(tickets.map(maintainTicket));
-  for (const ticket of tickets) await maintainTicket(ticket);
+const getTickets = () =>
+  Array.from(container.client.channels.cache.values()).filter(isTicket);
 
-  for (const ticket of tickets) {
-    try {
-      if (ticket.lastPinAt) continue;
-      const top = await getTicketTop(ticket);
-      await top?.pin();
-    } catch (e) {
-      const header = `Failed to pin ticket top in ${ticket.name} in ${ticket.guild.name}:`;
-      if (e instanceof DiscordAPIError) {
-        if (e.code == 50001) return;
-        container.logger.error(header, e.code, e.message);
-      } else if (e instanceof Error && e.name == "ConnectTimeoutError") {
-        container.logger.error(header, "Connect Timeout Error");
-      } else container.logger.error(header, e);
-    }
-  }
-}
-
-async function maintainTicket(ticket: TextChannel) {
+async function maintain(ticket: TextChannel) {
   try {
     const support = SupportTeams[ticket.guildId];
     if (!support) return;
@@ -77,6 +73,22 @@ async function maintainTicket(ticket: TextChannel) {
     return;
   } catch (e) {
     const header = `Failed to maintain ticket in ${ticket.name} in ${ticket.guild.name}:`;
+    if (e instanceof DiscordAPIError) {
+      if (e.code == 50001) return;
+      container.logger.error(header, e.code, e.message);
+    } else if (e instanceof Error && e.name == "ConnectTimeoutError") {
+      container.logger.error(header, "Connect Timeout Error");
+    } else container.logger.error(header, e);
+  }
+}
+
+export async function pinTop(ticket: TextChannel) {
+  try {
+    if (ticket.lastPinAt) return;
+    const top = await getTicketTop(ticket);
+    await top?.pin();
+  } catch (e) {
+    const header = `Failed to pin ticket top in ${ticket.name} in ${ticket.guild.name}:`;
     if (e instanceof DiscordAPIError) {
       if (e.code == 50001) return;
       container.logger.error(header, e.code, e.message);
