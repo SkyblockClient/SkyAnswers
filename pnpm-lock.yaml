@@ -83,9 +83,6 @@ importers:
       p-memoize:
         specifier: ^7.1.1
         version: 7.1.1
-      p-retry:
-        specifier: ^6.2.0
-        version: 6.2.0
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
@@ -502,9 +499,6 @@ packages:
 
   '@types/phoenix@1.6.4':
     resolution: {integrity: sha512-B34A7uot1Cv0XtaHRYDATltAdKx0BvVKNgYNqE4WjtPUa4VQJM7kxeXcVKaH+KS+kCmZ+6w+QaUdcljiheiBJA==}
-
-  '@types/retry@0.12.2':
-    resolution: {integrity: sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==}
 
   '@types/ws@8.5.9':
     resolution: {integrity: sha512-jbdrY0a8lxfdTp/+r7Z4CkycbOFN8WX+IOchLJr3juT/xzbJ8URyTVSJ/hvNdadTgM1mnedb47n+Y31GsFnQlg==}
@@ -1046,10 +1040,6 @@ packages:
     resolution: {integrity: sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg==}
     engines: {node: '>=0.10.0'}
 
-  is-network-error@1.1.0:
-    resolution: {integrity: sha512-tUdRRAnhT+OtCZR/LxZelH/C7QtjtFrTu5tXCA8pl55eTUElUHT+GPYV8MBMBvea/j+NxQqVt3LbWMRir7Gx9g==}
-    engines: {node: '>=16'}
-
   is-number@7.0.0:
     resolution: {integrity: sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==}
     engines: {node: '>=0.12.0'}
@@ -1316,10 +1306,6 @@ packages:
     resolution: {integrity: sha512-DZ/bONJILHkQ721hSr/E9wMz5Am/OTJ9P6LhLFo2Tu+jL8044tgc9LwHO8g4PiaYePnlVVRAJcKmgy8J9MVFrA==}
     engines: {node: '>=14.16'}
 
-  p-retry@6.2.0:
-    resolution: {integrity: sha512-JA6nkq6hKyWLLasXQXUrO4z8BUZGUt/LjlJxx8Gb2+2ntodU/SS63YZ8b0LUTbQ8ZB9iwOfhEPhg4ykKnn2KsA==}
-    engines: {node: '>=16.17'}
-
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
 
@@ -1419,10 +1405,6 @@ packages:
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
-
-  retry@0.13.1:
-    resolution: {integrity: sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg==}
-    engines: {node: '>= 4'}
 
   reusify@1.0.4:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
@@ -2181,8 +2163,6 @@ snapshots:
 
   '@types/phoenix@1.6.4': {}
 
-  '@types/retry@0.12.2': {}
-
   '@types/ws@8.5.9':
     dependencies:
       '@types/node': 20.12.12
@@ -2769,8 +2749,6 @@ snapshots:
     dependencies:
       is-extglob: 2.1.1
 
-  is-network-error@1.1.0: {}
-
   is-number@7.0.0: {}
 
   is-path-cwd@3.0.0: {}
@@ -3016,12 +2994,6 @@ snapshots:
       mimic-fn: 4.0.0
       type-fest: 3.13.1
 
-  p-retry@6.2.0:
-    dependencies:
-      '@types/retry': 0.12.2
-      is-network-error: 1.1.0
-      retry: 0.13.1
-
   pako@1.0.11: {}
 
   parent-module@1.0.1:
@@ -3111,8 +3083,6 @@ snapshots:
       strip-indent: 4.0.0
 
   resolve-from@4.0.0: {}
-
-  retry@0.13.1: {}
 
   reusify@1.0.4: {}
 
