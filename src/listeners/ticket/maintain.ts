@@ -86,7 +86,8 @@ export async function pinTop(ticket: TextChannel) {
   try {
     if (ticket.lastPinAt) return;
     const top = await getTicketTop(ticket);
-    await top?.pin();
+    if (!top || top.pinned) return;
+    await top.pin();
   } catch (e) {
     const header = `Failed to pin ticket top in ${ticket.name} in ${ticket.guild.name}:`;
     if (e instanceof DiscordAPIError) {
