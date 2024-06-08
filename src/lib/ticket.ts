@@ -26,15 +26,10 @@ export const getTicketTop = pMemoize(
   async (ticket: ChannelTypes) => {
     if (!isTicket(ticket)) return;
 
-    let msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
-    let msg = msgs.first();
-    if (!msg) {
-      await sleep(Time.Second);
-      msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
-      msg = msgs.first();
-      if (!msg) return;
-    }
-    if (!msg.author.bot) return;
+    await sleep(Time.Second * 0.5);
+    const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
+    const msg = msgs.first();
+    if (!msg || !msg.author.bot) return;
     return msg;
   },
   { cacheKey: ([channel]) => channel.id },
