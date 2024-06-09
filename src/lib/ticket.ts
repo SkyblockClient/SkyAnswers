@@ -26,7 +26,7 @@ export const getTicketTop = pMemoize(
   async (ticket: ChannelTypes) => {
     if (!isTicket(ticket)) return;
 
-    await sleep(Time.Second * 0.5);
+    await sleep(Time.Second * 2);
     const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
     const msg = msgs.first();
     if (!msg || !msg.author.bot) return;

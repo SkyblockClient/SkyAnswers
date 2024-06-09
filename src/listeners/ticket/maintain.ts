@@ -24,7 +24,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
 
     const stopwatch = new Stopwatch();
     // We want the bot to prefetch and cache ticket information.
-    await pMap(tickets, getTicketOwner, { concurrency: 5 });
+    await pMap(tickets, getTicketOwner);
     container.logger.info(
       `Pre-cached ${tickets.length} tickets.`,
       `Took ${stopwatch.stop()}`,
