@@ -37,7 +37,7 @@ export class ButtonHandler extends InteractionHandler {
         );
       case "launcher":
         return channel.send(`You'll need to send your crash log. Please follow these instructions:
-1. Open your SkyClient folder. If you use the vanilla launcher, see this: https://youtu.be/BHIM2htfMk8
+1. Open your SkyClient folder. If you use Minecraft Launcher, see this: https://youtu.be/BHIM2htfMk8
 2. - **If you saw a "View Crash Report" button in the launcher:**
      Go to the \`crash-reports\` folder and upload the most recent file here.
    - **If you didn't see the button:**
