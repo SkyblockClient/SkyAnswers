@@ -42,7 +42,7 @@ export class ButtonHandler extends InteractionHandler {
      Go to the \`crash-reports\` folder and upload the most recent file here.
    - **If you didn't see the button:**
      Go to the \`logs\` folder and upload the file called \`latest\` or \`latest.log\`.
-   - **If you use Prism, Modrinth (app) or another non-vanilla launcher:***
+   - **If you use the Prism or Modrinth Launcher:***
      Click the \`Folder\` button in your launcher and open the \`logs\` folder.
      Then upload the \`fml-client-latest\` file here.
 3. ${plsBePatientTY}`);
