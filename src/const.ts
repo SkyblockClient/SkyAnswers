@@ -25,6 +25,9 @@ export const SkyClient = {
 
 export const Polyfrost = {
   id: "822066990423605249",
+  channels: {
+    BotLogs: "1225178336532369598",
+  },
   roles: {
     NoGiveaways: "1182506496156766250",
     SupportTeam: "997376364460114001",
