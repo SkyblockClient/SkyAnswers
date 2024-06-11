@@ -12,9 +12,6 @@ import { sleep } from "@sapphire/utilities";
 })
 export class UserEvent extends Listener<typeof Events.MessageCreate> {
   public override async run(message: Message<true>) {
-    // TODO: Adapt for Polyforst
-    if (message.guildId != Servers.SkyClient) return;
-
     const msgLogs = message.attachments
       .filter(
         (attachment) =>
@@ -29,7 +26,10 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       logsToCheck.map(async (log) => {
         const resp = await fetch(log);
         const text = await resp.text();
-        const info = await verbalizeCrash(text);
+        const info = await verbalizeCrash(
+          text,
+          message.guildId == Servers.SkyClient,
+        );
         if (info) {
           await sleep(500);
           await message.channel.send(info);
