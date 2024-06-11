@@ -3,7 +3,7 @@ import { Events, Listener } from "@sapphire/framework";
 import { getTrackedData } from "../../lib/data.js";
 import { Message } from "discord.js";
 import { z } from "zod";
-import { Servers } from "../../const.js";
+import { SkyClient } from "../../const.js";
 import { sleep } from "@sapphire/utilities";
 
 /** Provides info and recommendations for crashes */
@@ -28,7 +28,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         const text = await resp.text();
         const info = await verbalizeCrash(
           text,
-          message.guildId == Servers.SkyClient,
+          message.guildId == SkyClient.id,
         );
         if (info) {
           await sleep(500);

@@ -4,7 +4,7 @@ import type {
   ContextMenuCommandInteraction,
   Message,
 } from "discord.js";
-import { isDevUser, Servers } from "../const.js";
+import { SkyClient, DevServer, isDevUser } from "../const.js";
 
 export class UserPrecondition extends Precondition {
   public override messageRun(message: Message) {
@@ -25,7 +25,7 @@ export class UserPrecondition extends Precondition {
 }
 
 export const notSkyClient = (guildId: string | null) =>
-  !(guildId == Servers.SkyClient || (guildId == Servers.Dev && isDevUser));
+  !(guildId == SkyClient.id || (guildId == DevServer.id && isDevUser));
 
 declare module "@sapphire/framework" {
   interface Preconditions {

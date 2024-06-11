@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { invalidateTrackedData } from "../../lib/data.js";
-import { Roles } from "../../const.js";
+import { SkyClient } from "../../const.js";
 
 @ApplyOptions<Command.Options>({
   description: "Clears the data (eg mods, autoresponses, etc) caches",
@@ -22,7 +22,7 @@ export class UserCommand extends Command {
     if (!member) return;
 
     if (
-      !member.roles.cache.has(Roles.GitHubKeeper) &&
+      !member.roles.cache.has(SkyClient.roles.GitHubKeeper) &&
       !member.permissions.has("Administrator")
     )
       return interaction.reply({

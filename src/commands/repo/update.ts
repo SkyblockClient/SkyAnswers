@@ -9,7 +9,7 @@ import {
 import JSZip from "jszip";
 import { Mod, getJSON, getMods } from "../../lib/data.js";
 import { checkMember } from "../../lib/update.js";
-import { Channels, Emojis, Servers } from "../../const.js";
+import { SkyClient, Emojis } from "../../const.js";
 import z from "zod";
 import { basename } from "@std/url";
 import { PendingUpdatesDB } from "../../lib/db.js";
@@ -58,10 +58,10 @@ export class UserCommand extends Command {
     }
 
     const isProper =
-      guild.id != Servers.SkyClient || channel.id == Channels.ModUpdating;
+      guild.id != SkyClient.id || channel.id == SkyClient.channels.ModUpdating;
     if (!isProper)
       return interaction.reply({
-        content: `💡 this command is only available in <#${Channels.ModUpdating}>`,
+        content: `💡 this command is only available in <#${SkyClient.channels.ModUpdating}>`,
         ephemeral: true,
       });
 
