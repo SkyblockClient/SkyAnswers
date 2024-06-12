@@ -9,6 +9,17 @@ import {
 import { isTicket } from "../../lib/ticket.js";
 
 const streaks: Record<string, string[]> = {};
+const ignoredChannels = [
+  // Polyfrost
+  "1053827347469570158", // #bot-land
+  "1057847561597239336", // #counting
+  "984850370834620416", //  #testers-chat
+
+  // SkyClient
+  "796546551878516766", //  #bot-commands
+  "1135190905373081650", // #the-void
+  SkyClient.channels.Trolling,
+];
 
 /** Flags users who are spamming for giveaways */
 @ApplyOptions<Listener.Options>({
@@ -36,7 +47,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
       : Polyfrost.channels.BotLogs;
     const roles = member.roles.cache;
 
-    if (channel.id == SkyClient.channels.Trolling) return; // exclude trolling
+    if (ignoredChannels.includes(channel.id)) return;
     if (roles.has(SkyClient.roles.CoolPeople)) return; // cool people
     if (roles.has(noGiveawaysRole)) return; // already has no giveaways
 
