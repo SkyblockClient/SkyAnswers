@@ -74,18 +74,26 @@ export class UserCommand extends Command {
       headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
     });
     if (!modResp.ok) {
-      container.logger.error(await modResp.text());
-      throw new Error(`${modResp.statusText} while fetching ${url}`);
+      container.logger.error(
+        `${modResp.statusText} while fetching ${url}`,
+        await modResp.text(),
+      );
+      return await msg.edit("Failed to fetch mod. Is the URL correct?");
     }
     const modFile = await modResp.arrayBuffer();
 
-    const modZip = await JSZip.loadAsync(modFile);
-    const modInfoFile = modZip.file("mcmod.info");
     let modId: string | undefined;
-    if (modInfoFile) {
-      const modInfoStr = await modInfoFile.async("text");
-      const modInfo = JSON.parse(modInfoStr);
-      modId = modInfo[0].modid;
+    try {
+      const modZip = await JSZip.loadAsync(modFile);
+      const modInfoFile = modZip.file("mcmod.info");
+      if (modInfoFile) {
+        const modInfoStr = await modInfoFile.async("text");
+        const modInfo = JSON.parse(modInfoStr);
+        modId = modInfo[0].modid;
+      }
+    } catch (e) {
+      container.logger.error("Failed to read ZIP", e);
+      return await msg.edit("Failed to read ZIP. Is the URL correct?");
     }
 
     if (!modId) {
