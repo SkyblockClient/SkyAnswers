@@ -1,10 +1,11 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
 import { getTrackedData } from "../../lib/data.js";
-import { Message } from "discord.js";
+import { ButtonStyle, ComponentType, Message } from "discord.js";
 import { z } from "zod";
 import { SkyClient } from "../../const.js";
-import { sleep } from "@sapphire/utilities";
+import { postLog } from "../../lib/mcLogs.js";
+import { FetchResultTypes, fetch } from "@sapphire/fetch";
 
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
@@ -19,24 +20,71 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       )
       .map((attachment) => attachment.url);
 
-    const logsToCheck = [...msgLogs, ...findLogs(message.content)];
-    if (logsToCheck.length > 0) message.channel.sendTyping();
+    const log = [...msgLogs, ...findLogs(message.content)].at(0);
+    if (!log) return;
+    // TODO: https://github.com/aternosorg/mclogs/issues/116
+    const toDelete = true; // !log.includes("mclo.gs/");
 
-    await Promise.all(
-      logsToCheck.map(async (log) => {
-        const resp = await fetch(log);
-        const text = await resp.text();
-        const info = await verbalizeCrash(
-          text,
-          message.guildId == SkyClient.id,
-        );
-        if (info) {
-          await sleep(500);
-          await message.channel.send(info);
-        }
-      }),
-    );
+    await message.channel.sendTyping();
+
+    const mcLog = await getNewLog(log);
+    const text = await mcLog.getRaw();
+    const insights = await mcLog.getInsights();
+
+    const resp = [`${message.author} uploaded a ${insights.title}.`];
+    for (const info of insights.analysis.information) resp.push(info.message);
+
+    const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
+    if (verb) resp.push(verb);
+
+    await message.channel.send({
+      content: resp.join("\n"),
+      components: [
+        {
+          type: ComponentType.ActionRow,
+          components: [
+            {
+              type: ComponentType.Button,
+              style: ButtonStyle.Link,
+              label: "Open Log",
+              url: mcLog.url,
+            },
+            {
+              type: ComponentType.Button,
+              style: ButtonStyle.Link,
+              label: "Open Raw Log",
+              url: mcLog.raw,
+            },
+          ],
+        },
+      ],
+      allowedMentions: { parse: [] },
+    });
+    if (toDelete) await message.delete();
   }
+}
+
+// We want to use mclo.gs to censor logs,
+// but we don't need to upload if the log is already from MCLogs.
+async function getNewLog(url: string) {
+  // TODO: https://github.com/aternosorg/mclogs/issues/116
+  //if (url.includes("mclo.gs")) return getMCLog(url);
+
+  let text = await fetch(url, FetchResultTypes.Text);
+  text = text.replaceAll(/\w+\.\w+\.\w+:\w+/g, "REDACTED");
+  return await postLog(text);
+}
+
+function findLogs(txt: string) {
+  const ret = [];
+
+  const hastebinMatch = txt.match(/hst\.sh\/(?:raw\/)?([a-z]+)/i);
+  if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
+
+  const mclogsMatch = txt.match(/mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i);
+  if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
+
+  return ret;
 }
 
 const CrashCause = z.object({
@@ -57,18 +105,6 @@ const Crashes = z.object({
   fixtypes: FixType.array(),
   default_fix_type: z.number(),
 });
-
-function findLogs(txt: string) {
-  const ret = [];
-
-  const hastebinMatch = txt.match(/https:\/\/hst\.sh\/(?:raw\/)?([a-z]*)/i);
-  if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
-
-  const mclogsMatch = txt.match(/https:\/\/mclo\.gs\/([a-z0-9]*)/i);
-  if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
-
-  return ret;
-}
 
 async function verbalizeCrash(log: string, isSkyclient?: boolean) {
   const pathIndicator = "`";
