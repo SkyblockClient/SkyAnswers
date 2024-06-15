@@ -42,7 +42,10 @@ export class ButtonHandler extends InteractionHandler {
      Go to the \`crash-reports\` folder and upload the most recent file here.
    - **If you didn't see the button:**
      Go to the \`logs\` folder and upload the file called \`latest\` or \`latest.log\`.
-   - **If you use the Prism or Modrinth Launcher:***
+   - **If you use the Prism Launcher and haven't closed it yet:**
+     Click on your instance's \`Minecraft Log\` tab and click \`Upload\`.
+     Then paste the copied link in here.
+   - **If you use the Modrinth Launcher, or you have closed Prism Launcher:**
      Click the \`Folder\` button in your launcher and open the \`logs\` folder.
      Then upload the \`fml-client-latest\` file here.
 3. ${plsBePatientTY}`);
