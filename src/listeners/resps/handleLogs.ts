@@ -1,11 +1,22 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
 import { getTrackedData } from "../../lib/data.js";
-import { APIEmbed, ButtonStyle, ComponentType, Message } from "discord.js";
+import {
+  APIEmbed,
+  APIEmbedField,
+  ButtonStyle,
+  ComponentType,
+  Message,
+  blockQuote,
+} from "discord.js";
 import { z } from "zod";
 import { SkyClient } from "../../const.js";
-import { postLog } from "../../lib/mcLogs.js";
+import { getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
+import { filterNullAndUndefined } from "@sapphire/utilities";
+
+const hatshRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/i;
+const mclogsRegex = /https:\/\/(?:api.)?mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i;
 
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
@@ -22,12 +33,14 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 
     const log = [...msgLogs, ...findLogs(message.content)].at(0);
     if (!log) return;
-    // TODO: https://github.com/aternosorg/mclogs/issues/116
-    const toDelete = true; // !log.includes("mclo.gs/");
 
     await message.channel.sendTyping();
 
+    const newContent = message.content
+      .replaceAll(hatshRegex, "")
+      .replaceAll(mclogsRegex, "");
     const mcLog = await getNewLog(log);
+    const toDelete = log == mcLog.raw;
     const text = await mcLog.getRaw();
     const insights = await mcLog.getInsights();
 
@@ -45,14 +58,16 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     ];
 
     const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
-    if (verb)
+    if (verb.length > 0)
       embeds.push({
         title: "Bot Analysis",
-        description: verb,
+        fields: verb,
       });
 
+    let content = `${message.author} uploaded a ${insights.type}`;
+    if (newContent && toDelete) content += `\n${blockQuote(newContent)}`;
     await message.channel.send({
-      content: `${message.author} uploaded a ${insights.type}`,
+      content,
       embeds,
       components: [
         {
@@ -85,18 +100,23 @@ async function getNewLog(url: string) {
   // TODO: https://github.com/aternosorg/mclogs/issues/116
   //if (url.includes("mclo.gs")) return getMCLog(url);
 
-  let text = await fetch(url, FetchResultTypes.Text);
-  text = text.replaceAll(/\w+\.\w+\.\w+:\w+/g, "REDACTED");
+  const mcLog = url.includes("mclo.gs") && getMCLog(url);
+  const origText = mcLog
+    ? await mcLog.getRaw() // Log may already be cached
+    : await fetch(url, FetchResultTypes.Text);
+  const text = origText.replaceAll(/\w+\.\w+\.\w+:\w+/g, "REDACTED");
+  if (mcLog && text == origText) return mcLog;
+
   return await postLog(text);
 }
 
 function findLogs(txt: string) {
   const ret = [];
 
-  const hastebinMatch = txt.match(/hst\.sh\/(?:raw\/)?([a-z]+)/i);
+  const hastebinMatch = txt.match(hatshRegex);
   if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
 
-  const mclogsMatch = txt.match(/mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i);
+  const mclogsMatch = txt.match(mclogsRegex);
   if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
 
   return ret;
@@ -122,7 +142,10 @@ const Crashes = z.object({
   default_fix_type: z.number(),
 });
 
-async function verbalizeCrash(log: string, isSkyclient?: boolean) {
+async function verbalizeCrash(
+  log: string,
+  isSkyclient?: boolean,
+): Promise<APIEmbedField[]> {
   const pathIndicator = "`";
   const gameRoot = ".minecraft";
   const profileRoot = isSkyclient ? ".minecraft/skyclient" : ".minecraft";
@@ -142,22 +165,24 @@ async function verbalizeCrash(log: string, isSkyclient?: boolean) {
   });
 
   const cheater = relevantInfo.find((info) => info.fix.startsWith("Cheater"));
-  if (cheater) return `# ${cheater.fix}`;
+  if (cheater) return [{ name: "Cheater", value: cheater.fix }];
 
   const crashGroups = crashData.fixtypes.map((type, i) => {
     const groupInfo = relevantInfo.filter(
       (info) => (info.fixtype ?? crashData.default_fix_type) == i,
     );
     if (!groupInfo.length) return;
-    return `**${type.name}**
-${groupInfo
-  .map((info) =>
-    info.fix
-      .replaceAll("%pathindicator%", pathIndicator)
-      .replaceAll("%gameroot%", gameRoot)
-      .replaceAll("%profileroot%", profileRoot),
-  )
-  .join("\n")}`;
+    return {
+      name: type.name,
+      value: groupInfo
+        .map((info) =>
+          info.fix
+            .replaceAll("%pathindicator%", pathIndicator)
+            .replaceAll("%gameroot%", gameRoot)
+            .replaceAll("%profileroot%", profileRoot),
+        )
+        .join("\n"),
+    };
   });
-  return crashGroups.filter(Boolean).join("\n");
+  return crashGroups.filter(filterNullAndUndefined);
 }
