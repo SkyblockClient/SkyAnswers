@@ -4,7 +4,7 @@ import { getJSON } from "../../lib/data.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
 import { Message } from "discord.js";
-import { Channels, Roles, Servers } from "../../const.js";
+import { SkyClient } from "../../const.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import { z } from "zod";
 
@@ -18,15 +18,15 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     if (!member) return;
     if (message.author.bot) return;
     // TODO: Adapt for Polyforst
-    if (message.guildId != Servers.SkyClient) return;
+    if (message.guildId != SkyClient.id) return;
 
     let canAutoResp =
-      channel.id == Channels.General || // general
+      channel.id == SkyClient.channels.General || // general
       channel.id == "1110717104757416027" || // skyblock talk
       channel.id == "1001798063964303390" || // support
       channel.id == "796546551878516766" || // bot commands
       channel.name.startsWith("ticket-");
-    if (member.roles.cache.has(Roles.NoAuto)) canAutoResp = false;
+    if (member.roles.cache.has(SkyClient.roles.NoAuto)) canAutoResp = false;
 
     const responses = await findAutoresps(message.content, canAutoResp);
     if (responses.length > 3) return;

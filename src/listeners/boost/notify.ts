@@ -7,7 +7,7 @@ import {
   ActionRowBuilder,
   ButtonStyle,
 } from "discord.js";
-import { Channels, Roles, Servers } from "../../const.js";
+import { SkyClient } from "../../const.js";
 import { isTextBasedChannel } from "@sapphire/discord.js-utilities";
 
 /** Tracks when people (un)boost */
@@ -19,9 +19,9 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
     oldUser: GuildMember | PartialGuildMember,
     user: GuildMember,
   ) {
-    if (user.guild.id != Servers.SkyClient) return;
+    if (user.guild.id != SkyClient.id) return;
 
-    const botLogs = user.client.channels.cache.get(Channels.BotLogs);
+    const botLogs = user.client.channels.cache.get(SkyClient.channels.BotLogs);
 
     if (oldUser.premiumSince && !user.premiumSince) {
       container.logger.info("Boost stop", user.id);
@@ -29,7 +29,10 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
         await botLogs.send(
           `${user.id} (${user.user.username}) stopped boosting`,
         );
-      await user.roles.remove(Roles.GiveawayBypass, "User stopped boosting");
+      await user.roles.remove(
+        SkyClient.roles.GiveawayBypass,
+        "User stopped boosting",
+      );
     } else if (!oldUser.premiumSince && user.premiumSince) {
       container.logger.info("Boost start", user.id);
       if (isTextBasedChannel(botLogs))
@@ -37,9 +40,14 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
           `${user.id} (${user.user.username}) started boosting`,
         );
 
-      await user.roles.add(Roles.GiveawayBypass, "User started boosting");
+      await user.roles.add(
+        SkyClient.roles.GiveawayBypass,
+        "User started boosting",
+      );
 
-      const general = await user.client.channels.fetch(Channels.General);
+      const general = await user.client.channels.fetch(
+        SkyClient.channels.General,
+      );
       if (!isTextBasedChannel(general)) return;
 
       const compRow = new ActionRowBuilder<ButtonBuilder>();

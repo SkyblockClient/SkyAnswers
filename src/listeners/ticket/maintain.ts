@@ -1,7 +1,7 @@
 import { Events, Listener, container } from "@sapphire/framework";
 import { DiscordAPIError, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
-import { Servers, Users } from "../../const.js";
+import { SkyClient, Polyfrost, DevServer, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
 import { getTicketOwner, getTicketTop, isTicket } from "../../lib/ticket.js";
 import { Duration, Time } from "@sapphire/time-utilities";
@@ -9,9 +9,9 @@ import { Stopwatch } from "@sapphire/stopwatch";
 import pMap from "p-map";
 
 const SupportTeams: Record<string, string> = {
-  [Servers.SkyClient]: "931626562539909130",
-  "822066990423605249": "997376364460114001",
-  [Servers.Dev]: "1240761899092803715",
+  [SkyClient.id]: SkyClient.roles.SupportTeam,
+  [Polyfrost.id]: Polyfrost.roles.SupportTeam,
+  [DevServer.id]: DevServer.roles.SupportTeam,
 };
 
 @ApplyOptions<Listener.Options>({
@@ -24,7 +24,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
 
     const stopwatch = new Stopwatch();
     // We want the bot to prefetch and cache ticket information.
-    await pMap(tickets, getTicketOwner, { concurrency: 5 });
+    await pMap(tickets, getTicketOwner);
     container.logger.info(
       `Pre-cached ${tickets.length} tickets.`,
       `Took ${stopwatch.stop()}`,
@@ -86,7 +86,8 @@ export async function pinTop(ticket: TextChannel) {
   try {
     if (ticket.lastPinAt) return;
     const top = await getTicketTop(ticket);
-    await top?.pin();
+    if (!top || top.pinned) return;
+    await top.pin();
   } catch (e) {
     const header = `Failed to pin ticket top in ${ticket.name} in ${ticket.guild.name}:`;
     if (e instanceof DiscordAPIError) {

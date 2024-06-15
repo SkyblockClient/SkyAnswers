@@ -1,11 +1,10 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { invalidateTrackedData } from "../../lib/data.js";
-import { Roles } from "../../const.js";
+import { Polyfrost, SkyClient } from "../../const.js";
 
 @ApplyOptions<Command.Options>({
   description: "Clears the data (eg mods, autoresponses, etc) caches",
-  preconditions: ["notPublic"],
 })
 export class UserCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
@@ -18,13 +17,18 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    const member = interaction.guild?.members.resolve(interaction.user);
-    if (!member) return;
+    const { client, user } = interaction;
 
-    if (
-      !member.roles.cache.has(Roles.GitHubKeeper) &&
-      !member.permissions.has("Administrator")
-    )
+    const scMember = client.guilds.resolve(SkyClient.id)?.members.resolve(user);
+    const pfMember = client.guilds.resolve(Polyfrost.id)?.members.resolve(user);
+
+    const canDo =
+      scMember?.roles.cache.has(SkyClient.roles.GitHubKeeper) ||
+      scMember?.permissions.has("Administrator") ||
+      pfMember?.permissions.has("Administrator") ||
+      false;
+
+    if (!canDo)
       return interaction.reply({
         content: "why do you think you can do this?",
         ephemeral: true,

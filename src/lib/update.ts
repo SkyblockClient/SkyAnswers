@@ -1,7 +1,7 @@
 import { GuildMember } from "discord.js";
 import { getJSON } from "./data.js";
 import z from "zod";
-import { isDevUser, Roles, Users } from "../const.js";
+import { SkyClient, isDevUser, Users } from "../const.js";
 
 const ModOwner = z.object({
   github: z.string(),
@@ -10,7 +10,8 @@ const ModOwner = z.object({
 const ModOwners = z.record(ModOwner);
 
 export const checkMember = async (member: GuildMember) => {
-  if (member.roles.cache.has(Roles.GitHubKeeper)) return { all: true };
+  if (member.roles.cache.has(SkyClient.roles.GitHubKeeper))
+    return { all: true };
   if (isDevUser && member.id == Users.BotDev) return { all: true };
 
   const owners = ModOwners.parse(await getJSON("mod_owners"));

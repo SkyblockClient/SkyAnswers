@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container } from "@sapphire/framework";
 import { ApplicationCommandOptionType } from "discord.js";
-import { Servers } from "../const.js";
+import { SkyClient } from "../const.js";
 import { getMCName } from "../lib/mcAPI.js";
 import { BoostersDB } from "../lib/db.js";
 
@@ -27,7 +27,7 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    if (interaction.guildId != Servers.SkyClient) return;
+    if (interaction.guildId != SkyClient.id) return;
 
     interaction.guild?.members.resolve(interaction.user);
     interaction.guild?.members.resolve(interaction.user)?.premiumSince;

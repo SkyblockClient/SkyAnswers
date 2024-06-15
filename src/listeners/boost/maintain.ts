@@ -2,7 +2,7 @@ import { Events, Listener, container } from "@sapphire/framework";
 import { Client } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { BoostersDB } from "../../lib/db.js";
-import { Servers } from "../../const.js";
+import { SkyClient } from "../../const.js";
 import { z } from "zod";
 import { readGHFile, writeGHFile } from "../../lib/GHAPI.js";
 import { format } from "prettier";
@@ -32,7 +32,7 @@ const TagsJSON = z.object({
 
 export async function run(client: Client<true>) {
   try {
-    const members = client.guilds.cache.get(Servers.SkyClient)?.members;
+    const members = client.guilds.cache.get(SkyClient.id)?.members;
     if (!members) return;
     const db = BoostersDB.data;
     const boosters: string[] = [];
