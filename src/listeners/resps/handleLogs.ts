@@ -5,6 +5,7 @@ import {
   APIEmbed,
   APIEmbedField,
   ButtonStyle,
+  Colors,
   ComponentType,
   Message,
   blockQuote,
@@ -46,7 +47,8 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const embeds: APIEmbed[] = [
       {
         title: insights.title,
-        url: mcLog.url,
+        url: mcLog.raw,
+        color: 0x2d3943,
         thumbnail: { url: "https://mclo.gs/img/logo.png" },
         fields: insights.analysis.information.map((v) => ({
           name: v.label,
@@ -55,12 +57,20 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         })),
       },
     ];
+    if (insights.id == "vanilla/server")
+      embeds.push({
+        title: "This may be an incomplete log",
+        color: Colors.Yellow,
+        description:
+          "If you're using Prism or Modrinth Launcher, please upload fml-client-latest.",
+      });
 
     const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
     if (verb.length > 0) {
       const myAvatar = message.client.user.avatarURL();
       embeds.push({
         title: "Bot Analysis",
+        color: 0x81ca3f,
         thumbnail: myAvatar ? { url: myAvatar } : undefined,
         fields: verb,
       });
@@ -75,16 +85,16 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         {
           type: ComponentType.ActionRow,
           components: [
+            // {
+            //   type: ComponentType.Button,
+            //   style: ButtonStyle.Link,
+            //   label: "Open Log",
+            //   url: mcLog.url,
+            // },
             {
               type: ComponentType.Button,
               style: ButtonStyle.Link,
               label: "Open Log",
-              url: mcLog.url,
-            },
-            {
-              type: ComponentType.Button,
-              style: ButtonStyle.Link,
-              label: "Open Raw Log",
               url: mcLog.raw,
             },
           ],
