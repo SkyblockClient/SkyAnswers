@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
 import { getTrackedData } from "../../lib/data.js";
-import { ButtonStyle, ComponentType, Message } from "discord.js";
+import { APIEmbed, ButtonStyle, ComponentType, Message } from "discord.js";
 import { z } from "zod";
 import { SkyClient } from "../../const.js";
 import { postLog } from "../../lib/mcLogs.js";
@@ -31,29 +31,33 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const text = await mcLog.getRaw();
     const insights = await mcLog.getInsights();
 
-    const resp = [`${message.author} uploaded a ${insights.type}.`];
+    const embeds: APIEmbed[] = [
+      {
+        title: `${insights.title} #${mcLog.id}`,
+        url: mcLog.url,
+        thumbnail: { url: "https://mclo.gs/img/logo.png" },
+        fields: insights.analysis.information.map((v) => ({
+          name: v.label,
+          value: v.value,
+          inline: true,
+        })),
+        author: {
+          name: message.author.tag,
+          icon_url: message.author.displayAvatarURL(),
+        },
+      },
+    ];
 
     const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
-    if (verb) resp.push(verb);
+    if (verb)
+      embeds.push({
+        title: "SkyAnswers Analysis",
+        description: verb,
+      });
 
     await message.channel.send({
-      content: resp.join("\n"),
-      embeds: [
-        {
-          title: `${insights.title} #${mcLog.id}`,
-          url: mcLog.url,
-          thumbnail: { url: "https://mclo.gs/img/logo.png" },
-          fields: insights.analysis.information.map((v) => ({
-            name: v.label,
-            value: v.value,
-            inline: true,
-          })),
-          author: {
-            name: message.author.tag,
-            icon_url: message.author.displayAvatarURL(),
-          },
-        },
-      ],
+      content: `${message.author} uploaded a ${insights.type}.`,
+      embeds,
       components: [
         {
           type: ComponentType.ActionRow,
