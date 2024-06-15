@@ -41,22 +41,18 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
           value: v.value,
           inline: true,
         })),
-        author: {
-          name: message.author.tag,
-          icon_url: message.author.displayAvatarURL(),
-        },
       },
     ];
 
     const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
     if (verb)
       embeds.push({
-        title: "SkyAnswers Analysis",
+        title: "Bot Analysis",
         description: verb,
       });
 
     await message.channel.send({
-      content: `${message.author} uploaded a ${insights.type}.`,
+      content: `${message.author} uploaded a ${insights.type}`,
       embeds,
       components: [
         {
@@ -113,6 +109,7 @@ const CrashCause = z.object({
 const CrashFix = z.object({
   name: z.string().optional(),
   fixtype: z.number().optional(),
+  onlySkyClient: z.boolean().optional(),
   fix: z.string(),
   causes: CrashCause.array(),
 });
@@ -134,14 +131,15 @@ async function verbalizeCrash(log: string, isSkyclient?: boolean) {
       "https://github.com/SkyblockClient/CrashData/raw/main/crashes.json",
     ),
   );
-  const relevantInfo = crashData.fixes.filter((fix) =>
-    fix.causes.every((type) => {
+  const relevantInfo = crashData.fixes.filter((fix) => {
+    if (fix.onlySkyClient && !isSkyclient) return false;
+    return fix.causes.every((type) => {
       if (type.method == "contains") return log.includes(type.value);
       else if (type.method == "regex") return log.match(new RegExp(type.value));
       else if (type.method == "contains_not") return !log.includes(type.value);
       else return false;
-    }),
-  );
+    });
+  });
 
   const cheater = relevantInfo.find((info) => info.fix.startsWith("Cheater"));
   if (cheater) return `# ${cheater.fix}`;
