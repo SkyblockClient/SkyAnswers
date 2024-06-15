@@ -99,16 +99,9 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 // We want to use mclo.gs to censor logs,
 // but we don't need to upload if the log is already from MCLogs.
 async function getNewLog(url: string) {
-  // TODO: https://github.com/aternosorg/mclogs/issues/116
-  //if (url.includes("mclo.gs")) return getMCLog(url);
+  if (url.includes("mclo.gs")) return getMCLog(url);
 
-  const mcLog = url.includes("mclo.gs") && getMCLog(url);
-  const origText = mcLog
-    ? await mcLog.getRaw() // Log may already be cached
-    : await fetch(url, FetchResultTypes.Text);
-  const text = origText.replaceAll(/\w+\.\w+\.\w+:\w+/g, "REDACTED");
-  if (mcLog && text == origText) return mcLog;
-
+  const text = await fetch(url, FetchResultTypes.Text);
   return await postLog(text);
 }
 
