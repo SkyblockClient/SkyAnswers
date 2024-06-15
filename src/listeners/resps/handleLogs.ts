@@ -45,7 +45,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 
     const embeds: APIEmbed[] = [
       {
-        title: `${insights.title} #${mcLog.id}`,
+        title: insights.title,
         url: mcLog.url,
         thumbnail: { url: "https://mclo.gs/img/logo.png" },
         fields: insights.analysis.information.map((v) => ({
@@ -57,11 +57,14 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     ];
 
     const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
-    if (verb.length > 0)
+    if (verb.length > 0) {
+      const myAvatar = message.client.user.avatarURL();
       embeds.push({
         title: "Bot Analysis",
+        thumbnail: myAvatar ? { url: myAvatar } : undefined,
         fields: verb,
       });
+    }
 
     let content = `${message.author} uploaded a ${insights.type}`;
     if (newContent) content += `\n${blockQuote(newContent)}`;
