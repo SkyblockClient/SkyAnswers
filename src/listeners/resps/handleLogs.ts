@@ -15,9 +15,6 @@ import { getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
 
-const hatshRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/i;
-const mclogsRegex = /https:\/\/(?:api.)?mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i;
-
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
   event: Events.MessageCreate,
@@ -37,10 +34,12 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     await message.channel.sendTyping();
 
     const newContent = message.content
-      .replaceAll(hatshRegex, "")
-      .replaceAll(mclogsRegex, "");
+      .replaceAll(/https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/gi, "")
+      .replaceAll(
+        /https:\/\/(?:api.)?mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/gi,
+        "",
+      );
     const mcLog = await getNewLog(log);
-    const toDelete = log == mcLog.raw;
     const text = await mcLog.getRaw();
     const insights = await mcLog.getInsights();
 
@@ -65,7 +64,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       });
 
     let content = `${message.author} uploaded a ${insights.type}`;
-    if (newContent && toDelete) content += `\n${blockQuote(newContent)}`;
+    if (newContent) content += `\n${blockQuote(newContent)}`;
     await message.channel.send({
       content,
       embeds,
@@ -90,7 +89,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       ],
       allowedMentions: { parse: [] },
     });
-    if (toDelete) await message.delete();
+    await message.delete();
   }
 }
 
@@ -113,11 +112,11 @@ async function getNewLog(url: string) {
 function findLogs(txt: string) {
   const ret = [];
 
-  const hastebinMatch = txt.match(hatshRegex);
-  if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
-
-  const mclogsMatch = txt.match(mclogsRegex);
+  const mclogsMatch = txt.match(/mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i);
   if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
+
+  const hastebinMatch = txt.match(/hst\.sh\/(?:raw\/)?([a-z]+)/i);
+  if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
 
   return ret;
 }
