@@ -96,13 +96,10 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       );
     } catch (e) {
       console.error(e);
-      let description = e instanceof Error ? e.message : "Unknown error";
-      if (description.includes("POST argument"))
-        description += "\nFile may be too large.";
       embeds.push({
         title: "Failed to upload to mclo.gs",
         color: Colors.Red,
-        description,
+        description: e instanceof Error ? e.message : "Unknown error",
         thumbnail: { url: mclogsLogo },
       });
       text = await fetch(logURL, FetchResultTypes.Text);
@@ -148,7 +145,9 @@ async function getNewLog(url: string): Promise<Log> {
   const origText = mcLog
     ? await mcLog.getRaw() // Log may already be cached
     : await fetch(url, FetchResultTypes.Text);
-  const text = origText.replaceAll(/\w+\.\w+\.\w+:\w+/g, "REDACTED");
+  const text = origText
+    .substring(0, 10_000_000) // 10 MB
+    .replaceAll(/\w+\.\w+\.\w+:\w+/g, "REDACTED");
   if (mcLog && text == origText) return mcLog;
 
   return await postLog(text);
