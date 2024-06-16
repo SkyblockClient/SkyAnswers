@@ -124,12 +124,15 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     await message.channel.send({
       content,
       embeds,
-      components: [
-        {
-          type: ComponentType.ActionRow,
-          components,
-        },
-      ],
+      components:
+        components.length > 0
+          ? [
+              {
+                type: ComponentType.ActionRow,
+                components,
+              },
+            ]
+          : [],
       allowedMentions: { parse: [] },
     });
   }
