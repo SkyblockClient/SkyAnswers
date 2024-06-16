@@ -37,11 +37,6 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const log = [...msgLogs, ...findLogs(message.content)].at(0);
     if (!log) return;
 
-    try {
-      await message.delete();
-    } catch {
-      // in case message was already deleted by another bot
-    }
     await message.channel.sendTyping();
 
     const newContent = message.content
@@ -51,6 +46,12 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const mcLog = await getNewLog(log);
     const text = await mcLog.getRaw();
     const insights = await mcLog.getInsights();
+
+    try {
+      await message.delete();
+    } catch {
+      // in case message was already deleted by another bot
+    }
 
     const embeds: APIEmbed[] = [
       {
