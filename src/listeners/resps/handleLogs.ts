@@ -16,6 +16,11 @@ import { getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
 
+const mclogsRegex = /https:\/\/(?:mclo\.gs|api.mclo\.gs\/1\/raw)\/([a-z0-9]+)/i;
+const hstshRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/i;
+const mclogsRegexG = new RegExp(mclogsRegex, "gi");
+const hstshRegexG = new RegExp(hstshRegex, "gi");
+
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
   event: Events.MessageCreate,
@@ -35,11 +40,9 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     await message.channel.sendTyping();
 
     const newContent = message.content
-      .replaceAll(/https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/gi, "")
-      .replaceAll(
-        /https:\/\/(?:api.)?mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/gi,
-        "",
-      );
+      .replaceAll(hstshRegexG, "")
+      .replaceAll(mclogsRegexG, "")
+      .trim();
     const mcLog = await getNewLog(log);
     const text = await mcLog.getRaw();
     const insights = await mcLog.getInsights();
@@ -125,10 +128,10 @@ async function getNewLog(url: string) {
 function findLogs(txt: string) {
   const ret = [];
 
-  const mclogsMatch = txt.match(/mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i);
+  const mclogsMatch = txt.match(mclogsRegex);
   if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
 
-  const hastebinMatch = txt.match(/hst\.sh\/(?:raw\/)?([a-z]+)/i);
+  const hastebinMatch = txt.match(hstshRegex);
   if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
 
   return ret;
