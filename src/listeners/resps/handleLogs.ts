@@ -37,6 +37,11 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const log = [...msgLogs, ...findLogs(message.content)].at(0);
     if (!log) return;
 
+    try {
+      await message.delete();
+    } catch {
+      // in case message was already deleted by another bot
+    }
     await message.channel.sendTyping();
 
     const newContent = message.content
@@ -105,7 +110,6 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       ],
       allowedMentions: { parse: [] },
     });
-    await message.delete();
   }
 }
 
