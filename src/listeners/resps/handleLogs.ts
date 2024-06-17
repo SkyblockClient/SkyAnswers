@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { getTrackedData } from "../../lib/data.js";
 import {
   APIEmbed,
@@ -55,8 +55,9 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       const mcLog = await getNewLog(logURL);
       try {
         await message.delete();
-      } catch {
-        // in case message was already deleted by another bot
+      } catch (e) {
+        // message may have already been deleted by another bot
+        container.logger.error("Failed to delete log message", e);
       }
       text = await mcLog.getRaw();
       const insights = await mcLog.getInsights();
