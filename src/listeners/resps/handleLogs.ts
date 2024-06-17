@@ -5,15 +5,23 @@ import {
   APIEmbed,
   APIEmbedField,
   ButtonStyle,
+  Colors,
   ComponentType,
   Message,
+  MessageActionRowComponentData,
   blockQuote,
 } from "discord.js";
 import { z } from "zod";
 import { SkyClient } from "../../const.js";
-import { getMCLog, postLog } from "../../lib/mcLogs.js";
+import { Log, getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
+
+const mclogsLogo = "https://mclo.gs/img/logo.png";
+const mclogsRegex = /https:\/\/(?:mclo\.gs|api.mclo\.gs\/1\/raw)\/([a-z0-9]+)/i;
+const hstshRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/i;
+const mclogsRegexG = new RegExp(mclogsRegex, "gi");
+const hstshRegexG = new RegExp(hstshRegex, "gi");
 
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
@@ -28,90 +36,122 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       )
       .map((attachment) => attachment.url);
 
-    const log = [...msgLogs, ...findLogs(message.content)].at(0);
-    if (!log) return;
+    const logURL = [...msgLogs, ...findLogs(message.content)].at(0);
+    if (!logURL) return;
 
     await message.channel.sendTyping();
 
     const newContent = message.content
-      .replaceAll(/https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/gi, "")
-      .replaceAll(
-        /https:\/\/(?:api.)?mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/gi,
-        "",
-      );
-    const mcLog = await getNewLog(log);
-    const text = await mcLog.getRaw();
-    const insights = await mcLog.getInsights();
+      .replaceAll(hstshRegexG, "")
+      .replaceAll(mclogsRegexG, "")
+      .trim();
+    const embeds: APIEmbed[] = [];
+    const components: MessageActionRowComponentData[] = [];
+    let text: string;
+    let content = `${message.author} uploaded a `;
+    try {
+      const mcLog = await getNewLog(logURL);
+      try {
+        await message.delete();
+      } catch {
+        // in case message was already deleted by another bot
+      }
+      text = await mcLog.getRaw();
+      const insights = await mcLog.getInsights();
+      content += insights.type;
 
-    const embeds: APIEmbed[] = [
-      {
+      embeds.push({
         title: insights.title,
-        url: mcLog.url,
-        thumbnail: { url: "https://mclo.gs/img/logo.png" },
+        url: mcLog.raw,
+        color: 0x2d3943,
+        thumbnail: { url: mclogsLogo },
         fields: insights.analysis.information.map((v) => ({
           name: v.label,
           value: v.value,
           inline: true,
         })),
-      },
-    ];
+      });
+
+      if (insights.id == "vanilla/server")
+        embeds.push({
+          title: "This may be an incomplete log",
+          color: Colors.Yellow,
+          description:
+            "If you're using Prism or Modrinth Launcher, please upload fml-client-latest.",
+        });
+
+      components.push(
+        // {
+        //   type: ComponentType.Button,
+        //   style: ButtonStyle.Link,
+        //   label: "Open Log",
+        //   url: mcLog.url,
+        // },
+        {
+          type: ComponentType.Button,
+          style: ButtonStyle.Link,
+          label: "Open Log",
+          url: mcLog.raw,
+        },
+      );
+    } catch (e) {
+      console.error(e);
+      embeds.push({
+        title: "Failed to upload to mclo.gs",
+        color: Colors.Red,
+        description: e instanceof Error ? e.message : "Unknown error",
+        thumbnail: { url: mclogsLogo },
+      });
+      text = await fetch(logURL, FetchResultTypes.Text);
+      content += "file";
+    }
 
     const verb = await verbalizeCrash(text, message.guildId == SkyClient.id);
     if (verb.length > 0) {
       const myAvatar = message.client.user.avatarURL();
       embeds.push({
         title: "Bot Analysis",
+        color: 0x81ca3f,
         thumbnail: myAvatar ? { url: myAvatar } : undefined,
         fields: verb,
       });
     }
 
-    let content = `${message.author} uploaded a ${insights.type}`;
     if (newContent) content += `\n${blockQuote(newContent)}`;
     await message.channel.send({
       content,
       embeds,
-      components: [
-        {
-          type: ComponentType.ActionRow,
-          components: [
-            {
-              type: ComponentType.Button,
-              style: ButtonStyle.Link,
-              label: "Open Log",
-              url: mcLog.url,
-            },
-            {
-              type: ComponentType.Button,
-              style: ButtonStyle.Link,
-              label: "Open Raw Log",
-              url: mcLog.raw,
-            },
-          ],
-        },
-      ],
+      components:
+        components.length > 0
+          ? [
+              {
+                type: ComponentType.ActionRow,
+                components,
+              },
+            ]
+          : [],
       allowedMentions: { parse: [] },
     });
-    await message.delete();
   }
 }
 
 // We want to use mclo.gs to censor logs,
 // but we don't need to upload if the log is already from MCLogs.
-async function getNewLog(url: string) {
+async function getNewLog(url: string): Promise<Log> {
   if (url.includes("mclo.gs")) return getMCLog(url);
 
-  const text = await fetch(url, FetchResultTypes.Text);
+  const origText = await fetch(url, FetchResultTypes.Text);
+  const text = origText.substring(0, 10_000_000); // 10 MB
   return await postLog(text);
 }
 
 function findLogs(txt: string) {
   const ret = [];
 
-  const mclogsMatch = txt.match(/mclo\.gs\/(?:\/1\/raw)?([a-z0-9]+)/i);
+  const mclogsMatch = txt.match(mclogsRegex);
   if (mclogsMatch) ret.push(`https://api.mclo.gs/1/raw/${mclogsMatch[1]}`);
 
-  const hastebinMatch = txt.match(/hst\.sh\/(?:raw\/)?([a-z]+)/i);
+  const hastebinMatch = txt.match(hstshRegex);
   if (hastebinMatch) ret.push(`https://hst.sh/raw/${hastebinMatch[1]}`);
 
   return ret;

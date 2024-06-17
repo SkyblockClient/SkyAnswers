@@ -20,7 +20,7 @@ type PostLog = z.input<typeof PostLog>;
 const PostLogRes = z.discriminatedUnion("success", [PostLog, APIError]);
 type PostLogRes = PostLog | APIError;
 
-type Log = Omit<PostLog, "success"> & {
+export type Log = Omit<PostLog, "success"> & {
   getRaw: () => Promise<string>;
   getInsights: () => Promise<LogInsights>;
 };
@@ -33,7 +33,7 @@ export async function postLog(log: string): Promise<Log> {
     body: `${params}`,
   });
   const res = PostLogRes.parse(data);
-  if (!res.success) throw res.error;
+  if (!res.success) throw new Error(res.error);
   return getMCLog(res.id);
 }
 
