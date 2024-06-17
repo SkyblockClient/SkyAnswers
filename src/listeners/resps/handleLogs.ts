@@ -68,7 +68,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       const logLines = text.split("\n").length;
       const truncated = logLines == 25_000 || logSize == tenMiB;
       let footer = `${logFileSize} / ${logLines} lines`;
-      if (truncated) footer += " (truncated)";
+      if (truncated) footer += " (**truncated**)";
       embeds.push({
         title: insights.title,
         url: mcLog.raw,
