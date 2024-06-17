@@ -16,12 +16,14 @@ import { SkyClient } from "../../const.js";
 import { Log, getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
+import { format as formatBytes } from "@std/fmt/bytes";
 
 const mclogsLogo = "https://mclo.gs/img/logo.png";
 const mclogsRegex = /https:\/\/(?:mclo\.gs|api.mclo\.gs\/1\/raw)\/([a-z0-9]+)/i;
 const hstshRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/i;
 const mclogsRegexG = new RegExp(mclogsRegex, "gi");
 const hstshRegexG = new RegExp(hstshRegex, "gi");
+const tenMiB = 10_485_760;
 
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
@@ -60,6 +62,12 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       const insights = await mcLog.getInsights();
       content += insights.type;
 
+      const logSize = text.length;
+      const logFileSize = formatBytes(logSize, { binary: true });
+      const logLines = text.split("\n").length;
+      const truncated = logLines == 25_000 || logSize == tenMiB;
+      let footer = `${logFileSize} / ${logLines} lines`;
+      if (truncated) footer += " (truncated)";
       embeds.push({
         title: insights.title,
         url: mcLog.raw,
@@ -70,6 +78,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
           value: v.value,
           inline: true,
         })),
+        footer: { text: footer },
       });
 
       if (insights.id == "vanilla/server")
@@ -141,7 +150,7 @@ async function getNewLog(url: string): Promise<Log> {
   if (url.includes("mclo.gs")) return getMCLog(url);
 
   const origText = await fetch(url, FetchResultTypes.Text);
-  const text = origText.substring(0, 10_000_000); // 10 MB
+  const text = origText.substring(0, tenMiB);
   return await postLog(text);
 }
 
