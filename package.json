@@ -22,7 +22,6 @@
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^20.12.12",
-    "@typescript-eslint/parser": "^7.11.0",
     "del-cli": "^5.1.0",
     "eslint": "~9.4.0",
     "eslint-config-prettier": "^9.1.0",
@@ -31,13 +30,13 @@
     "prettier": "^3.1.1",
     "tsc-watch": "^6.2.0",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^7.11.0"
+    "typescript-eslint": "8.0.0-alpha.30"
   },
   "dependencies": {
     "@octokit/core": "^6.1.2",
     "@octokit/rest": "^20.1.1",
     "@sapphire/decorators": "^6.1.0",
-    "@sapphire/discord.js-utilities": "^7.2.1",
+    "@sapphire/discord.js-utilities": "^7.3.0",
     "@sapphire/fetch": "^3.0.2",
     "@sapphire/framework": "^5.2.1",
     "@sapphire/plugin-editable-commands": "^4.0.2",
@@ -46,18 +45,18 @@
     "@sapphire/stopwatch": "^1.5.2",
     "@sapphire/time-utilities": "^1.7.12",
     "@sapphire/type": "^2.4.4",
-    "@sapphire/utilities": "^3.15.3",
+    "@sapphire/utilities": "^3.16.2",
     "@skyra/env-utilities": "^1.3.0",
     "@std/fmt": "npm:@jsr/std__fmt@^0.225.4",
     "@std/text": "npm:@jsr/std__text@1.0.0-rc.1",
-    "@std/url": "npm:@jsr/std__url@^0.224.0",
-    "discord.js": "^14.14.1",
+    "@std/url": "npm:@jsr/std__url@1.0.0-rc.1",
+    "discord.js": "^14.15.3",
     "expiry-map": "^2.0.0",
     "jszip": "^3.10.1",
     "lowdb": "^7.0.1",
     "p-map": "^7.0.2",
     "p-memoize": "^7.1.1",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "zod": "^3.23.8"
   }
 }
