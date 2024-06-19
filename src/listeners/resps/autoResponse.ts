@@ -7,6 +7,7 @@ import { Message } from "discord.js";
 import { SkyClient } from "../../const.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import { z } from "zod";
+import { isTicket } from "../../lib/ticket.js";
 
 /** Sends an autoresponse for the commands and suggestions we have */
 @ApplyOptions<Listener.Options>({
@@ -25,7 +26,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       channel.id == "1110717104757416027" || // skyblock talk
       channel.id == "1001798063964303390" || // support
       channel.id == "796546551878516766" || // bot commands
-      channel.name.startsWith("ticket-");
+      isTicket(channel);
     if (member.roles.cache.has(SkyClient.roles.NoAuto)) canAutoResp = false;
 
     const responses = await findAutoresps(message.content, canAutoResp);

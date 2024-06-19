@@ -4,22 +4,23 @@ import { Time } from "@sapphire/time-utilities";
 import { Nullish, sleep } from "@sapphire/utilities";
 import { TextChannel } from "discord.js";
 import pMemoize from "p-memoize";
+import { formatChannel } from "./logHelper.js";
 
 export const plsBePatientTY =
   "Expect a response within the next day. Support Team has already been pinged.";
 
 export async function setTicketOpen(channel: ChannelTypes, open: boolean) {
-  if (!isTicket(channel)) return;
+  const header = `${open ? "Opening" : "Closing"} ${formatChannel(channel)}`;
+  if (!isTicket(channel)) {
+    container.logger.warn(header, "Not a ticket");
+    return;
+  }
 
   const owner = await getTicketOwner(channel);
-  container.logger.info(
-    open ? "Opening" : "Closing",
-    `#${channel.name} (${channel.id})`,
-    `for ${owner}`,
-  );
-  if (owner)
+  if (owner) {
+    container.logger.info(header, "for", owner);
     await channel.permissionOverwrites.edit(owner, { SendMessages: open });
-  else container.logger.warn(`Failed to find owner`);
+  } else container.logger.warn(header, "Failed to find owner");
 }
 
 export const getTicketTop = pMemoize(
