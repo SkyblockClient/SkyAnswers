@@ -29,8 +29,6 @@ export class UserCommand extends Command {
   ) {
     if (interaction.guildId != SkyClient.id) return;
 
-    interaction.guild?.members.resolve(interaction.user);
-    interaction.guild?.members.resolve(interaction.user)?.premiumSince;
     const member = interaction.guild?.members.resolve(interaction.user);
     if (!member) return;
     const hasNitro = !!member.premiumSince;

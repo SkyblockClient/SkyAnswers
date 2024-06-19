@@ -26,8 +26,8 @@ export async function readGHFile(
 
   const data = Array.isArray(rawData) ? rawData[0] : rawData;
 
-  if (data.type != "file") throw "not a file";
-  if (!data.content) throw "no content";
+  if (data.type != "file") throw new Error("not a file");
+  if (!data.content) throw new Error("no content");
 
   return { path, repo, content: atob(data.content), sha: data.sha };
 }

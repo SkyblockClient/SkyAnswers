@@ -102,10 +102,10 @@ export class ButtonHandler extends InteractionHandler {
         encoding: "utf8",
       }),
     );
-    if (!isModList(mods)) throw "failed to parse mods.json";
+    if (!isModList(mods)) throw new Error("failed to parse mods.json");
 
     const mod = mods.find((m: Mod) => m.forge_id == data.forge_id);
-    if (!mod) throw "mod not found";
+    if (!mod) throw new Error("mod not found");
     mod.url = data.url;
     mod.file = data.file;
     mod.hash = data.hash;
@@ -116,7 +116,8 @@ export class ButtonHandler extends InteractionHandler {
           encoding: "utf8",
         }),
       );
-      if (!isModList(betaMods)) throw "failed to parse mods_beta.json";
+      if (!isModList(betaMods))
+        throw new Error("failed to parse mods_beta.json");
       const index = betaMods.findIndex(
         (m: Mod) => m.forge_id === data.forge_id,
       );
