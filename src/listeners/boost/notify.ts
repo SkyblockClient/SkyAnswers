@@ -59,7 +59,7 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
         }),
       );
       return general.send({
-        content: `${user} **Thank you for boosting!!!** <3
+        content: `${user.toString()} **Thank you for boosting!!!** <3
 Claim your in-game rank with the \`/claimboost\` command`,
         allowedMentions: { users: [user.id] },
         // components: [compRow] // TODO

@@ -97,19 +97,26 @@ export class ButtonHandler extends InteractionHandler {
 
     await interaction.message.edit("pushing it out...");
 
-    const mods = JSON.parse(
-      (await fs.readFile(`${tmp}/files/mods.json`)).toString(),
+    const mods: unknown = JSON.parse(
+      await fs.readFile(`${tmp}/files/mods.json`, {
+        encoding: "utf8",
+      }),
     );
+    if (!isModList(mods)) throw "failed to parse mods.json";
 
     const mod = mods.find((m: Mod) => m.forge_id == data.forge_id);
+    if (!mod) throw "mod not found";
     mod.url = data.url;
     mod.file = data.file;
     mod.hash = data.hash;
 
     if (data.beta) {
-      const betaMods = JSON.parse(
-        (await fs.readFile(`${tmp}/files/mods_beta.json`)).toString(),
+      const betaMods: unknown = JSON.parse(
+        await fs.readFile(`${tmp}/files/mods_beta.json`, {
+          encoding: "utf8",
+        }),
       );
+      if (!isModList(betaMods)) throw "failed to parse mods_beta.json";
       const index = betaMods.findIndex(
         (m: Mod) => m.forge_id === data.forge_id,
       );
@@ -165,4 +172,8 @@ export class ButtonHandler extends InteractionHandler {
     if (interaction.customId !== "updateCheck3") return this.none();
     return this.some();
   }
+}
+
+function isModList(obj: unknown): obj is Mod[] {
+  return Mod.array().safeParse(obj).success;
 }

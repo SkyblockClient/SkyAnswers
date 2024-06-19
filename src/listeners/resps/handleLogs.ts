@@ -50,7 +50,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const embeds: APIEmbed[] = [];
     const components: MessageActionRowComponentData[] = [];
     let text: string;
-    let content = `${message.author} uploaded a `;
+    let content = `${message.author.toString()} uploaded a `;
     try {
       const mcLog = await getNewLog(logURL);
       try {

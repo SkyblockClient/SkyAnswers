@@ -30,7 +30,7 @@ export async function postLog(log: string): Promise<Log> {
   const data = await fetch(`${baseURL}/log`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `${params}`,
+    body: params.toString(),
   });
   const res = PostLogRes.parse(data);
   if (!res.success) throw new Error(res.error);

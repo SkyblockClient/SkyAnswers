@@ -8,7 +8,7 @@ import { Message } from "discord.js";
 })
 export class UserEvent extends Listener<typeof Events.MessageCreate> {
   public override run(message: Message<true>) {
-    const me = message.client.user;
+    const me = message.client.user.toString();
     const content = message.content.toLowerCase();
     if (content.startsWith(`${me} why`)) return message.reply("¯\\_(ツ)_/¯");
     return;

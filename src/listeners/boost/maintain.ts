@@ -19,7 +19,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
     if (!envParseString("GH_KEY", null))
       return container.logger.error("Missing GitHub API Key!");
     await run(client);
-    setInterval(() => run(client), Time.Minute * 5);
+    setInterval(() => void run(client), Time.Minute * 5);
   }
 }
 

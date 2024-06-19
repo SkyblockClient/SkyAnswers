@@ -48,34 +48,34 @@ export class UserCommand extends Command {
   ) {
     if (flags.async) code = `(async () => {\n${code}\n})();`;
 
-    const msg = message;
     // @ts-expect-error shortcuts for eval
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { channel, guild, client, author } = msg;
+    const { channel, guild, client, author } = message;
 
     let success = true;
-    let result = null;
+    let ret: unknown;
 
     try {
-      result = eval(code);
+      ret = eval(code);
     } catch (error) {
       if (error && error instanceof Error && error.stack) {
         this.container.client.logger.error(error);
       }
-      result = error;
+      ret = error;
       success = false;
     }
 
-    const type = new Type(result).toString();
-    if (isThenable(result)) result = await result;
+    const type = new Type(ret).toString();
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    if (isThenable(ret)) ret = await ret;
 
-    if (typeof result !== "string") {
-      result = inspect(result, {
-        depth: flags.depth,
-        showHidden: flags.showHidden,
-      });
-    }
-
+    const result =
+      typeof ret == "string"
+        ? ret
+        : inspect(ret, {
+            depth: flags.depth,
+            showHidden: flags.showHidden,
+          });
     return { result, success, type };
   }
 }

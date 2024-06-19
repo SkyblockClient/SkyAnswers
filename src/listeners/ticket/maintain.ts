@@ -27,12 +27,12 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
     await pMap(tickets, getTicketOwner);
     container.logger.info(
       `Pre-cached ${tickets.length} tickets.`,
-      `Took ${stopwatch.stop()}`,
+      `Took ${stopwatch.stop().toString()}`,
     );
 
     await pMap(getTickets(), pinTop);
     setInterval(
-      () => pMap(getTickets(), maintain, { concurrency: 3 }),
+      () => void pMap(getTickets(), maintain, { concurrency: 3 }),
       Time.Second * 30,
     );
   }
@@ -57,7 +57,7 @@ async function maintain(ticket: TextChannel) {
     const ownerId = await getTicketOwner(ticket);
     if (ownerId) {
       const owner = ticket.guild.members.resolve(ownerId);
-      if (!owner) return pingStaff(ticket, "owner left");
+      if (!owner) return void pingStaff(ticket, "owner left");
     }
 
     if (
@@ -68,9 +68,8 @@ async function maintain(ticket: TextChannel) {
     ) {
       // last message was bump
       const twoDays = new Duration("2d").dateFrom(lastMessage.createdAt);
-      if (twoDays < new Date()) return pingStaff(ticket, "time to close");
+      if (twoDays < new Date()) return void pingStaff(ticket, "time to close");
     }
-    return;
   } catch (e) {
     const header = `Failed to maintain ticket in ${ticket.name} in ${ticket.guild.name}:`;
     if (e instanceof DiscordAPIError) {
@@ -102,5 +101,5 @@ export async function pinTop(ticket: TextChannel) {
 const pingStaff = async (channel: TextChannel, msg: string) => {
   const support = SupportTeams[channel.guildId];
   if (!support) return;
-  channel.send(`${roleMention(support)} ${msg}`);
+  return channel.send(`${roleMention(support)} ${msg}`);
 };

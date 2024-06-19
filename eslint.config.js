@@ -8,7 +8,15 @@ import prettier from "eslint-config-prettier";
 export default ts.config(
   { languageOptions: { globals: globals.node } },
   js.configs.recommended,
-  ...ts.configs.recommended,
+  ...ts.configs.recommendedTypeChecked,
+  {
+    languageOptions: {
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   prettier,
-  { ignores: ["old/", "dist/"] },
+  { ignores: ["old/", "dist/", "eslint.config.js"] },
 );

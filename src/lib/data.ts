@@ -11,15 +11,15 @@ import { EmbedBuilder, hyperlink, InteractionReplyOptions } from "discord.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 
 export const getTrackedData = pMemoize(
-  async (url: string) => {
+  async (url: string): Promise<unknown> => {
     container.logger.info("refetching", url);
     try {
       const resp = await fetch(url, FetchResultTypes.Result);
-      if (!resp.ok)
-        throw new Error(`http error ${resp.statusText} while fetching ${url}`);
-      return await resp.json();
+      if (!resp.ok) throw new Error(`http error ${resp.statusText}`);
+      return resp.json();
     } catch (e) {
-      throw new Error(`error ${e} while fetching ${url}`);
+      container.logger.error(`error while fetching ${url}`, e);
+      throw new Error(`error while fetching ${url}`);
     }
   },
   { cache: new ExpiryMap(Time.Hour) },

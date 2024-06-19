@@ -15,6 +15,8 @@ import { basename } from "@std/url";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 
+const ModInfo = z.array(z.object({ modid: z.string() }));
+
 @ApplyOptions<Command.Options>({
   description: "Updates a mod to the latest version supplied",
 })
@@ -92,7 +94,7 @@ export class UserCommand extends Command {
       const modInfoFile = modZip.file("mcmod.info");
       if (modInfoFile) {
         const modInfoStr = await modInfoFile.async("text");
-        const modInfo = JSON.parse(modInfoStr);
+        const modInfo = ModInfo.parse(JSON.parse(modInfoStr));
         modId = modInfo[0].modid;
       }
     } catch (e) {

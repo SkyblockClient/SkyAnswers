@@ -46,7 +46,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
           }),
         );
         if (!resp.tag) reply.setComponents([delRow]);
-        message.reply(reply);
+        return message.reply(reply);
       }),
     );
   }
