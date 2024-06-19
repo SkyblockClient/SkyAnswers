@@ -3,30 +3,28 @@ import { z } from "zod";
 import { repoFilesURL } from "../const.js";
 import { levenshteinDistance } from "@std/text";
 import { container } from "@sapphire/framework";
-import pMemoize, { pMemoizeClear } from "p-memoize";
-import ExpiryMap from "expiry-map";
+import memoize, { memoizeClear } from "memoize";
 import { Time } from "@sapphire/time-utilities";
 import { filterNullish } from "@sapphire/utilities";
 import { EmbedBuilder, hyperlink, InteractionReplyOptions } from "discord.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 
-export const getTrackedData = pMemoize(
-  async (url: string): Promise<unknown> => {
-    container.logger.info("refetching", url);
-    try {
-      const resp = await fetch(url, FetchResultTypes.Result);
-      if (!resp.ok) throw new Error(`http error ${resp.statusText}`);
-      return resp.json();
-    } catch (e) {
-      container.logger.error(`error while fetching ${url}`, e);
-      throw new Error(`error while fetching ${url}`);
-    }
-  },
-  { cache: new ExpiryMap(Time.Hour) },
-);
+async function _getTrackedData(url: string): Promise<unknown> {
+  container.logger.info("refetching", url);
+  try {
+    const resp = await fetch(url, FetchResultTypes.Result);
+    if (!resp.ok) throw new Error(`http error ${resp.statusText}`);
+    return resp.json();
+  } catch (e) {
+    container.logger.error(`error while fetching ${url}`, e);
+    throw new Error(`error while fetching ${url}`);
+  }
+}
+export const getTrackedData = memoize(_getTrackedData, { maxAge: Time.Hour });
+
 export const getJSON = (jsonFilename: string) =>
   getTrackedData(`${repoFilesURL}/${jsonFilename}.json`);
-export const invalidateTrackedData = () => pMemoizeClear(getTrackedData);
+export const invalidateTrackedData = () => memoizeClear(getTrackedData);
 
 export const DataType = z.enum(["mods", "packs"]);
 export type DataType = z.infer<typeof DataType>;

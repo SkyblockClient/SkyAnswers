@@ -16,20 +16,20 @@
     "clean": "rimraf dist"
   },
   "devDependencies": {
-    "@eslint/js": "^9.4.0",
+    "@eslint/js": "^9.5.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/ts-config": "^5.0.1",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/eslint__js": "^8.42.3",
-    "@types/node": "^20.12.12",
-    "eslint": "~9.4.0",
+    "@types/node": "^20.14.6",
+    "eslint": "^9.5.0",
     "eslint-config-prettier": "^9.1.0",
-    "globals": "^15.3.0",
-    "isomorphic-git": "^1.25.3",
-    "prettier": "^3.1.1",
+    "globals": "^15.6.0",
+    "isomorphic-git": "^1.25.10",
+    "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "tsc-watch": "^6.2.0",
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.5",
     "typescript-eslint": "8.0.0-alpha.30"
   },
   "dependencies": {
@@ -51,11 +51,10 @@
     "@std/text": "npm:@jsr/std__text@1.0.0-rc.1",
     "@std/url": "npm:@jsr/std__url@1.0.0-rc.1",
     "discord.js": "^14.15.3",
-    "expiry-map": "^2.0.0",
     "jszip": "^3.10.1",
     "lowdb": "^7.0.1",
+    "memoize": "^10.0.0",
     "p-map": "^7.0.2",
-    "p-memoize": "^7.1.1",
     "tslib": "^2.6.3",
     "zod": "^3.23.8"
   }

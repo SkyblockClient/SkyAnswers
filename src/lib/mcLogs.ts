@@ -1,5 +1,6 @@
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
-import pMemoize from "p-memoize";
+import { Time } from "@sapphire/time-utilities";
+import memoize from "memoize";
 import z from "zod";
 
 const baseURL = "https://api.mclo.gs/1";
@@ -54,18 +55,14 @@ export function getMCLog(log: string | PostLog): Log {
   };
 }
 
-export const getRawLog = pMemoize(
-  async (log: string | PostLog): Promise<string> => {
-    const id = getMCLogID(log);
-    return await fetch(
-      `https://api.mclo.gs/1/raw/${id}`,
-      FetchResultTypes.Text,
-    );
-  },
-  {
-    cacheKey: ([log]) => getMCLogID(log),
-  },
-);
+async function _getRawLog(log: string | PostLog): Promise<string> {
+  const id = getMCLogID(log);
+  return fetch(`https://api.mclo.gs/1/raw/${id}`, FetchResultTypes.Text);
+}
+export const getRawLog = memoize(_getRawLog, {
+  cacheKey: ([log]) => getMCLogID(log),
+  maxAge: Time.Hour,
+});
 
 enum Level {
   EMERGENCY,
@@ -133,11 +130,15 @@ const LogInsights = z.object({
 });
 type LogInsights = z.infer<typeof LogInsights>;
 
-export const getLogInsights = pMemoize(async (log: string | PostLog) => {
+async function _getLogInsights(log: string | PostLog) {
   const id = getMCLogID(log);
   const data = await fetch(
     `https://api.mclo.gs/1/insights/${encodeURIComponent(id)}`,
     FetchResultTypes.JSON,
   );
   return LogInsights.parse(data);
+}
+export const getLogInsights = memoize(_getLogInsights, {
+  cacheKey: ([log]) => getMCLogID(log),
+  maxAge: Time.Hour,
 });

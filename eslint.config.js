@@ -18,5 +18,5 @@ export default ts.config(
     },
   },
   prettier,
-  { ignores: ["old/", "dist/", "eslint.config.js"] },
+  { ignores: ["old/", "dist/", "node_modules/", "eslint.config.js"] },
 );
