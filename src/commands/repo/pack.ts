@@ -1,7 +1,12 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { getDistance, getPacks, queryDownloadable } from "../../lib/data.js";
-import { getDownloadableMessage } from "./mod.js";
+import {
+  getDistance,
+  getDownloadableMessage,
+  getPacks,
+  probableMatches,
+  queryData,
+} from "../../lib/data.js";
 import { ApplicationCommandOptionType } from "discord.js";
 
 @ApplyOptions<Command.Options>({
@@ -29,12 +34,9 @@ export class UserCommand extends Command {
   ) {
     const query = interaction.options.getString("pack", true);
     const items = await getPacks();
-    const item = queryDownloadable(items, query, "packs");
+    const item = queryData(items, query);
     if (!item) {
-      const sortedOptions = items.sort(
-        (a, b) => getDistance(a, query) - getDistance(b, query),
-      );
-      const bestOption = sortedOptions[0];
+      const bestOption = probableMatches(items, query)[0];
       const bestDistance = getDistance(bestOption, query);
       return interaction.reply(
         "No pack found" +

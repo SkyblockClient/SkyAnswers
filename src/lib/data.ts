@@ -1,11 +1,14 @@
 import { fetch, FetchResultTypes } from "@sapphire/fetch";
 import { z } from "zod";
 import { repoFilesURL } from "../const.js";
-import levenshtein from "js-levenshtein";
+import { levenshteinDistance } from "@std/text";
 import { container } from "@sapphire/framework";
 import pMemoize, { pMemoizeClear } from "p-memoize";
 import ExpiryMap from "expiry-map";
 import { Time } from "@sapphire/time-utilities";
+import { filterNullish } from "@sapphire/utilities";
+import { EmbedBuilder, hyperlink, InteractionReplyOptions } from "discord.js";
+import { MessageBuilder } from "@sapphire/discord.js-utilities";
 
 export const getTrackedData = pMemoize(
   async (url: string) => {
@@ -16,17 +19,14 @@ export const getTrackedData = pMemoize(
         throw new Error(`http error ${resp.statusText} while fetching ${url}`);
       return await resp.json();
     } catch (e) {
-      throw new Error(`exception ${e} while fetching ${url}`);
+      throw new Error(`error ${e} while fetching ${url}`);
     }
   },
   { cache: new ExpiryMap(Time.Hour) },
 );
-export const invalidateTrackedData = () => pMemoizeClear(getTrackedData);
-
 export const getJSON = (jsonFilename: string) =>
   getTrackedData(`${repoFilesURL}/${jsonFilename}.json`);
-export const getMods = async () => Mod.array().parse(await getJSON("mods"));
-export const getPacks = async () => Pack.array().parse(await getJSON("packs"));
+export const invalidateTrackedData = () => pMemoizeClear(getTrackedData);
 
 export const DataType = z.enum(["mods", "packs"]);
 export type DataType = z.infer<typeof DataType>;
@@ -39,18 +39,6 @@ export const Data = z
   })
   .passthrough();
 export type Data = z.infer<typeof Data>;
-
-export const Discord = Data.extend({
-  icon: z.string().optional(),
-  description: z.string().optional(),
-  // partner: z.boolean().optional(),
-  // type: DataType.optional(),
-  code: z.string(),
-  fancyname: z.string().optional(),
-  // mods: z.string().array().optional(),
-  // packs: z.string().array().optional()
-}).passthrough();
-export type Discord = z.infer<typeof Discord>;
 
 // const Action = z.object({
 // 	icon: z.string().optional(),
@@ -89,78 +77,112 @@ export const Mod = Downloadable.extend({
   // files: z.string().array().optional(),
   forge_id: z.string().optional(),
   packages: z.string().array().optional(),
-}).passthrough();
+})
+  .passthrough()
+  .transform((v) => ({
+    ...v,
+    download: v.url || `${repoFilesURL}/mods/${v.file}`,
+  }));
 export type Mod = z.infer<typeof Mod>;
 
 export const Pack = Downloadable.extend({
   screenshot: z.string().optional(),
+})
+  .passthrough()
+  .transform((v) => ({
+    ...v,
+    download: v.url || `${repoFilesURL}/packs/${v.file}`,
+  }));
+export type Pack = z.infer<typeof Pack>;
+
+export const Discord = Data.extend({
+  icon: z.string().optional(),
+  description: z.string().optional(),
+  // partner: z.boolean().optional(),
+  // type: DataType.optional(),
+  code: z.string(),
+  fancyname: z.string().optional(),
+  // mods: z.string().array().optional(),
+  // packs: z.string().array().optional()
 }).passthrough();
-export type Pack = z.infer<typeof Mod>;
+export type Discord = z.infer<typeof Discord>;
 
-export const DownloadableMod = Mod.transform((v) => ({
-  ...v,
-  download: v.url || `${repoFilesURL}/mods/${v.file}`,
-}));
-export type DownloadableMod = z.infer<typeof DownloadableMod>;
-export const DownloadablePack = Pack.transform((v) => ({
-  ...v,
-  download: v.url || `${repoFilesURL}/packs/${v.file}`,
-}));
-export type DownloadablePack = z.infer<typeof DownloadablePack>;
+export const getMods = async () => Mod.array().parse(await getJSON("mods"));
+export const getPacks = async () => Pack.array().parse(await getJSON("packs"));
+export const getDiscords = async () =>
+  Discord.array().parse(await getJSON("discords"));
 
-export function queryData<T extends Data>(
-  options: T[],
-  query: string,
-): T | undefined {
-  const q = query.toLowerCase();
-  return options.find(
-    (opt) =>
-      opt.id == q ||
-      opt.nicknames?.includes?.(q) ||
-      opt.display?.toLowerCase() == q,
-  );
-}
+export const queryData = <T extends Data>(items: T[], query: string) =>
+  items.find((opt) => getDistance(opt, query) == 0);
 
-export function queryDownloadable(
-  options: Mod[],
-  query: string,
-  hosting: "mods",
-): DownloadableMod | undefined;
-export function queryDownloadable(
-  options: Pack[],
-  query: string,
-  hosting: "packs",
-): DownloadablePack | undefined;
-export function queryDownloadable<T extends Downloadable>(
-  options: T[],
-  query: string,
-  hosting: DataType,
-): DownloadableMod | DownloadablePack | undefined {
-  const option = queryData(options, query);
-  if (!option) return;
-  switch (hosting) {
-    case "mods":
-      return DownloadableMod.parse(option);
-    case "packs":
-      return DownloadablePack.parse(option);
-  }
-}
-
-export function probableMatches<T extends Data>(
-  items: T[],
-  query: string,
-): T[] {
-  const ret = items.sort(
-    (a, b) => getDistance(a, query) - getDistance(b, query),
-  );
-  return ret.slice(0, 25);
-}
+export const probableMatches = <T extends Data>(items: T[], query: string) =>
+  items
+    .sort((a, b) => getDistance(a, query) - getDistance(b, query))
+    .slice(0, 25);
 
 export function getDistance(item: Data, query: string) {
-  const allNames = [item.id, ...(item.nicknames || [])].map((name) =>
-    name.toLowerCase(),
-  );
-  if (item.display) allNames.push(item.display.toLowerCase());
-  const allDistances = allNames.map((name) => levenshtein(query, name));
-  return Math.min(...allDistances);
+  const distances = [item.id, item.display, ...(item.nicknames || [])]
+    .filter(filterNullish)
+    .map((name) => name.toLowerCase())
+    .map((name) => levenshteinDistance(query.toLowerCase(), name));
+  return Math.min(...distances);
+}
+
+const isMod = (obj: unknown): obj is Mod => Mod.safeParse(obj).success;
+const isPack = (obj: unknown): obj is Pack => Pack.safeParse(obj).success;
+
+export async function getDownloadableMessage(
+  downloadable: Mod | Pack,
+  bundledIn?: string,
+): Promise<InteractionReplyOptions> {
+  const message = new MessageBuilder();
+  const embed = new EmbedBuilder({
+    color: downloadable.hash
+      ? Number("0x" + downloadable.hash.slice(0, 6))
+      : undefined,
+    title: downloadable.display,
+    description: downloadable.description,
+    footer: { text: `Created by ${downloadable.creator}` },
+  });
+  if (downloadable.icon)
+    embed.setThumbnail(
+      `${repoFilesURL}/icons/${encodeURIComponent(downloadable.icon)}`,
+    );
+  if (isPack(downloadable) && downloadable.screenshot)
+    embed.setImage(downloadable.screenshot);
+  if (downloadable.hidden)
+    embed.addFields({
+      name: "Note",
+      value:
+        "This item is hidden, so it won't show up in the normal installer. " +
+        (bundledIn
+          ? `You can get it in the bundle ${bundledIn}.`
+          : "It might be internal or outdated."),
+    });
+
+  const mods = Mod.array().parse(await getMods());
+  const downloads: string[] = [
+    hyperlink(downloadable.file, encodeURI(downloadable.download)),
+  ];
+  if (isMod(downloadable) && downloadable.packages) {
+    for (const pkgName of downloadable.packages) {
+      const mod = mods.find((mod) => mod.id == pkgName);
+      if (mod) downloads.push(hyperlink(mod.file, encodeURI(mod.download)));
+      else downloads.push(pkgName);
+    }
+  }
+  embed.addFields({
+    name: downloads.length > 1 ? "Downloads" : "Download",
+    value: downloads.join("\n"),
+    inline: downloads.length == 1,
+  });
+
+  if (isMod(downloadable) && downloadable.command)
+    embed.addFields({
+      name: "Config Command",
+      value: downloadable.command,
+      inline: true,
+    });
+
+  return message.setEmbeds([embed]);
 }

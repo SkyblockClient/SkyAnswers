@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { DownloadableMod, getMods } from "../../lib/data.js";
+import { Mod, getMods } from "../../lib/data.js";
 import { APIEmbed, hyperlink, unorderedList } from "discord.js";
 
 enum ItemType {
@@ -24,10 +24,10 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    const items = DownloadableMod.array()
+    const items = Mod.array()
       .parse(await getMods())
       .filter((item) => !item.hidden);
-    const categorizeItem = (item: DownloadableMod) =>
+    const categorizeItem = (item: Mod) =>
       item.packages
         ? ItemType.Bundle
         : item.categories?.includes("2;All Skyblock") ||
