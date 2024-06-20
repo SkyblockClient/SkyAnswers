@@ -12,10 +12,11 @@ import { pinTop } from "./maintain.js";
 export class UserEvent extends Listener<typeof Events.ChannelCreate> {
   public override async run(channel: GuildChannel) {
     if (!isTicket(channel)) return;
-    // TODO: Adapt for Polyforst
+    await pinTop(channel);
+
     if (notSkyClient(channel.guildId)) return;
 
-    await pinTop(channel);
+    // TODO: Adapt for Polyforst
     await channel.send({
       content: "What is your ticket about? You must click on one to continue.",
       components: [
