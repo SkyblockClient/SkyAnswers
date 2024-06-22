@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
 import { Message } from "discord.js";
+import { Users } from "../../const.js";
 
 /** Corrects incorrect commands */
 @ApplyOptions<Listener.Options>({
@@ -24,7 +25,11 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     if (content.startsWith("-update")) return message.reply(srs("/update"));
     if (content.startsWith("-bupdate"))
       return message.reply(srs("/update beta:true"));
-    if (content.startsWith("-mod")) return message.reply(srs("/mod"));
+    if (content.startsWith("-mod")) {
+      let reply = srs("/mod");
+      if (message.author.id == Users.nacrt) reply = "fuck you " + reply;
+      return message.reply(reply);
+    }
     if (content.startsWith("-pack")) return message.reply(srs("/pack"));
     return;
   }

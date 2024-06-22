@@ -45,6 +45,7 @@ export const Users = {
   TicketTool: "557628352828014614",
   Fire: "444871677176709141",
   BotDev: "157917665162297344",
+  nacrt: "435443705055543306",
 };
 
 export const Emojis = {
