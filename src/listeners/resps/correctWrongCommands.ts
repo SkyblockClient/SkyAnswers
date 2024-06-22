@@ -17,6 +17,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const content = message.content.toLowerCase();
     let reply = "";
 
+    if (message.author.bot) return;
     if (content.startsWith("sky mod")) reply = witty("/mod");
     if (content.startsWith("sky pack")) reply = witty("/pack");
     if (content.startsWith("sky discord")) reply = witty("/discord");
@@ -32,6 +33,8 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     if (content.startsWith("-bupdate")) reply = srs("/update beta:true");
     if (content.startsWith("-mod")) reply = srs("/mod");
     if (content.startsWith("-pack")) reply = srs("/pack");
+
+    if (!reply) return; // DO NOT REMOVE LOL
 
     if (message.author.id == Users.nacrt) reply = "fuck you " + reply;
     const delRow = new ActionRowBuilder<ButtonBuilder>();
