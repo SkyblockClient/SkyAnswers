@@ -58,9 +58,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     }
 
     const words = content.match(/[\w'`´]+/g);
-    if (!words) return;
-
-    const isShort = words.length < 3;
+    const isShort = !words || words.length < 3;
     if (isShort) streak.push(content);
     else streak.length = 0;
 
