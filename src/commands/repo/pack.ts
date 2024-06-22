@@ -25,6 +25,19 @@ export class UserCommand extends Command {
           required: true,
           autocomplete: true,
         },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "instructions",
+          description: "Additional instructions to post with the mod",
+          required: false,
+          choices: [{ name: "Download Pack", value: "download" }],
+        },
+        {
+          type: ApplicationCommandOptionType.User,
+          name: "mention",
+          description: "User to mention when posting the mod",
+          required: false,
+        },
       ],
     });
   }
@@ -43,6 +56,19 @@ export class UserCommand extends Command {
           (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ""),
       );
     }
-    return interaction.reply(await getDownloadableMessage(item));
+    const ping = interaction.options.getUser("mention", false);
+    const instructions = interaction.options.getString("instructions", false);
+
+    const pingText = ping?.toString() || "";
+    let instText = "";
+    switch (instructions) {
+      case "download":
+        instText = `Download ${item.display} below and add it to your \`resourcepacks\` folder.`;
+    }
+
+    const reply = await getDownloadableMessage(item);
+    reply.content = `${pingText} ${instText}`;
+    reply.allowedMentions = { users: ping ? [ping.id] : [] };
+    return interaction.reply(reply);
   }
 }
