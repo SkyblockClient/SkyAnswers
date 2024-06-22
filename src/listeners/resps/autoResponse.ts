@@ -42,7 +42,8 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
           new ButtonBuilder({
             style: ButtonStyle.Danger,
             customId: "deleteResp|" + message.author.id,
-            label: "🗑️ Delete",
+            label: "Delete",
+            emoji: "🗑️",
           }),
         );
         if (!resp.tag) reply.setComponents([delRow]);
