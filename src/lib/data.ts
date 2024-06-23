@@ -113,10 +113,13 @@ export const getDiscords = async () =>
 export const queryData = <T extends Data>(items: T[], query: string) =>
   items.find((opt) => getDistance(opt, query) == 0);
 
-export const probableMatches = <T extends Data>(items: T[], query: string) =>
-  items
-    .sort((a, b) => getDistance(a, query) - getDistance(b, query))
-    .slice(0, 25);
+export const probableMatches = <T extends Data>(items: T[], query: string) => {
+  return (
+    !query
+      ? items
+      : items.sort((a, b) => getDistance(a, query) - getDistance(b, query))
+  ).slice(0, 25);
+};
 
 export function getDistance(item: Data, query: string) {
   const distances = [item.id, item.display, ...(item.nicknames || [])]
