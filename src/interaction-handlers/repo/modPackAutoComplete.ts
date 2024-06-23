@@ -7,7 +7,12 @@ import {
   AutocompleteInteraction,
   type ApplicationCommandOptionChoiceData,
 } from "discord.js";
-import { getPacks, probableMatches } from "../../lib/data.js";
+import {
+  Downloadable,
+  getMods,
+  getPacks,
+  probableMatches,
+} from "../../lib/data.js";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Autocomplete,
@@ -23,17 +28,17 @@ export class AutocompleteHandler extends InteractionHandler {
   public override async parse(interaction: AutocompleteInteraction) {
     const focusedOption = interaction.options.getFocused(true);
     const { value } = focusedOption;
+    let items: Downloadable[];
     switch (focusedOption.name) {
-      case "pack": {
-        const packs = await getPacks();
-        const items = probableMatches(packs, value).map((v) => ({
-          name: v.display.substring(0, 25),
-          value: v.id,
-        }));
-        return this.some(items);
-      }
+      case "mod":
+        items = probableMatches(await getMods(), value);
+        break;
+      case "pack":
+        items = probableMatches(await getPacks(), value);
+        break;
       default:
         return this.none();
     }
+    return this.some(items.map((v) => ({ name: v.display, value: v.id })));
   }
 }
