@@ -30,10 +30,10 @@ export class UserCommand extends Command {
 
     if (!canDo)
       return interaction.reply({
-        content: `Nothing has happened,
-Permission denied, it seems.
+        content: `No permissions, so
+You are now validated.
 Welp, at least you tried.
-(A haiku by ChatGPT)`,
+(A haiku)`,
         ephemeral: true,
       });
 
