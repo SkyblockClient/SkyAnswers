@@ -41,6 +41,12 @@ export class UserCommand extends Command {
           description: "User to mention when posting the mod",
           required: false,
         },
+        {
+          type: ApplicationCommandOptionType.Boolean,
+          name: "hidden",
+          description: "Shows the information only to you",
+          required: false,
+        },
       ],
     });
   }
@@ -59,18 +65,19 @@ export class UserCommand extends Command {
           (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ""),
       );
     }
+
     let bundledIn: string | undefined;
     if (item.hidden) {
       bundledIn = items.find((otherItem) =>
         otherItem.packages?.includes(item.id),
       )?.display;
     }
-    const ping = interaction.options.getUser("mention", false);
-    const instructions = interaction.options.getString("instructions", false);
 
+    const ping = interaction.options.getUser("mention", false);
     const pingText = ping?.toString() || "";
+
     let instText = "";
-    switch (instructions) {
+    switch (interaction.options.getString("instructions", false)) {
       case "download":
         instText = `Download ${item.display} below and add it to your \`mods\` folder.`;
         break;
@@ -84,9 +91,11 @@ export class UserCommand extends Command {
         instText = `You can configure ${item.display} using the command \`${command}\` in-game.`;
       }
     }
+
     const reply = await getDownloadableMessage(item, bundledIn);
     reply.content = `${pingText} ${instText}`;
     reply.allowedMentions = { users: ping ? [ping.id] : [] };
+    reply.ephemeral = !!interaction.options.getBoolean("hidden", false);
     return interaction.reply(reply);
   }
 }
