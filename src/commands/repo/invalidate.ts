@@ -1,7 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command } from "@sapphire/framework";
+import { Command, container } from "@sapphire/framework";
 import { invalidateTrackedData } from "../../lib/data.js";
 import { Polyfrost, SkyClient, shrug } from "../../const.js";
+import { formatUser } from "../../lib/logHelper.js";
 
 @ApplyOptions<Command.Options>({
   description: "Clears the data (eg mods, autoresponses, etc) caches",
@@ -28,14 +29,16 @@ export class UserCommand extends Command {
       pfMember?.permissions.has("Administrator") ||
       false;
 
-    if (!canDo)
+    if (!canDo) {
+      container.logger.info(`${formatUser(user)} has been validated.`);
       return interaction.reply({
         content: `No permissions, so
-You are now validated.
+You have been validated.
 Welp, at least you tried.
 (A haiku)`,
         ephemeral: true,
       });
+    }
 
     invalidateTrackedData();
     return interaction.reply(`cache cleared. no haiku for you. ${shrug}`);
