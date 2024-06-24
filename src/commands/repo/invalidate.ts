@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { invalidateTrackedData } from "../../lib/data.js";
-import { Polyfrost, SkyClient } from "../../const.js";
+import { Polyfrost, SkyClient, shrug } from "../../const.js";
 
 @ApplyOptions<Command.Options>({
   description: "Clears the data (eg mods, autoresponses, etc) caches",
@@ -30,11 +30,14 @@ export class UserCommand extends Command {
 
     if (!canDo)
       return interaction.reply({
-        content: "why do you think you can do this?",
+        content: `Nothing has happened,
+Permission denied, it seems.
+Welp, at least you tried.
+(A haiku by ChatGPT)`,
         ephemeral: true,
       });
 
     invalidateTrackedData();
-    return interaction.reply("cleared caches");
+    return interaction.reply(`cache cleared. no haiku for you. ${shrug}`);
   }
 }

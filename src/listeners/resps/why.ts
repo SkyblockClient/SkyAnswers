@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
 import { Message } from "discord.js";
+import { shrug } from "../../const.js";
 
 /** Corrects incorrect commands */
 @ApplyOptions<Listener.Options>({
@@ -10,7 +11,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
   public override run(message: Message<true>) {
     const me = message.client.user.toString();
     const content = message.content.toLowerCase();
-    if (content.startsWith(`${me} why`)) return message.reply("¯\\_(ツ)_/¯");
+    if (content.startsWith(`${me} why`)) return message.reply(shrug);
     return;
   }
 }
