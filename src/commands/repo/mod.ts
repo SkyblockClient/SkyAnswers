@@ -31,8 +31,8 @@ export class UserCommand extends Command {
           description: "Additional instructions to post with the mod",
           required: false,
           choices: [
-            { name: "Download Pack", value: "download" },
-            { name: "Update Pack", value: "update" },
+            { name: "Download Mod", value: "download" },
+            { name: "Update Mod", value: "update" },
             { name: "Config Command", value: "config" },
           ],
         },
