@@ -194,11 +194,21 @@ async function verbalizeCrash(
   const pathIndicator = "`";
   const gameRoot = ".minecraft";
   const profileRoot = isSkyclient ? ".minecraft/skyclient" : ".minecraft";
-  const crashData = Crashes.parse(
+  const crashes = Crashes.safeParse(
     await getTrackedData(
       "https://github.com/SkyblockClient/CrashData/raw/main/crashes.json",
     ),
   );
+  if (!crashes.success) {
+    container.logger.error("Failed to parse crashes.json", crashes.error);
+    return [
+      {
+        name: "Failed to parse crashes.json",
+        value: "Blame Wyvest",
+      },
+    ];
+  }
+  const crashData = crashes.data;
   const relevantInfo = crashData.fixes.filter((fix) => {
     if (fix.onlySkyClient && !isSkyclient) return false;
     return fix.causes.every((type) => {

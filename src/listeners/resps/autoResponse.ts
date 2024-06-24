@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getJSON } from "../../lib/data.js";
 
 import { ApplyOptions } from "@sapphire/decorators";
-import { Events, Listener } from "@sapphire/framework";
+import { Events, Listener, container } from "@sapphire/framework";
 import { Message } from "discord.js";
 import { SkyClient } from "../../const.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
@@ -62,6 +62,7 @@ const AutoResp = z.object({
     .optional(),
   response: z.string(),
 });
+type AutoResp = z.infer<typeof AutoResp>;
 
 const Resp = z.object({
   response: z.string(),
@@ -70,8 +71,12 @@ const Resp = z.object({
 type Resp = z.infer<typeof Resp>;
 
 export async function findAutoresps(message: string, canAutoResp: boolean) {
-  const options = AutoResp.array().parse(await getJSON("botautoresponse"));
-  return options
+  const resps = AutoResp.array().safeParse(await getJSON("botautoresponse"));
+  if (!resps.success) {
+    container.logger.error("Failed to read botautoresponse.json!", resps.error);
+    return [];
+  }
+  return resps.data
     .map((option): Resp | undefined => {
       if (option.tag) {
         for (const tag of option.tag) {
