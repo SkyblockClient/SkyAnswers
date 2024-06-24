@@ -30,7 +30,10 @@ export class UserCommand extends Command {
           name: "instructions",
           description: "Additional instructions to post with the mod",
           required: false,
-          choices: [{ name: "Download Pack", value: "download" }],
+          choices: [
+            { name: "Download Pack", value: "download" },
+            { name: "Update Pack", value: "update" },
+          ],
         },
         {
           type: ApplicationCommandOptionType.User,
@@ -70,6 +73,9 @@ export class UserCommand extends Command {
     switch (interaction.options.getString("instructions", false)) {
       case "download":
         instText = `Download ${item.display} below and add it to your \`resourcepacks\` folder.`;
+        break;
+      case "update":
+        instText = `\n1. Remove the old version of ${item.display} from your \`resourcepacks\` folder.\n2. Download ${item.display} below and add it to your \`resourcepacks\` folder.`;
     }
 
     const reply = await getDownloadableMessage(item);

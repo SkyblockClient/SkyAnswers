@@ -31,7 +31,8 @@ export class UserCommand extends Command {
           description: "Additional instructions to post with the mod",
           required: false,
           choices: [
-            { name: "Download Mod", value: "download" },
+            { name: "Download Pack", value: "download" },
+            { name: "Update Pack", value: "update" },
             { name: "Config Command", value: "config" },
           ],
         },
@@ -80,6 +81,9 @@ export class UserCommand extends Command {
     switch (interaction.options.getString("instructions", false)) {
       case "download":
         instText = `Download ${item.display} below and add it to your \`mods\` folder.`;
+        break;
+      case "update":
+        instText = `\n1. Remove the old version of ${item.display} from your \`mods\` folder.\n2. Download ${item.display} below and add it to your \`mods\` folder.`;
         break;
       case "config": {
         const { command } = item;
