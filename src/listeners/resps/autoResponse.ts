@@ -71,12 +71,14 @@ const Resp = z.object({
 type Resp = z.infer<typeof Resp>;
 
 export async function findAutoresps(message: string, canAutoResp: boolean) {
-  const resps = AutoResp.array().safeParse(await getJSON("botautoresponse"));
-  if (!resps.success) {
-    container.logger.error("Failed to read botautoresponse.json!", resps.error);
+  let resps: AutoResp[];
+  try {
+    resps = AutoResp.array().parse(await getJSON("botautoresponse"));
+  } catch (e) {
+    container.logger.error("Failed to read botautoresponse.json!", e);
     return [];
   }
-  return resps.data
+  return resps
     .map((option): Resp | undefined => {
       if (option.tag) {
         for (const tag of option.tag) {

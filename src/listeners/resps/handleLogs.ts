@@ -186,6 +186,7 @@ const Crashes = z.object({
   fixtypes: FixType.array(),
   default_fix_type: z.number(),
 });
+type Crashes = z.infer<typeof Crashes>;
 
 async function verbalizeCrash(
   log: string,
@@ -194,13 +195,15 @@ async function verbalizeCrash(
   const pathIndicator = "`";
   const gameRoot = ".minecraft";
   const profileRoot = isSkyclient ? ".minecraft/skyclient" : ".minecraft";
-  const crashes = Crashes.safeParse(
-    await getTrackedData(
-      "https://github.com/SkyblockClient/CrashData/raw/main/crashes.json",
-    ),
-  );
-  if (!crashes.success) {
-    container.logger.error("Failed to parse crashes.json", crashes.error);
+  let crashData: Crashes;
+  try {
+    crashData = Crashes.parse(
+      await getTrackedData(
+        "https://github.com/SkyblockClient/CrashData/raw/main/crashes.json",
+      ),
+    );
+  } catch (e) {
+    container.logger.error("Failed to parse crashes.json", e);
     return [
       {
         name: "Failed to parse crashes.json",
@@ -208,7 +211,6 @@ async function verbalizeCrash(
       },
     ];
   }
-  const crashData = crashes.data;
   const relevantInfo = crashData.fixes.filter((fix) => {
     if (fix.onlySkyClient && !isSkyclient) return false;
     return fix.causes.every((type) => {
