@@ -25,12 +25,6 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
           components: [
             {
               type: ComponentType.Button,
-              label: "Minecraft won't start (not a crash)",
-              style: ButtonStyle.Primary,
-              customId: "ticketCategorize|wontStart",
-            },
-            {
-              type: ComponentType.Button,
               label: "Mods aren't updating",
               style: ButtonStyle.Primary,
               customId: "ticketCategorize|modsUpdating",

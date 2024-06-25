@@ -19,7 +19,6 @@ export class ButtonHandler extends InteractionHandler {
 
     const ticketType = interaction.customId.split("|")[1];
     const ticketTypeName = {
-      wontStart: "Minecraft won't start (not a crash)",
       modsUpdating: "Mods aren't updating",
       crash: "Crashing",
       install: "Help with installer",
@@ -48,11 +47,16 @@ export class ButtonHandler extends InteractionHandler {
                 label: 'The launcher says "Game crashed!"',
                 style: ButtonStyle.Primary,
               },
+            ],
+          },
+          {
+            type: ComponentType.ActionRow,
+            components: [
               {
                 type: ComponentType.Button,
                 customId: "ticketCategorizeCrash|other",
                 label: "Something else (like the game closing)",
-                style: ButtonStyle.Primary,
+                style: ButtonStyle.Secondary,
               },
             ],
           },
@@ -60,7 +64,7 @@ export class ButtonHandler extends InteractionHandler {
       });
     else {
       await setTicketOpen(channel, true);
-      if (ticketType == "wontStart" || ticketType == "modsUpdating")
+      if (ticketType == "modsUpdating")
         return interaction.update({
           content: ticketTypeDesc,
           embeds: [
