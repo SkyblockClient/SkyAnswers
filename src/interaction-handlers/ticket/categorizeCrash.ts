@@ -67,7 +67,7 @@ export class ButtonHandler extends InteractionHandler {
                   `,
                 },
               ],
-              thumbnail: { url: `${assetsBase}/prismlauncher.png` },
+              thumbnail: { url: `${assetsBase}/prismicon.png` },
             },
             {
               title: "Modrinth Launcher",
