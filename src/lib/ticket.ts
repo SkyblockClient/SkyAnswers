@@ -69,11 +69,13 @@ export function isTicket(
 }
 
 export function isSupportTeam(member: FirstArgument<typeof isGuildMember>) {
-  if (!isGuildMember(member)) return;
-  const roles = member.roles.cache;
-  return roles.hasAny(
-    SkyClient.roles.SupportTeam,
-    Polyfrost.roles.SupportTeam,
-    DevServer.roles.SupportTeam,
+  if (!isGuildMember(member)) return false;
+  return (
+    member.permissions.has("Administrator") ||
+    member.roles.cache.hasAny(
+      SkyClient.roles.SupportTeam,
+      Polyfrost.roles.SupportTeam,
+      DevServer.roles.SupportTeam,
+    )
   );
 }
