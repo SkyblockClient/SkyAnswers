@@ -13,6 +13,7 @@ export const SkyClient = {
     BotLogs: "934968221923168266",
     Tickets: "1222344626325688330",
     ModUpdating: "1198710827327434852",
+    Support: "931624995522773032",
   },
   roles: {
     CoolPeople: "832754819588292679",

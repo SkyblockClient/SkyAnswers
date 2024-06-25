@@ -5,7 +5,9 @@ import {
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
 import { ButtonStyle, ComponentType } from "discord.js";
-import { isTicket, plsBePatientTY, setTicketOpen } from "../../lib/ticket.js";
+import { isTicket, setTicketOpen } from "../../lib/ticket.js";
+import dedent from "dedent";
+import { SkyClient } from "../../const.js";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
@@ -17,6 +19,8 @@ export class ButtonHandler extends InteractionHandler {
 
     const ticketType = interaction.customId.split("|")[1];
     const ticketTypeName = {
+      wontStart: "Minecraft won't start (not a crash)",
+      modsUpdating: "Mods aren't updating",
       crash: "Crashing",
       install: "Help with installer",
       mods: "Help with mods",
@@ -56,12 +60,34 @@ export class ButtonHandler extends InteractionHandler {
       });
     else {
       await setTicketOpen(channel, true);
-      return interaction.update({
-        content: `${ticketTypeDesc}
-Please describe your problem so we can help you.
-${plsBePatientTY}`,
-        components: [], // components stay behind without this
-      });
+      if (ticketType == "wontStart" || ticketType == "modsUpdating")
+        return interaction.update({
+          content: ticketTypeDesc,
+          embeds: [
+            {
+              title: "Instructions",
+              description: dedent`
+                Please read the bolded instructions in <#${SkyClient.channels.Support}>
+                - If you have any trouble with the linked guide, describe your problem here
+                - Otherwise, if your issue is resolved, please close the ticket above
+              `,
+            },
+          ],
+          components: [], // components stay behind without this
+        });
+      else
+        return interaction.update({
+          content: ticketTypeDesc,
+          embeds: [
+            {
+              description: dedent`
+                Please describe your problem so we can help you.
+                Expect a response within the next day. Support Team has already been pinged.
+              `,
+            },
+          ],
+          components: [], // components stay behind without this
+        });
     }
   }
 

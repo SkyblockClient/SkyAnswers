@@ -6,9 +6,6 @@ import { TextChannel } from "discord.js";
 import memoize from "memoize";
 import { formatChannel } from "./logHelper.js";
 
-export const plsBePatientTY =
-  "Expect a response within the next day. Support Team has already been pinged.";
-
 export async function setTicketOpen(channel: ChannelTypes, open: boolean) {
   const header = `${open ? "Opening" : "Closing"} ${formatChannel(channel)}`;
   if (!isTicket(channel)) {

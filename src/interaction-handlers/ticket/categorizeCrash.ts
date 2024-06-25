@@ -4,7 +4,11 @@ import {
   InteractionHandlerTypes,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
-import { isTicket, plsBePatientTY, setTicketOpen } from "../../lib/ticket.js";
+import { isTicket, setTicketOpen } from "../../lib/ticket.js";
+import dedent from "dedent";
+
+const assetsBase =
+  "https://github.com/SkyblockClient/SkyAnswers/raw/rewrite/assets";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
@@ -30,22 +34,87 @@ export class ButtonHandler extends InteractionHandler {
     await setTicketOpen(channel, true);
     switch (crashType) {
       case "CP":
-        return channel.send(
-          `Please follow these instructions from the CrashPatch screen:
-1. **Click the copy icon on the right side and paste the results here.**
-2. ${plsBePatientTY}`,
-        );
+        return channel.send({
+          embeds: [
+            {
+              title: "Instructions",
+              description: dedent`
+                Please follow these steps from the CrashPatch screen:
+                1. Click the copy icon on the right side and paste the results here.
+                2. Expect a response within the next day. Support Team has already been pinged.
+              `,
+            },
+          ],
+        });
       case "launcher":
-        return channel.send(`You'll need to send your crash log. Please follow these instructions:
-1. Open your SkyClient folder. See this: https://youtu.be/BHIM2htfMk8
-2. - **If you saw a "View Crash Report" button in the launcher:**
-     Go to the \`crash-reports\` folder and upload the most recent file here.
-   - **If you didn't see the button:**
-     Go to the \`logs\` folder and upload the file called \`latest\` or \`latest.log\`.
-3. ${plsBePatientTY}`);
+        return channel.send({
+          content: "",
+          tts: false,
+          embeds: [
+            {
+              title: "Prism Launcher",
+              color: 0xdf6277,
+              description: dedent`
+                1. Recreate the crash. The log should automatically open.
+                2. Click "Copy" on the top right and paste the log here.
+              `,
+              fields: [
+                {
+                  name: "If you already closed the log:",
+                  value: dedent`
+                    1. Right-click SkyClient in Prism Launcher, then click "Folder"
+                    2. Open the \`logs\` folder and upload the \`fml-client-latest\` file here.
+                  `,
+                },
+              ],
+              thumbnail: { url: `${assetsBase}/prismlauncher.png` },
+            },
+            {
+              title: "Modrinth Launcher",
+              color: 0x1bd96a,
+              description: dedent`
+                1. Within your SkyClient instance, click the "Folder" button next to the "Play" button
+                2. Open the \`logs\` folder and upload the \`fml-client-latest\` file here
+                
+                Please don't copy / upload your log from Modrinth's Logs tab. Those logs don't give enough information.
+              `,
+              thumbnail: { url: `${assetsBase}/mricon.png` },
+            },
+            {
+              title: "Minecraft Launcher (Official Launcher)",
+              color: 0x52a535,
+              description:
+                "1. Open your SkyClient folder. See this: https://youtu.be/BHIM2htfMk8",
+              fields: [
+                {
+                  name: 'If you saw a "View Crash Report" button in the launcher:',
+                  value:
+                    "- Go to the `crash-reports` folder and upload the most recent file here",
+                },
+                {
+                  name: "If you didn't see the button:",
+                  value:
+                    "- Go to the `logs` folder and upload the file called `latest` here",
+                },
+              ],
+              thumbnail: { url: `${assetsBase}/mcicon.png` },
+            },
+            {
+              title: "Instructions",
+              description: dedent`
+                Please send a log using the steps above, depending on what launcher you use.
+                Once the file is uploaded, expect a response within the next day.
+                Our Support Team has already been notified.
+              `,
+            },
+          ],
+        });
       case "other":
         return channel.send(
-          `1. Please describe your crash so we can help you.\n2. ${plsBePatientTY}`,
+          dedent`
+            Please describe your crash so we can help you.
+            Expect a response within the next day. Support Team has already been pinged.
+          `,
         );
     }
     return;

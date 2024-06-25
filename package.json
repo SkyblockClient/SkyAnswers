@@ -50,6 +50,7 @@
     "@std/fmt": "npm:@jsr/std__fmt@^0.225.4",
     "@std/text": "npm:@jsr/std__text@1.0.0-rc.1",
     "@std/url": "npm:@jsr/std__url@1.0.0-rc.1",
+    "dedent": "^1.5.3",
     "discord.js": "^14.15.3",
     "jszip": "^3.10.1",
     "lowdb": "^7.0.1",
