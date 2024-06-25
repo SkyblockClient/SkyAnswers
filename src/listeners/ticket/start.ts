@@ -29,17 +29,17 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
               style: ButtonStyle.Primary,
               customId: "ticketCategorize|modsUpdating",
             },
-          ],
-        },
-        {
-          type: ComponentType.ActionRow,
-          components: [
             {
               type: ComponentType.Button,
               label: "I'm crashing",
               style: ButtonStyle.Primary,
               customId: "ticketCategorize|crash",
             },
+          ],
+        },
+        {
+          type: ComponentType.ActionRow,
+          components: [
             {
               type: ComponentType.Button,
               label: "I need help with the installer",
