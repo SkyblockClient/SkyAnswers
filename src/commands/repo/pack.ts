@@ -8,6 +8,8 @@ import {
   queryData,
 } from "../../lib/data.js";
 import { ApplicationCommandOptionType } from "discord.js";
+import { isSupportTeam } from "../../lib/ticket.js";
+import dedent from "dedent";
 
 @ApplyOptions<Command.Options>({
   description: "Gives info about a pack",
@@ -28,7 +30,8 @@ export class UserCommand extends Command {
         {
           type: ApplicationCommandOptionType.String,
           name: "instructions",
-          description: "Additional instructions to post with the mod",
+          description:
+            "Additional instructions to post with the mod (Support Team only)",
           required: false,
           choices: [
             { name: "Download Pack", value: "download" },
@@ -38,7 +41,8 @@ export class UserCommand extends Command {
         {
           type: ApplicationCommandOptionType.User,
           name: "mention",
-          description: "User to mention when posting the mod",
+          description:
+            "User to mention when posting the mod (Support Team only)",
           required: false,
         },
         {
@@ -75,12 +79,19 @@ export class UserCommand extends Command {
         instText = `Download ${item.display} below and add it to your \`resourcepacks\` folder.`;
         break;
       case "update":
-        instText = `\n1. Remove the old version of ${item.display} from your \`resourcepacks\` folder.\n2. Download ${item.display} below and add it to your \`resourcepacks\` folder.`;
+        instText = "\n";
+        instText += dedent`
+          Please manually update ${item.display}:
+          1. Remove the old version of ${item.display} from your \`resourcepacks\` folder.
+          2. Download ${item.display} below and add it to your \`resourcepacks\` folder.
+        `;
     }
 
     const reply = await getDownloadableMessage(item);
-    reply.content = `${pingText} ${instText}`;
-    reply.allowedMentions = { users: ping ? [ping.id] : [] };
+    if (isSupportTeam(interaction.member)) {
+      reply.content = `${pingText} ${instText}`;
+      reply.allowedMentions = { users: ping ? [ping.id] : [] };
+    }
     reply.ephemeral = !!interaction.options.getBoolean("hidden", false);
     return interaction.reply(reply);
   }

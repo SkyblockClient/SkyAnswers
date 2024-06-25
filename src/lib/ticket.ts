@@ -1,10 +1,15 @@
-import { ChannelTypes, isTextChannel } from "@sapphire/discord.js-utilities";
+import {
+  ChannelTypes,
+  isGuildMember,
+  isTextChannel,
+} from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
 import { Time } from "@sapphire/time-utilities";
-import { Nullish, sleep } from "@sapphire/utilities";
+import { FirstArgument, Nullish, sleep } from "@sapphire/utilities";
 import { TextChannel } from "discord.js";
 import memoize from "memoize";
 import { formatChannel } from "./logHelper.js";
+import { DevServer, Polyfrost, SkyClient } from "../const.js";
 
 export async function setTicketOpen(channel: ChannelTypes, open: boolean) {
   const header = `${open ? "Opening" : "Closing"} ${formatChannel(channel)}`;
@@ -60,5 +65,15 @@ export function isTicket(
     channel.name.startsWith("ticket-") &&
     channel.name != "ticket-logs" &&
     channel.name != "ticket-transcripts"
+  );
+}
+
+export function isSupportTeam(member: FirstArgument<typeof isGuildMember>) {
+  if (!isGuildMember(member)) return;
+  const roles = member.roles.cache;
+  return roles.hasAny(
+    SkyClient.roles.SupportTeam,
+    Polyfrost.roles.SupportTeam,
+    DevServer.roles.SupportTeam,
   );
 }
