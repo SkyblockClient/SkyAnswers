@@ -48,35 +48,23 @@ export class ButtonHandler extends InteractionHandler {
         });
       case "launcher":
         return channel.send({
-          content: "",
-          tts: false,
           embeds: [
             {
               title: "Prism Launcher",
               color: 0xdf6277,
               description: dedent`
-                1. Recreate the crash. The log should automatically open.
-                2. Click "Copy" on the top right and paste the log here.
+                1. Recreate the crash. The log should automatically open
+                2. Click "Copy" on the top right and paste the log here
               `,
-              fields: [
-                {
-                  name: "If you already closed the log:",
-                  value: dedent`
-                    1. Right-click SkyClient in Prism Launcher, then click "Folder"
-                    2. Open the \`logs\` folder and upload the \`fml-client-latest\` file here.
-                  `,
-                },
-              ],
               thumbnail: { url: `${assetsBase}/prismicon.png` },
             },
             {
               title: "Modrinth Launcher",
               color: 0x1bd96a,
               description: dedent`
-                1. Within your SkyClient instance, click the "Folder" button next to the "Play" button
-                2. Open the \`logs\` folder and upload the \`fml-client-latest\` file here
-                
-                Please don't copy / upload your log from Modrinth's Logs tab. Those logs don't give enough information.
+                1. Within your SkyClient instance, go to the "Logs" tab
+                2. Make sure "Live Log" is select on the top left
+                3. Click "Copy" on the top right and paste the log here
               `,
               thumbnail: { url: `${assetsBase}/mricon.png` },
             },
