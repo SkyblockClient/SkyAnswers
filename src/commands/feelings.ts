@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command, container } from "@sapphire/framework";
+import { Command } from "@sapphire/framework";
 import dedent from "dedent";
 
 @ApplyOptions<Command.Options>({
