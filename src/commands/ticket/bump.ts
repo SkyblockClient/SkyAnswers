@@ -45,6 +45,7 @@ If you do not respond ${twoDaysStamp}, your ticket will be closed.`,
           color: 0xffff88,
         },
       ],
+      allowedMentions: { users: owner ? [owner] : [] },
     });
     if (owner) message.setContent(`Hey <@${owner}>:`);
     return interaction.reply(message);
