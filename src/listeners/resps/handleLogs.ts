@@ -17,6 +17,7 @@ import { Log, getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
 import { format as formatBytes } from "@std/fmt/bytes";
+import * as R from "remeda";
 
 const mclogsLogo = "https://mclo.gs/img/logo.png";
 const mclogsRegex = /https:\/\/(?:mclo\.gs|api.mclo\.gs\/1\/raw)\/([a-z0-9]+)/i;
@@ -231,14 +232,17 @@ async function verbalizeCrash(
     if (!groupInfo.length) return;
     return {
       name: type.name,
-      value: groupInfo
-        .map((info) =>
+      value: R.pipe(
+        groupInfo,
+        R.map((info) =>
           info.fix
             .replaceAll("%pathindicator%", pathIndicator)
             .replaceAll("%gameroot%", gameRoot)
             .replaceAll("%profileroot%", profileRoot),
-        )
-        .join("\n"),
+        ),
+        R.unique(),
+        R.join("\n"),
+      ),
     };
   });
   return crashGroups.filter(filterNullAndUndefined);

@@ -77,6 +77,9 @@ importers:
       p-map:
         specifier: ^7.0.2
         version: 7.0.2
+      remeda:
+        specifier: ^2.2.1
+        version: 2.2.1
       tslib:
         specifier: ^2.6.3
         version: 2.6.3
@@ -1183,6 +1186,9 @@ packages:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
     engines: {node: '>= 6'}
 
+  remeda@2.2.1:
+    resolution: {integrity: sha512-/nC9lgpfV45nfN5nySynVZ7etCg5OCDlW3+Ga908306TxMv52bV7Av5TcOQq55oFQSDrbNdV1Jw92Nyxu6oIkQ==}
+
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
@@ -1347,6 +1353,10 @@ packages:
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
+
+  type-fest@4.20.1:
+    resolution: {integrity: sha512-R6wDsVsoS9xYOpy8vgeBlqpdOyzJ12HNfQhC/aAKWM3YoCV9TtunJzh/QpkMgeDhkoynDcw5f1y+qF9yc/HHyg==}
+    engines: {node: '>=16'}
 
   typescript-eslint@8.0.0-alpha.30:
     resolution: {integrity: sha512-/vGhBMsK1TpadQh1eQ02c5pyiPGmKR9cVzX5C9plZ+LC0HPLpWoJbbTVfQN7BkIK7tUxDt2BFr3pFL5hDDrx7g==}
@@ -2552,6 +2562,10 @@ snapshots:
       string_decoder: 1.3.0
       util-deprecate: 1.0.2
 
+  remeda@2.2.1:
+    dependencies:
+      type-fest: 4.20.1
+
   resolve-from@4.0.0: {}
 
   reusify@1.0.4: {}
@@ -2695,6 +2709,8 @@ snapshots:
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
+
+  type-fest@4.20.1: {}
 
   typescript-eslint@8.0.0-alpha.30(eslint@9.5.0)(typescript@5.4.5):
     dependencies:
