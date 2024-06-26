@@ -62,36 +62,36 @@ export class ButtonHandler extends InteractionHandler {
           },
         ],
       });
-    else {
+    else if (ticketType == "modsUpdating") {
       await setTicketOpen(channel, true);
-      if (ticketType == "modsUpdating")
-        return interaction.update({
-          content: ticketTypeDesc,
-          embeds: [
-            {
-              title: "Instructions",
-              description: dedent`
+      return interaction.update({
+        content: ticketTypeDesc,
+        embeds: [
+          {
+            title: "Instructions",
+            description: dedent`
                 Please read the bolded instructions in <#${SkyClient.channels.Support}>
                 - If you have any trouble with the linked guide, describe your problem here
                 - Otherwise, if your issue is resolved, please close the ticket above
               `,
-            },
-          ],
-          components: [], // components stay behind without this
-        });
-      else
-        return interaction.update({
-          content: ticketTypeDesc,
-          embeds: [
-            {
-              description: dedent`
+          },
+        ],
+        components: [], // components stay behind without this
+      });
+    } else {
+      await setTicketOpen(channel, true);
+      return interaction.update({
+        content: ticketTypeDesc,
+        embeds: [
+          {
+            description: dedent`
                 Please describe your problem so we can help you.
                 Expect a response within the next day. Support Team has already been pinged.
               `,
-            },
-          ],
-          components: [], // components stay behind without this
-        });
+          },
+        ],
+        components: [], // components stay behind without this
+      });
     }
   }
 
