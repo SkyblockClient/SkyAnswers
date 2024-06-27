@@ -16,6 +16,7 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
 
     if (notSkyClient(channel.guildId)) return;
 
+    await setTicketOpen(channel, false);
     // TODO: Adapt for Polyforst
     await channel.send({
       content: "What is your ticket about? You must click on one to continue.",
@@ -67,6 +68,5 @@ export class UserEvent extends Listener<typeof Events.ChannelCreate> {
         },
       ],
     });
-    await setTicketOpen(channel, false);
   }
 }
