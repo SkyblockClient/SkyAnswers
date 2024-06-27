@@ -11,7 +11,12 @@ import memoize from "memoize";
 import { formatChannel } from "./logHelper.js";
 import { DevServer, Polyfrost, SkyClient } from "../const.js";
 
-export async function setTicketOpen(channel: ChannelTypes, open: boolean) {
+export async function setTicketOpen(
+  channel: ChannelTypes,
+  open: boolean = true,
+) {
+  if (open == undefined || open == null)
+    throw new Error(`open = ${open} WHY IS THIS HAPPENING`);
   const header = `${open ? "Opening" : "Closing"} ${formatChannel(channel)}`;
   if (!isTicket(channel)) {
     container.logger.warn(header, "Not a ticket");
