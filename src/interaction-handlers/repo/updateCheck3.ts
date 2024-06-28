@@ -97,33 +97,39 @@ export class ButtonHandler extends InteractionHandler {
 
     await interaction.message.edit("pushing it out...");
 
-    const mods: unknown = JSON.parse(
+    let mods = JSON.parse(
       await fs.readFile(`${tmp}/files/mods.json`, {
         encoding: "utf8",
       }),
-    );
+    ) as Mod[];
     if (!isModList(mods)) throw new Error("failed to parse mods.json");
 
-    const mod = mods.find((m: Mod) => m.forge_id == data.forge_id);
-    if (!mod) throw new Error("mod not found");
-    mod.url = data.url;
-    mod.file = data.file;
-    mod.hash = data.hash;
+    let foundMods = 0;
+    mods = mods.map((mod) => {
+      if (mod.forge_id != data.forge_id) return mod;
+      mod.url = data.url;
+      mod.file = data.file;
+      mod.hash = data.hash;
+      foundMods++;
+      return mod;
+    });
+    if (foundMods == 0) throw new Error("mod not found");
 
     if (data.beta) {
-      const betaMods: unknown = JSON.parse(
+      const betaMods = JSON.parse(
         await fs.readFile(`${tmp}/files/mods_beta.json`, {
           encoding: "utf8",
         }),
-      );
+      ) as Mod[];
       if (!isModList(betaMods))
         throw new Error("failed to parse mods_beta.json");
-      const index = betaMods.findIndex(
-        (m: Mod) => m.forge_id === data.forge_id,
-      );
 
-      if (index === -1) betaMods.push(mod);
-      else betaMods[index] = mod;
+      const updated = mods.filter((mod) => mod.forge_id == data.forge_id);
+      for (const mod of updated) {
+        const index = betaMods.findIndex((m) => m.id == mod.id);
+        if (index == -1) betaMods.push(mod);
+        else betaMods[index] = mod;
+      }
 
       await fs.writeFile(
         `${tmp}/files/mods_beta.json`,
