@@ -16,7 +16,7 @@ export async function setTicketOpen(
   open: boolean = true,
 ) {
   if (open == undefined || open == null)
-    throw new Error(`open = ${open} WHY IS THIS HAPPENING`);
+    throw new Error(`open undefined WHY IS THIS HAPPENING`);
   const header = `${open ? "Opening" : "Closing"} ${formatChannel(channel)}`;
   if (!isTicket(channel)) {
     container.logger.warn(header, "Not a ticket");
