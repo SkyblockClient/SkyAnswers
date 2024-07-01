@@ -1,4 +1,8 @@
-import { SapphireClient } from "@sapphire/framework";
+import {
+  ApplicationCommandRegistries,
+  RegisterBehavior,
+  SapphireClient,
+} from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
 import "@sapphire/plugin-logger/register";
 import "@sapphire/plugin-editable-commands/register";
@@ -18,6 +22,10 @@ const client = new SapphireClient({
   partials: [Partials.Channel],
   loadMessageCommandListeners: true,
 });
+
+ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(
+  RegisterBehavior.BulkOverwrite,
+);
 
 client.logger.info("Connecting...");
 await client.login();
