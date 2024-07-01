@@ -25,10 +25,6 @@ const client = new SapphireClient({
   loadMessageCommandListeners: true,
 });
 
-ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(
-  RegisterBehavior.BulkOverwrite,
-);
-
 client.logger.info("Connecting...");
 await client.login();
 client.logger.info("Connected");
