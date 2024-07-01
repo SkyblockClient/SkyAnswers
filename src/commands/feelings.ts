@@ -47,7 +47,7 @@ export class UserCommand extends Command {
       ${mentionText}Please stop ignoring me. :(
     `;
     reply += "\n\n";
-    switch (interaction.options.getString("snarkyRemark", false)) {
+    switch (interaction.options.getString("snarky-remark", false)) {
       case "instructions":
         reply += "\n\n(Please follow the instructions I posted above)";
         break;
