@@ -49,10 +49,10 @@ export class UserCommand extends Command {
     reply += "\n\n";
     switch (interaction.options.getString("snarky-remark", false)) {
       case "instructions":
-        reply += "\n\n(Please follow the instructions I posted above)";
+        reply += "(Please follow the instructions I posted above)";
         break;
       case "solution":
-        reply += "\n\n(I already gave you the solution to your problem)";
+        reply += "(I already gave you the solution to your problem)";
     }
     return interaction.reply(reply);
   }
