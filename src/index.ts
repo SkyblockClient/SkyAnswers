@@ -1,10 +1,6 @@
 #!/usr/bin/env -S pnpm tsx
 
-import {
-  ApplicationCommandRegistries,
-  RegisterBehavior,
-  SapphireClient,
-} from "@sapphire/framework";
+import { SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
 import "@sapphire/plugin-logger/register";
 import "@sapphire/plugin-editable-commands/register";
