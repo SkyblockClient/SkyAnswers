@@ -1,6 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import dedent from "dedent";
+import { ApplicationCommandOptionType } from "discord.js";
+import { isSupportTeam } from "../lib/ticket.js";
 
 @ApplyOptions<Command.Options>({
   description: "Bots have feelings too",
@@ -10,17 +12,48 @@ export class UserCommand extends Command {
     registry.registerChatInputCommand({
       name: this.name,
       description: this.description,
+      options: [
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "snarkyRemark",
+          description: "Snarky remark to add at the end",
+          required: false,
+          choices: [
+            { name: "Already gave solution", value: "solution" },
+            { name: "Follow the instructions", value: "instructions" },
+          ],
+        },
+        {
+          type: ApplicationCommandOptionType.User,
+          name: "mention",
+          description: "User to mention (Support Team only)",
+          required: false,
+        },
+      ],
     });
   }
 
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    return interaction.reply(dedent`
-      I may be a bot, but that doesn't mean I don't have feelings.
-      Please stop ignoring me. :(
+    const mention = interaction.options.getUser("mention", false);
+    const mentionText =
+      isSupportTeam(interaction.member) && mention
+        ? `${mention.toString()} `
+        : "";
 
-      (I already gave you the solution to your problem.)
-    `);
+    let reply = dedent`
+      I may be a bot, but that doesn't mean I don't have feelings.
+      ${mentionText}Please stop ignoring me. :(
+    `;
+    reply += "\n\n";
+    switch (interaction.options.getString("snarkyRemark", false)) {
+      case "instructions":
+        reply += "\n\n(Please follow the instructions I posted above)";
+        break;
+      case "solution":
+        reply += "\n\n(I already gave you the solution to your problem)";
+    }
+    return interaction.reply(reply);
   }
 }
