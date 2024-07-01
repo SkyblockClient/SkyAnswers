@@ -15,7 +15,7 @@ export class UserCommand extends Command {
       options: [
         {
           type: ApplicationCommandOptionType.String,
-          name: "snarkyRemark",
+          name: "snarky-remark",
           description: "Snarky remark to add at the end",
           required: false,
           choices: [
