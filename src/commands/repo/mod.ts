@@ -63,12 +63,14 @@ export class UserCommand extends Command {
     const items = await getMods();
     const item = queryData(items, query);
     if (!item) {
-      const bestOption = probableMatches(items, query)[0];
-      const bestDistance = getDistance(bestOption, query);
-      return interaction.reply(
-        "No mod found" +
-          (bestDistance <= 3 ? `, did you mean "${bestOption.id}"?` : ""),
-      );
+      const best = probableMatches(items, query)[0];
+      let reply = "Mod not found.";
+      if (getDistance(best, query) <= 3)
+        reply += `\nDid you mean ${best.display}?`;
+      return interaction.reply({
+        content: reply,
+        ephemeral: true,
+      });
     }
 
     let bundledIn: string | undefined;
