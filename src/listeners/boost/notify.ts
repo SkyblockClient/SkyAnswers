@@ -9,6 +9,7 @@ import {
 } from "discord.js";
 import { SkyClient } from "../../const.js";
 import { isTextBasedChannel } from "@sapphire/discord.js-utilities";
+import { formatUser } from "../../lib/logHelper.js";
 
 /** Tracks when people (un)boost */
 @ApplyOptions<Listener.Options>({
@@ -26,19 +27,16 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
     if (oldUser.premiumSince && !user.premiumSince) {
       container.logger.info("Boost stop", user.id);
       if (isTextBasedChannel(botLogs))
-        await botLogs.send(
-          `${user.id} (${user.user.username}) stopped boosting`,
+        await botLogs.send(`${formatUser(user)} stopped boosting`);
+      if (!user.roles.cache.has(SkyClient.roles.GiveawayDonor))
+        await user.roles.remove(
+          SkyClient.roles.GiveawayBypass,
+          "Stopped boosting",
         );
-      await user.roles.remove(
-        SkyClient.roles.GiveawayBypass,
-        "User stopped boosting",
-      );
     } else if (!oldUser.premiumSince && user.premiumSince) {
       container.logger.info("Boost start", user.id);
       if (isTextBasedChannel(botLogs))
-        await botLogs.send(
-          `${user.id} (${user.user.username}) started boosting`,
-        );
+        await botLogs.send(`${formatUser(user)} started boosting`);
 
       await user.roles.add(
         SkyClient.roles.GiveawayBypass,

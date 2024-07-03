@@ -21,6 +21,7 @@ export const SkyClient = {
     GitHubKeeper: "799020944487612428",
     NoAuto: "852016624605462589",
     GiveawayBypass: "1187979851706142793",
+    GiveawayDonor: "1186726399789248693",
     SupportTeam: "931626562539909130",
   },
 };
