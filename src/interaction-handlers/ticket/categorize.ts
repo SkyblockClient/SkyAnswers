@@ -7,7 +7,6 @@ import type { ButtonInteraction } from "discord.js";
 import { ButtonStyle, ComponentType } from "discord.js";
 import { isTicket, setTicketOpen } from "../../lib/ticket.js";
 import dedent from "dedent";
-import { SkyClient } from "../../const.js";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
