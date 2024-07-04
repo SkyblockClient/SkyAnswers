@@ -70,8 +70,9 @@ export class ButtonHandler extends InteractionHandler {
           {
             title: "Instructions",
             description: dedent`
-                Please read the bolded instructions in <#${SkyClient.channels.Support}>
-                - If you have any trouble with the linked guide, describe your problem here
+                Most mod updating issues can be fixed by switching launchers:
+                https://microcontrollersdev.github.io/Alternatives/launcher/home
+                - If you have any trouble with the guide, describe your problem here
                 - Otherwise, if your issue is resolved, please close the ticket above
               `,
           },
