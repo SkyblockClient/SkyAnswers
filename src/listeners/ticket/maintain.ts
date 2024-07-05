@@ -97,24 +97,19 @@ export async function expireBumps(ticket: TextChannel) {
     const bumps = messages.filter(isBumpMessage);
     if (!lastMsg) return;
 
-    const isBumped = bumps.some((bump) => bump.id == lastMsg.id);
     for (const bump of bumps.values()) {
       if (lastMsg.id == bump.id) continue;
 
-      if (isBumped) await bump.delete();
-      else
-        await bump.edit({
-          content: "",
-          embeds: [
-            {
-              title: "Bump Expired",
-              description:
-                "Because somebody sent a message, this ticket will no longer automatically close unless bumped again.",
-              color: Colors.Red,
-            },
-          ],
-          components: [buildDeleteBtnRow()],
-        });
+      await bump.edit({
+        content: "",
+        embeds: [
+          {
+            title: "Bump Expired",
+            color: Colors.Red,
+          },
+        ],
+        // components: [buildDeleteBtnRow()],
+      });
     }
   } catch {
     /* empty */
