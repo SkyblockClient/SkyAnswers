@@ -12,7 +12,6 @@ import {
 import { Duration, Time } from "@sapphire/time-utilities";
 import { Stopwatch } from "@sapphire/stopwatch";
 import pMap from "p-map";
-import { buildDeleteBtnRow } from "../../lib/builders.js";
 
 const SupportTeams: Record<string, string> = {
   [SkyClient.id]: SkyClient.roles.SupportTeam,
