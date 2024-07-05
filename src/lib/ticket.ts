@@ -6,7 +6,7 @@ import {
 import { container } from "@sapphire/framework";
 import { Time } from "@sapphire/time-utilities";
 import { FirstArgument, Nullish, sleep } from "@sapphire/utilities";
-import { TextChannel } from "discord.js";
+import { Message, TextBasedChannel, TextChannel } from "discord.js";
 import memoize from "memoize";
 import { formatChannel } from "./logHelper.js";
 import { DevServer, Polyfrost, SkyClient } from "../const.js";
@@ -83,4 +83,13 @@ export function isSupportTeam(member: FirstArgument<typeof isGuildMember>) {
       DevServer.roles.SupportTeam,
     )
   );
+}
+
+export const isBumpMessage = (msg: Message) =>
+  msg.author.id == msg.client.user.id &&
+  msg.embeds.some((embed) => embed.title == "Do you still need help?");
+
+export async function getLastBump(channel: TextBasedChannel) {
+  const messages = await channel.messages.fetch();
+  return messages.filter(isBumpMessage).first();
 }

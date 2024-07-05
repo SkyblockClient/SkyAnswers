@@ -1,12 +1,19 @@
 import { Events, Listener, container } from "@sapphire/framework";
-import { DiscordAPIError, roleMention } from "discord.js";
+import { Colors, DiscordAPIError, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { SkyClient, Polyfrost, DevServer, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
-import { getTicketOwner, getTicketTop, isTicket } from "../../lib/ticket.js";
+import {
+  getLastBump,
+  getTicketOwner,
+  getTicketTop,
+  isBumpMessage,
+  isTicket,
+} from "../../lib/ticket.js";
 import { Duration, Time } from "@sapphire/time-utilities";
 import { Stopwatch } from "@sapphire/stopwatch";
 import pMap from "p-map";
+import { buildDeleteBtnRow } from "../../lib/builders.js";
 
 const SupportTeams: Record<string, string> = {
   [SkyClient.id]: SkyClient.roles.SupportTeam,
@@ -35,6 +42,10 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
       () => void pMap(getTickets(), maintain, { concurrency: 3 }),
       Time.Second * 30,
     );
+    setInterval(
+      () => void pMap(getTickets(), expireBumps, { concurrency: 3 }),
+      Time.Minute,
+    );
   }
 }
 
@@ -47,12 +58,15 @@ async function maintain(ticket: TextChannel) {
     if (!support) return;
 
     const messages = await ticket.messages.fetch();
-    const lastMessage = messages
+    const lastMsg = messages
       .filter((message) => message.author.id != Users.TicketTool)
       .first();
-    if (!lastMessage) return;
-    const meLast = lastMessage.author.id == ticket.client.user.id;
-    if (meLast && lastMessage.content.startsWith(roleMention(support))) return;
+    if (!lastMsg) return;
+    if (
+      lastMsg.author.id == ticket.client.user.id &&
+      lastMsg.content.startsWith(roleMention(support))
+    )
+      return;
 
     const ownerId = await getTicketOwner(ticket);
     if (ownerId) {
@@ -60,14 +74,8 @@ async function maintain(ticket: TextChannel) {
       if (!owner) return void pingStaff(ticket, "owner left");
     }
 
-    if (
-      meLast &&
-      lastMessage.embeds.some(
-        (embed) => embed.title == "Do you still need help?",
-      )
-    ) {
-      // last message was bump
-      const twoDays = new Duration("2d").dateFrom(lastMessage.createdAt);
+    if (isBumpMessage(lastMsg)) {
+      const twoDays = new Duration("2d").dateFrom(lastMsg.createdAt);
       if (twoDays < new Date()) return void pingStaff(ticket, "time to close");
     }
   } catch (e) {
@@ -78,6 +86,34 @@ async function maintain(ticket: TextChannel) {
     } else if (e instanceof Error && e.name == "ConnectTimeoutError") {
       container.logger.error(header, "Connect Timeout Error");
     } else container.logger.error(header, e);
+  }
+}
+
+async function expireBumps(ticket: TextChannel) {
+  try {
+    const support = SupportTeams[ticket.guildId];
+    if (!support) return;
+
+    const messages = await ticket.messages.fetch();
+    const lastMsg = messages
+      .filter((message) => message.author.id != Users.TicketTool)
+      .first();
+    const lastBump = await getLastBump(ticket);
+    if (!lastMsg || !lastBump) return;
+    if (lastMsg.id == lastBump.id) return;
+
+    await lastBump.edit({
+      content: "",
+      embeds: [
+        {
+          title: "Bump Expired",
+          color: Colors.Red,
+        },
+      ],
+      components: [buildDeleteBtnRow()],
+    });
+  } catch {
+    /* empty */
   }
 }
 

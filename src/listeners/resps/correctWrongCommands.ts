@@ -1,12 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  Message,
-} from "discord.js";
+import { Message } from "discord.js";
 import { Users } from "../../const.js";
+import { buildDeleteBtnRow } from "../../lib/builders.js";
 
 /** Corrects incorrect commands */
 @ApplyOptions<Listener.Options>({
@@ -37,18 +33,9 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     if (!reply) return; // DO NOT REMOVE LOL
 
     if (message.author.id == Users.nacrt) reply = "fuck you " + reply;
-    const delRow = new ActionRowBuilder<ButtonBuilder>();
-    delRow.addComponents(
-      new ButtonBuilder({
-        style: ButtonStyle.Danger,
-        customId: "deleteResp|" + message.author.id,
-        label: "Delete",
-        emoji: "🗑️",
-      }),
-    );
     return message.reply({
       content: reply,
-      components: [delRow],
+      components: [buildDeleteBtnRow(message.author)],
     });
   }
 }

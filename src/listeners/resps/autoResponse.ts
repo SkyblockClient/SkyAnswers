@@ -1,13 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getJSON } from "../../lib/data.js";
 
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener, container } from "@sapphire/framework";
 import { Message } from "discord.js";
 import { SkyClient } from "../../const.js";
-import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import { z } from "zod";
 import { isTicket } from "../../lib/ticket.js";
+import { buildDeleteBtnRow } from "../../lib/builders.js";
 
 /** Sends an autoresponse for the commands and suggestions we have */
 @ApplyOptions<Listener.Options>({
@@ -33,22 +32,12 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     if (responses.length > 3) return;
 
     await Promise.all(
-      responses.map(async (resp) => {
-        const reply = new MessageBuilder({
+      responses.map(async (resp) =>
+        message.reply({
           content: resp.response,
-        });
-        const delRow = new ActionRowBuilder<ButtonBuilder>();
-        delRow.addComponents(
-          new ButtonBuilder({
-            style: ButtonStyle.Danger,
-            customId: "deleteResp|" + message.author.id,
-            label: "Delete",
-            emoji: "🗑️",
-          }),
-        );
-        if (!resp.tag) reply.setComponents([delRow]);
-        return message.reply(reply);
-      }),
+          components: !resp.tag ? [buildDeleteBtnRow(message.author)] : [],
+        }),
+      ),
     );
   }
 }
