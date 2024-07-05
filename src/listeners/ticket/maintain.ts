@@ -89,7 +89,7 @@ async function maintain(ticket: TextChannel) {
   }
 }
 
-async function expireBumps(ticket: TextChannel) {
+export async function expireBumps(ticket: TextChannel) {
   try {
     const support = SupportTeams[ticket.guildId];
     if (!support) return;
