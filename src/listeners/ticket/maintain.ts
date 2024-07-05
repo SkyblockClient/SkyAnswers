@@ -92,6 +92,13 @@ export async function expireBumps(ticket: TextChannel) {
     const messages = await ticket.messages.fetch();
     const lastMsg = messages
       .filter((message) => message.author.id != Users.TicketTool)
+      .filter(
+        (message) =>
+          !(
+            message.author.id == ticket.client.user.id &&
+            message.content.startsWith(roleMention(support))
+          ),
+      )
       .first();
     const bumps = messages.filter(isBumpMessage);
     if (!lastMsg) return;
