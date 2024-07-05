@@ -4,7 +4,6 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { SkyClient, Polyfrost, DevServer, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
 import {
-  getLastBump,
   getTicketOwner,
   getTicketTop,
   isBumpMessage,
@@ -42,10 +41,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
       () => void pMap(getTickets(), maintain, { concurrency: 3 }),
       Time.Second * 30,
     );
-    setInterval(
-      () => void pMap(getTickets(), expireBumps, { concurrency: 3 }),
-      Time.Minute,
-    );
+    await pMap(getTickets(), expireBumps, { concurrency: 3 });
   }
 }
 
@@ -98,20 +94,28 @@ export async function expireBumps(ticket: TextChannel) {
     const lastMsg = messages
       .filter((message) => message.author.id != Users.TicketTool)
       .first();
-    const lastBump = await getLastBump(ticket);
-    if (!lastMsg || !lastBump) return;
-    if (lastMsg.id == lastBump.id) return;
+    const bumps = messages.filter(isBumpMessage);
+    if (!lastMsg) return;
 
-    await lastBump.edit({
-      content: "",
-      embeds: [
-        {
-          title: "Bump Expired",
-          color: Colors.Red,
-        },
-      ],
-      components: [buildDeleteBtnRow()],
-    });
+    const isBumped = bumps.some((bump) => bump.id == lastMsg.id);
+    for (const bump of bumps.values()) {
+      if (lastMsg.id == bump.id) continue;
+
+      if (isBumped) await bump.delete();
+      else
+        await bump.edit({
+          content: "",
+          embeds: [
+            {
+              title: "Bump Expired",
+              description:
+                "Because somebody sent a message, this ticket will no longer automatically close unless bumped again.",
+              color: Colors.Red,
+            },
+          ],
+          components: [buildDeleteBtnRow()],
+        });
+    }
   } catch {
     /* empty */
   }

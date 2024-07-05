@@ -22,7 +22,7 @@ export class UserCommand extends Command {
     const { channel } = interaction;
     if (!isTicket(channel))
       return interaction.reply({
-        content: "not a ticket lol",
+        content: "Bold of you to assume this is a ticket...",
         ephemeral: true,
       });
 
