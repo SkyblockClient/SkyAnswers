@@ -1,7 +1,7 @@
 import { Events, Listener, container } from "@sapphire/framework";
-import { Colors, DiscordAPIError, roleMention } from "discord.js";
+import { Colors, DiscordAPIError, Message, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
-import { SkyClient, Polyfrost, DevServer, Users } from "../../const.js";
+import { SupportTeams, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
 import {
   getTicketOwner,
@@ -12,12 +12,6 @@ import {
 import { Duration, Time } from "@sapphire/time-utilities";
 import { Stopwatch } from "@sapphire/stopwatch";
 import pMap from "p-map";
-
-const SupportTeams: Record<string, string> = {
-  [SkyClient.id]: SkyClient.roles.SupportTeam,
-  [Polyfrost.id]: Polyfrost.roles.SupportTeam,
-  [DevServer.id]: DevServer.roles.SupportTeam,
-};
 
 @ApplyOptions<Listener.Options>({
   once: true,
@@ -57,11 +51,7 @@ async function maintain(ticket: TextChannel) {
       .filter((message) => message.author.id != Users.TicketTool)
       .first();
     if (!lastMsg) return;
-    if (
-      lastMsg.author.id == ticket.client.user.id &&
-      lastMsg.content.startsWith(roleMention(support))
-    )
-      return;
+    if (isStaffPing(lastMsg)) return;
 
     const ownerId = await getTicketOwner(ticket);
     if (ownerId) {
@@ -92,13 +82,7 @@ export async function expireBumps(ticket: TextChannel) {
     const messages = await ticket.messages.fetch();
     const lastMsg = messages
       .filter((message) => message.author.id != Users.TicketTool)
-      .filter(
-        (message) =>
-          !(
-            message.author.id == ticket.client.user.id &&
-            message.content.startsWith(roleMention(support))
-          ),
-      )
+      .filter((message) => !isStaffPing(message))
       .first();
     const bumps = messages.filter(isBumpMessage);
     if (!lastMsg) return;
@@ -139,8 +123,19 @@ export async function pinTop(ticket: TextChannel) {
   }
 }
 
-const pingStaff = async (channel: TextChannel, msg: string) => {
+async function pingStaff(channel: TextChannel, msg: string) {
   const support = SupportTeams[channel.guildId];
   if (!support) return;
   return channel.send(`${roleMention(support)} ${msg}`);
-};
+}
+
+function isStaffPing(msg: Message) {
+  const { guild } = msg;
+  if (!guild) return false;
+  const support = SupportTeams[guild.id];
+  if (!support) return false;
+  return (
+    msg.author.id == msg.client.user.id &&
+    msg.content.startsWith(roleMention(support))
+  );
+}

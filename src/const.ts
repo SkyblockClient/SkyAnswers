@@ -55,3 +55,9 @@ export const Emojis = {
   YouWhat: "<:youwhat:889306727953104936>",
   BlameWyvest: "<:blamewyvest:1001055682289741864>",
 };
+
+export const SupportTeams: Record<string, string> = {
+  [SkyClient.id]: SkyClient.roles.SupportTeam,
+  [Polyfrost.id]: Polyfrost.roles.SupportTeam,
+  [DevServer.id]: DevServer.roles.SupportTeam,
+};
