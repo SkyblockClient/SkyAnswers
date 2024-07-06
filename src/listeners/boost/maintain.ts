@@ -24,7 +24,9 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
 }
 
 const TagsJSON = z.object({
-  tags: z.record(z.tuple([z.string(), z.string()])),
+  tags: z.record(
+    z.union([z.tuple([z.string(), z.string()]), z.tuple([z.string()])]),
+  ),
   perms: z.record(z.string().array()),
   whitelist: z.boolean(),
   whitelisted: z.string().array(),
