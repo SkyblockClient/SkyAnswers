@@ -32,14 +32,7 @@ export async function expireBumps(ticket: TextChannel) {
       if (lastMsg.id == bump.id) continue;
 
       await bump.edit({
-        content: "",
-        embeds: [
-          {
-            title: "Bump Expired",
-            color: Colors.Red,
-          },
-        ],
-        // components: [buildDeleteBtnRow()],
+        embeds: [bump.embeds[0]],
       });
     }
   } catch {

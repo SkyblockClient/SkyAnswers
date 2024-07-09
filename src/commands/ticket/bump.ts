@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { hyperlink, time } from "discord.js";
+import { Colors, hyperlink, time } from "discord.js";
 import { getTicketTop, getTicketOwner, isTicket } from "../../lib/ticket.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import { Duration } from "@sapphire/time-utilities";
@@ -39,10 +39,22 @@ export class UserCommand extends Command {
       embeds: [
         {
           title: "Do you still need help?",
-          description: `***Yes***: __Restate your problem clearly.__ If someone asked you to upload something, do that.
-***No, all my problems are solved***: __Close the ticket.__ View the ${pinnedMsg} at the top, and click the :lock: button to close your ticket.
-If you do not respond ${twoDaysStamp}, your ticket will be closed.`,
-          color: 0xffff88,
+          color: Colors.Yellow,
+          fields: [
+            {
+              name: "> Yes, I still need help!",
+              value:
+                "__Restate your problem clearly.__ If someone asked you to upload something, do that.",
+            },
+            {
+              name: "> No, all my problems are solved.",
+              value: `__Close the ticket.__ View the ${pinnedMsg}, click the 🔒 button, and follow the bot's instructions.`,
+            },
+          ],
+        },
+        {
+          description: `If you do not respond ${twoDaysStamp}, your ticket will be closed.`,
+          color: Colors.DarkRed,
         },
       ],
       allowedMentions: { users: owner ? [owner] : [] },
