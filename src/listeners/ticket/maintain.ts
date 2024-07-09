@@ -1,5 +1,5 @@
 import { Events, Listener, container } from "@sapphire/framework";
-import { Colors, DiscordAPIError, Message, roleMention } from "discord.js";
+import { DiscordAPIError, roleMention } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { SupportTeams, Users } from "../../const.js";
 import { TextChannel } from "discord.js";
@@ -7,11 +7,13 @@ import {
   getTicketOwner,
   getTicketTop,
   isBumpMessage,
+  isStaffPing,
   isTicket,
 } from "../../lib/ticket.js";
 import { Duration, Time } from "@sapphire/time-utilities";
 import { Stopwatch } from "@sapphire/stopwatch";
 import pMap from "p-map";
+import { expireBumps } from "./expireBumps.js";
 
 @ApplyOptions<Listener.Options>({
   once: true,
@@ -31,7 +33,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
 
     await pMap(getTickets(), pinTop);
     setInterval(
-      () => void pMap(getTickets(), maintain, { concurrency: 3 }),
+      () => void pMap(getTickets(), expireTickets, { concurrency: 3 }),
       Time.Second * 30,
     );
     await pMap(getTickets(), expireBumps, { concurrency: 3 });
@@ -41,7 +43,7 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
 const getTickets = () =>
   Array.from(container.client.channels.cache.values()).filter(isTicket);
 
-async function maintain(ticket: TextChannel) {
+async function expireTickets(ticket: TextChannel) {
   try {
     const support = SupportTeams[ticket.guildId];
     if (!support) return;
@@ -74,38 +76,6 @@ async function maintain(ticket: TextChannel) {
   }
 }
 
-export async function expireBumps(ticket: TextChannel) {
-  try {
-    const support = SupportTeams[ticket.guildId];
-    if (!support) return;
-
-    const messages = await ticket.messages.fetch();
-    const lastMsg = messages
-      .filter((message) => message.author.id != Users.TicketTool)
-      .filter((message) => !isStaffPing(message))
-      .first();
-    const bumps = messages.filter(isBumpMessage);
-    if (!lastMsg) return;
-
-    for (const bump of bumps.values()) {
-      if (lastMsg.id == bump.id) continue;
-
-      await bump.edit({
-        content: "",
-        embeds: [
-          {
-            title: "Bump Expired",
-            color: Colors.Red,
-          },
-        ],
-        // components: [buildDeleteBtnRow()],
-      });
-    }
-  } catch {
-    /* empty */
-  }
-}
-
 export async function pinTop(ticket: TextChannel) {
   try {
     if (ticket.lastPinAt) return;
@@ -123,19 +93,8 @@ export async function pinTop(ticket: TextChannel) {
   }
 }
 
-async function pingStaff(channel: TextChannel, msg: string) {
+export async function pingStaff(channel: TextChannel, msg: string) {
   const support = SupportTeams[channel.guildId];
   if (!support) return;
   return channel.send(`${roleMention(support)} ${msg}`);
-}
-
-function isStaffPing(msg: Message) {
-  const { guild } = msg;
-  if (!guild) return false;
-  const support = SupportTeams[guild.id];
-  if (!support) return false;
-  return (
-    msg.author.id == msg.client.user.id &&
-    msg.content.startsWith(roleMention(support))
-  );
 }

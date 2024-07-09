@@ -6,10 +6,10 @@ import {
 import { container } from "@sapphire/framework";
 import { Time } from "@sapphire/time-utilities";
 import { FirstArgument, Nullish, sleep } from "@sapphire/utilities";
-import { Message, TextChannel } from "discord.js";
+import { Message, roleMention, TextChannel } from "discord.js";
 import memoize from "memoize";
 import { formatChannel } from "./logHelper.js";
-import { DevServer, Polyfrost, SkyClient } from "../const.js";
+import { DevServer, Polyfrost, SkyClient, SupportTeams } from "../const.js";
 
 export async function setTicketOpen(
   channel: ChannelTypes,
@@ -88,3 +88,14 @@ export function isSupportTeam(member: FirstArgument<typeof isGuildMember>) {
 export const isBumpMessage = (msg: Message) =>
   msg.author.id == msg.client.user.id &&
   msg.embeds.some((embed) => embed.title == "Do you still need help?");
+
+export function isStaffPing(msg: Message) {
+  const { guild } = msg;
+  if (!guild) return false;
+  const support = SupportTeams[guild.id];
+  if (!support) return false;
+  return (
+    msg.author.id == msg.client.user.id &&
+    msg.content.startsWith(roleMention(support))
+  );
+}
