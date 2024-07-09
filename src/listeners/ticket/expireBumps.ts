@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener } from "@sapphire/framework";
-import { Colors, Message, TextChannel } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 import { isBumpMessage, isStaffPing, isTicket } from "../../lib/ticket.js";
 import { SupportTeams, Users } from "../../const.js";
 
