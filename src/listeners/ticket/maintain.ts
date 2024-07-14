@@ -58,12 +58,12 @@ async function expireTickets(ticket: TextChannel) {
     const ownerId = await getTicketOwner(ticket);
     if (ownerId) {
       const owner = ticket.guild.members.resolve(ownerId);
-      if (!owner) return void pingStaff(ticket, "owner left");
+      if (!owner) return void pingStaff(ticket, "Owner left. Please close ticket.\n(I don't have hands to do it myself...)");
     }
 
     if (isBumpMessage(lastMsg)) {
       const twoDays = new Duration("2d").dateFrom(lastMsg.createdAt);
-      if (twoDays < new Date()) return void pingStaff(ticket, "time to close");
+      if (twoDays < new Date()) return void pingStaff(ticket, "Time to close");
     }
   } catch (e) {
     const header = `Failed to maintain ticket in ${ticket.name} in ${ticket.guild.name}:`;
