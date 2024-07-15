@@ -14,6 +14,7 @@ import z from "zod";
 import { basename } from "@std/url";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
+import { Nullish } from "@sapphire/utilities";
 
 const ModInfo = z.array(z.object({ modid: z.string() }));
 
@@ -36,6 +37,12 @@ export class UserCommand extends Command {
           type: ApplicationCommandOptionType.Boolean,
           name: "beta",
           description: "Beta",
+          required: false,
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "forge_id",
+          description: "modid to update, only used if not found in mcmod.info",
           required: false,
         },
       ],
@@ -88,7 +95,7 @@ export class UserCommand extends Command {
     }
     const modFile = await modResp.arrayBuffer();
 
-    let modId: string | undefined;
+    let modId: string | Nullish;
     try {
       const modZip = await JSZip.loadAsync(modFile);
       const modInfoFile = modZip.file("mcmod.info");
@@ -101,6 +108,7 @@ export class UserCommand extends Command {
       container.logger.error("Failed to read ZIP", e);
       return await int.editReply("Failed to read ZIP. Is the URL correct?");
     }
+    modId = modId || int.options.getString("forge_id");
 
     if (!modId) return await int.editReply("🫨 this mod doesn't have a mod id");
     if (!perms.all && (perms.perms ? perms.perms[modId] != "update" : false))
