@@ -15,6 +15,7 @@ import { basename } from "@std/url";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 import { Nullish } from "@sapphire/utilities";
+import { extname } from "path";
 
 const ModInfo = z.array(z.object({ modid: z.string() }));
 
@@ -43,6 +44,12 @@ export class UserCommand extends Command {
           type: ApplicationCommandOptionType.String,
           name: "forge_id",
           description: "modid to update, only used if not found in mcmod.info",
+          required: false,
+        },
+        {
+          type: ApplicationCommandOptionType.String,
+          name: "filename",
+          description: "filename for the file, replacing the autodetected name",
           required: false,
         },
       ],
@@ -114,11 +121,12 @@ export class UserCommand extends Command {
     if (!perms.all && (perms.perms ? perms.perms[modId] != "update" : false))
       return await int.editReply(`🫨 you can't update that mod`);
 
-    //const file = decodeURI(url).split('/').pop().split('?')[0];
     const data = {
       forge_id: modId,
       url,
-      file: decodeURIComponent(basename(url)),
+      file: decodeURIComponent(
+        int.options.getString("filename") || basename(url),
+      ),
       hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
     };
     const isBeta = int.options.getBoolean("beta") || false;
@@ -128,18 +136,24 @@ export class UserCommand extends Command {
       ? Mod.array().parse(await getJSON("mods_beta"))
       : modsRef;
 
-    if (!modsRef.find((mod) => mod.forge_id == modId))
-      return await int.editReply("🤔 that mod doesn't exist");
-
-    const existingMod = mods.find((mod) => mod.forge_id == modId);
+    const existingMod =
+      mods.find((mod) => mod.forge_id == modId) ||
+      modsRef.find((mod) => mod.forge_id == modId);
+    if (!existingMod) return await int.editReply("🤔 that mod doesn't exist");
 
     if (
-      existingMod &&
       existingMod.url == data.url &&
       existingMod.file == data.file &&
       existingMod.hash == data.hash
     )
       return await int.editReply("🤔 nothing to change");
+
+    if (!extname(data.file))
+      return await int.editReply("🤯 file extension required");
+    if (extname(existingMod.file) != extname(data.file))
+      return await int.editReply(
+        `🤯 file extension changed! (\`${extname(existingMod.file)}\` -> \`${extname(data.file)}\`)`,
+      );
 
     const { id } = await int.fetchReply();
     await PendingUpdatesDB.update((pending) => {
