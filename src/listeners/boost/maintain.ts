@@ -50,11 +50,6 @@ export async function run(client: Client<true>) {
       "docs/assets/tags.json",
       boosters,
     );
-    await updateBoosters(
-      "SkyblockClient/SCC-Data",
-      "features/tags.json",
-      boosters,
-    );
   } catch (e) {
     container.logger.error("Failed to update boosters", e);
   }
