@@ -45,16 +45,26 @@ export async function run(client: Client<true>) {
     }
     boosters.sort();
 
-    const oldFile = await readGHFile(
+    await updateBoosters(
+      "SkyblockClient/Website",
+      "docs/assets/tags.json",
+      boosters,
+    );
+    await updateBoosters(
       "SkyblockClient/SCC-Data",
       "features/tags.json",
+      boosters,
     );
-    const tags = TagsJSON.parse(JSON.parse(oldFile.content));
-    tags.perms.Booster = boosters;
-
-    const content = await format(JSON.stringify(tags), { parser: "json" });
-    await writeGHFile(oldFile, content, "chore: update booster list");
   } catch (e) {
     container.logger.error("Failed to update boosters", e);
   }
+}
+
+async function updateBoosters(repo: string, path: string, boosters: string[]) {
+  const oldFile = await readGHFile(repo, path);
+  const tags = TagsJSON.parse(JSON.parse(oldFile.content));
+  tags.perms.Booster = boosters;
+
+  const content = await format(JSON.stringify(tags), { parser: "json" });
+  await writeGHFile(oldFile, content, "chore: update booster list");
 }
