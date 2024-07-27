@@ -55,7 +55,7 @@ export class UserCommand extends Command {
     if (hasNitro)
       return interaction.reply({
         content: dedent`
-          # **Thanks for the boost!** <3 \
+          # Thanks for the boost! <3
           Your in-game rank will be applied to ${profile.name} in 5-10 minutes.
           -# [SkyClient Cosmetics](<https://modrinth.com/mod/scc>) is required to see the rank.
           -# If you don't see it, you may have to type \`/scc reload\` in game.
