@@ -65,12 +65,15 @@ export const getTicketOwner = memoize(_getTicketOwner, {
 export function isTicket(
   channel: ChannelTypes | Nullish,
 ): channel is TextChannel {
-  return (
-    isTextChannel(channel) &&
+  if (!isTextChannel(channel)) return false;
+  if (
     channel.name.startsWith("ticket-") &&
     channel.name != "ticket-logs" &&
     channel.name != "ticket-transcripts"
-  );
+  )
+    return true;
+  if (channel.parentId == Polyfrost.categories.BugReports) return true;
+  return false;
 }
 
 export function isSupportTeam(member: FirstArgument<typeof isGuildMember>) {

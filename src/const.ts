@@ -31,6 +31,9 @@ export const Polyfrost = {
   channels: {
     BotLogs: "1225178336532369598",
   },
+  categories: {
+    BugReports: "1063715268687310869",
+  },
   roles: {
     NoGiveaways: "1182506496156766250",
     SupportTeam: "997376364460114001",
