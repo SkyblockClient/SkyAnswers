@@ -92,16 +92,16 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         });
 
       components.push(
-        // {
-        //   type: ComponentType.Button,
-        //   style: ButtonStyle.Link,
-        //   label: "Open Log",
-        //   url: mcLog.url,
-        // },
         {
           type: ComponentType.Button,
           style: ButtonStyle.Link,
-          label: "Open Log",
+          label: "Open on mclo.gs",
+          url: mcLog.url,
+        },
+        {
+          type: ComponentType.Button,
+          style: ButtonStyle.Link,
+          label: "Raw Log",
           url: mcLog.raw,
         },
       );
