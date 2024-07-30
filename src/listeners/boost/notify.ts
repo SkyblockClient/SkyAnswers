@@ -10,6 +10,7 @@ import {
 import { SkyClient } from "../../const.js";
 import { isTextBasedChannel } from "@sapphire/discord.js-utilities";
 import { formatUser } from "../../lib/logHelper.js";
+import dedent from "dedent";
 
 /** Tracks when people (un)boost */
 @ApplyOptions<Listener.Options>({
@@ -57,8 +58,10 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
         }),
       );
       return general.send({
-        content: `${user.toString()} **Thank you for boosting!!!** <3
-Claim your in-game rank with the \`/claimboost\` command`,
+        content: dedent`
+          ${user.toString()} **Thank you for boosting!!!** <3
+          Use the \`/claimboost\` command on Discord to claim your in-game rank.
+        `,
         allowedMentions: { users: [user.id] },
         // components: [compRow] // TODO
       });
