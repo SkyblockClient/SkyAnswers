@@ -9,7 +9,9 @@ export const SkyClient = {
   id: "780181693100982273",
   channels: {
     General: "780181693553704973",
+    SkyblockTalk: "1110717104757416027",
     Trolling: "887818760126345246",
+    BotCommands: "796546551878516766",
     BotLogs: "934968221923168266",
     Tickets: "1222344626325688330",
     ModUpdating: "1198710827327434852",

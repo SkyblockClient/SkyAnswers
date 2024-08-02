@@ -7,6 +7,7 @@ import { SkyClient } from "../../const.js";
 import { z } from "zod";
 import { isTicket } from "../../lib/ticket.js";
 import { buildDeleteBtnRow } from "../../lib/builders.js";
+import { isTruthy } from "remeda";
 
 /** Sends an autoresponse for the commands and suggestions we have */
 @ApplyOptions<Listener.Options>({
@@ -17,18 +18,20 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const { member, channel } = message;
     if (!member) return;
     if (message.author.bot) return;
-    // TODO: Adapt for Polyforst
-    if (message.guildId != SkyClient.id) return;
 
     let canAutoResp =
       channel.id == SkyClient.channels.General || // general
-      channel.id == "1110717104757416027" || // skyblock talk
-      channel.id == "1001798063964303390" || // support
-      channel.id == "796546551878516766" || // bot commands
+      channel.id == SkyClient.channels.SkyblockTalk || // skyblock talk
+      channel.id == SkyClient.channels.Support || // support
+      channel.id == SkyClient.channels.BotCommands || // bot commands
       isTicket(channel);
     if (member.roles.cache.has(SkyClient.roles.NoAuto)) canAutoResp = false;
+    if (!canAutoResp) return;
 
-    const responses = await findAutoresps(message.content, canAutoResp);
+    const responses = await findAutoresps(
+      message.content,
+      message.guildId == SkyClient.id,
+    );
     if (responses.length > 3) return;
 
     await Promise.all(
@@ -44,11 +47,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 
 const AutoResp = z.object({
   triggers: z.string().array().optional(),
-  tag: z
-    .string()
-    .or(z.string().array())
-    .transform((v) => (typeof v == "string" ? [v] : v))
-    .optional(),
+  skyclient: z.boolean().optional(),
   response: z.string(),
 });
 type AutoResp = z.infer<typeof AutoResp>;
@@ -59,7 +58,7 @@ const Resp = z.object({
 });
 type Resp = z.infer<typeof Resp>;
 
-export async function findAutoresps(message: string, canAutoResp: boolean) {
+export async function findAutoresps(message: string, isSkyClient: boolean) {
   let resps: AutoResp[];
   try {
     resps = AutoResp.array().parse(await getJSON("botautoresponse"));
@@ -69,14 +68,7 @@ export async function findAutoresps(message: string, canAutoResp: boolean) {
   }
   return resps
     .map((option): Resp | undefined => {
-      if (option.tag) {
-        for (const tag of option.tag) {
-          if (message.toLowerCase() == tag.toLowerCase())
-            return { response: option.response, tag: true };
-        }
-      }
-
-      if (!canAutoResp) return;
+      if (option.skyclient && !isSkyClient) return;
       if (option.triggers)
         for (const re of option.triggers) {
           const matcher = new RegExp(re, "is");
@@ -85,5 +77,5 @@ export async function findAutoresps(message: string, canAutoResp: boolean) {
         }
       return;
     })
-    .filter(Boolean) as Resp[];
+    .filter(isTruthy);
 }

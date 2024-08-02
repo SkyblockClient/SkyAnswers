@@ -191,11 +191,11 @@ type Crashes = z.infer<typeof Crashes>;
 
 async function verbalizeCrash(
   log: string,
-  isSkyclient?: boolean,
+  isSkyClient: boolean,
 ): Promise<APIEmbedField[]> {
   const pathIndicator = "`";
   const gameRoot = ".minecraft";
-  const profileRoot = isSkyclient ? ".minecraft/skyclient" : ".minecraft";
+  const profileRoot = isSkyClient ? ".minecraft/skyclient" : ".minecraft";
   let crashData: Crashes;
   try {
     crashData = Crashes.parse(
@@ -213,7 +213,7 @@ async function verbalizeCrash(
     ];
   }
   const relevantInfo = crashData.fixes.filter((fix) => {
-    if (fix.onlySkyClient && !isSkyclient) return false;
+    if (fix.onlySkyClient && !isSkyClient) return false;
     return fix.causes.every((type) => {
       if (type.method == "contains") return log.includes(type.value);
       else if (type.method == "regex") return log.match(new RegExp(type.value));
