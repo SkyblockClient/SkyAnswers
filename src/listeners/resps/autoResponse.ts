@@ -3,7 +3,7 @@ import { getJSON } from "../../lib/data.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener, container } from "@sapphire/framework";
 import { Message } from "discord.js";
-import { SkyClient } from "../../const.js";
+import { Polyfrost, SkyClient } from "../../const.js";
 import { z } from "zod";
 import { isTicket } from "../../lib/ticket.js";
 import { buildDeleteBtnRow } from "../../lib/builders.js";
@@ -20,10 +20,12 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     if (message.author.bot) return;
 
     let canAutoResp =
-      channel.id == SkyClient.channels.General || // general
-      channel.id == SkyClient.channels.SkyblockTalk || // skyblock talk
-      channel.id == SkyClient.channels.Support || // support
-      channel.id == SkyClient.channels.BotCommands || // bot commands
+      channel.id == SkyClient.channels.General ||
+      channel.id == SkyClient.channels.SkyblockTalk ||
+      channel.id == SkyClient.channels.Support ||
+      channel.id == Polyfrost.channels.General ||
+      channel.id == Polyfrost.channels.TestingChat ||
+      channel.parentId == Polyfrost.forums.Suggestions ||
       isTicket(channel);
     if (member.roles.cache.has(SkyClient.roles.NoAuto)) canAutoResp = false;
     if (!canAutoResp) return;
