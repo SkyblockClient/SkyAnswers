@@ -66,12 +66,9 @@ export function isTicket(
   channel: ChannelTypes | Nullish,
 ): channel is TextChannel {
   if (!isTextChannel(channel)) return false;
-  if (
-    channel.name.startsWith("ticket-") &&
-    channel.name != "ticket-logs" &&
-    channel.name != "ticket-transcripts"
-  )
-    return true;
+  if (channel.name == "ticket-logs" || channel.name == "ticket-transcripts")
+    return false;
+  if (channel.name.startsWith("ticket-")) return true;
   if (channel.parentId == Polyfrost.categories.BugReports) return true;
   return false;
 }
