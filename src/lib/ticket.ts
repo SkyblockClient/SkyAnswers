@@ -1,11 +1,11 @@
 import {
-  ChannelTypes,
+  type ChannelTypes,
   isGuildMember,
   isTextChannel,
 } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
 import { Time } from "@sapphire/time-utilities";
-import { FirstArgument, Nullish, sleep } from "@sapphire/utilities";
+import { type FirstArgument, type Nullish, sleep } from "@sapphire/utilities";
 import { Message, roleMention, TextChannel } from "discord.js";
 import memoize from "memoize";
 import { formatChannel } from "./logHelper.js";

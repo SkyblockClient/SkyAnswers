@@ -4,10 +4,9 @@
   "author": "SkyClient",
   "type": "module",
   "scripts": {
-    "sapphire": "sapphire",
     "generate": "sapphire generate",
-    "watch": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "watch": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -45,6 +44,7 @@
     "@std/fmt": "npm:@jsr/std__fmt@^0.225.6",
     "@std/text": "npm:@jsr/std__text@1.0.0-rc.1",
     "@std/url": "npm:@jsr/std__url@1.0.0-rc.1",
+    "@tsconfig/bun": "^1.0.7",
     "dedent": "^1.5.3",
     "discord.js": "^14.15.3",
     "jszip": "^3.10.1",
@@ -52,8 +52,10 @@
     "memoize": "^10.0.0",
     "p-map": "^7.0.2",
     "remeda": "^2.6.0",
-    "tslib": "^2.6.3",
     "zod": "^3.23.8"
   },
-  "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"
+  "trustedDependencies": [
+    "@sapphire/type",
+    "esbuild"
+  ]
 }

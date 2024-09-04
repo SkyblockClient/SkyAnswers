@@ -1,10 +1,11 @@
 {
-  "extends": ["@sapphire/ts-config", "@sapphire/ts-config/decorators"],
+  "extends": [
+    "@tsconfig/bun/tsconfig.json",
+    "@sapphire/ts-config",
+    "@sapphire/ts-config/decorators"
+  ],
   "compilerOptions": {
-    "rootDir": "src",
     "declaration": false,
-    "declarationMap": false,
-    "importHelpers": true,
-    "noEmit": true
+    "declarationMap": false
   }
 }

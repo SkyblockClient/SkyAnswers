@@ -14,7 +14,7 @@ import z from "zod";
 import { basename } from "@std/url";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
-import { Nullish } from "@sapphire/utilities";
+import { type Nullish } from "@sapphire/utilities";
 import { extname } from "path";
 
 const ModInfo = z.array(z.object({ modid: z.string() }));

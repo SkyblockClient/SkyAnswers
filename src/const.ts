@@ -1,5 +1,5 @@
 const DevUser = "ethan";
-const user = process.env.USER || process.env.USERNAME;
+const user = process.env["USER"] || process.env["USERNAME"];
 export const isDevUser = user == DevUser;
 export const repoFilesURL =
   "https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files";

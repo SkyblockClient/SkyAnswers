@@ -58,7 +58,7 @@ export async function run(client: Client<true>) {
 async function updateBoosters(repo: string, path: string, boosters: string[]) {
   const oldFile = await readGHFile(repo, path);
   const tags = TagsJSON.parse(JSON.parse(oldFile.content));
-  tags.perms.Booster = boosters;
+  tags.perms["Booster"] = boosters;
 
   const content = await format(JSON.stringify(tags), { parser: "json" });
   await writeGHFile(oldFile, content, "chore: update booster list");

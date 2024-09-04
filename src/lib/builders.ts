@@ -1,6 +1,6 @@
 import {
-  APIActionRowComponent,
-  APIButtonComponent,
+  type APIActionRowComponent,
+  type APIButtonComponent,
   ButtonStyle,
   ComponentType,
   GuildMember,

@@ -6,7 +6,11 @@ import { container } from "@sapphire/framework";
 import memoize, { memoizeClear } from "memoize";
 import { Time } from "@sapphire/time-utilities";
 import { filterNullish } from "@sapphire/utilities";
-import { EmbedBuilder, hyperlink, InteractionReplyOptions } from "discord.js";
+import {
+  EmbedBuilder,
+  hyperlink,
+  type InteractionReplyOptions,
+} from "discord.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 
 async function _getTrackedData(url: string): Promise<unknown> {

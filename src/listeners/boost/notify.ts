@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener, container } from "@sapphire/framework";
 import {
-  PartialGuildMember,
+  type PartialGuildMember,
   GuildMember,
   ButtonBuilder,
   ActionRowBuilder,

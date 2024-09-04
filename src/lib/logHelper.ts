@@ -1,4 +1,4 @@
-import { ChannelTypes, isDMChannel } from "@sapphire/discord.js-utilities";
+import { type ChannelTypes, isDMChannel } from "@sapphire/discord.js-utilities";
 import { GuildMember, User } from "discord.js";
 
 export function formatChannel(channel: ChannelTypes): string {

@@ -2,18 +2,18 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener, container } from "@sapphire/framework";
 import { getTrackedData } from "../../lib/data.js";
 import {
-  APIEmbed,
-  APIEmbedField,
+  type APIEmbed,
+  type APIEmbedField,
   ButtonStyle,
   Colors,
   ComponentType,
   Message,
-  MessageActionRowComponentData,
+  type MessageActionRowComponentData,
   blockQuote,
 } from "discord.js";
 import { z } from "zod";
 import { SkyClient } from "../../const.js";
-import { Log, getMCLog, postLog } from "../../lib/mcLogs.js";
+import { type Log, getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
 import { format as formatBytes } from "@std/fmt/bytes";

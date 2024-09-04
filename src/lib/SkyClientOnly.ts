@@ -1,5 +1,5 @@
 import {
-  FunctionFallback,
+  type FunctionFallback,
   createFunctionPrecondition,
 } from "@sapphire/decorators";
 import { BaseInteraction, Message } from "discord.js";

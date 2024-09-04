@@ -1,4 +1,4 @@
-import { Snowflake } from "discord.js";
+import { type Snowflake } from "discord.js";
 import * as fs from "fs/promises";
 import { JSONFilePreset } from "lowdb/node";
 

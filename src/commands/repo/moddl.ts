@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { Mod, getMods } from "../../lib/data.js";
-import { APIEmbed, hyperlink, unorderedList } from "discord.js";
+import { type APIEmbed, hyperlink, unorderedList } from "discord.js";
 
 enum ItemType {
   Bundle,

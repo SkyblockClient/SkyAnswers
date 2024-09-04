@@ -4,7 +4,7 @@ import { Discord, getJSON, queryData } from "../../lib/data.js";
 import {
   ApplicationCommandOptionType,
   EmbedBuilder,
-  InteractionReplyOptions,
+  type InteractionReplyOptions,
 } from "discord.js";
 import { repoFilesURL } from "../../const.js";
 
