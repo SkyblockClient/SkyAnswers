@@ -7,6 +7,6 @@ to only answer tickets, but extended to replace another bot
 
 1. clone it
 2. `bun i`
-3. set `DISCORD_TOKEN` in `.env`
+3. copy `.env.example` to `.env` and add the needed values to it
 4. make sure the bot has edit channel perms
 5. `npm start`
