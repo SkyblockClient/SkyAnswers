@@ -4,7 +4,7 @@ import { Events, Listener, container } from "@sapphire/framework";
 import { ApplyOptions } from "@sapphire/decorators";
 import {
   isGuildBasedChannel,
-  isTextBasedChannel,
+  isTextChannel,
 } from "@sapphire/discord.js-utilities";
 import { isTicket } from "../../lib/ticket.js";
 
@@ -71,7 +71,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
       await channel.send(message);
 
       const verboseBotLogs = client.channels.cache.get(botLogsChannel);
-      if (!isTextBasedChannel(verboseBotLogs)) return;
+      if (!isTextChannel(verboseBotLogs)) return;
 
       const list = unorderedList(streak.map((v) => escapeMarkdown(v)));
       await verboseBotLogs.send({

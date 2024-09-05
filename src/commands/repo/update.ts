@@ -11,7 +11,7 @@ import { Mod, getJSON, getMods } from "../../lib/data.js";
 import { checkMember } from "../../lib/update.js";
 import { SkyClient, Emojis } from "../../const.js";
 import z from "zod";
-import { basename } from "@std/url";
+import { basename } from "node:path/posix";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 import { type Nullish } from "@sapphire/utilities";

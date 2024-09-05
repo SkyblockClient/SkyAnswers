@@ -8,7 +8,7 @@ import {
   ButtonStyle,
 } from "discord.js";
 import { SkyClient } from "../../const.js";
-import { isTextBasedChannel } from "@sapphire/discord.js-utilities";
+import { isTextChannel } from "@sapphire/discord.js-utilities";
 import { formatUser } from "../../lib/logHelper.js";
 import dedent from "dedent";
 
@@ -27,7 +27,7 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
 
     if (oldUser.premiumSince && !user.premiumSince) {
       container.logger.info("Boost stop", user.id);
-      if (isTextBasedChannel(botLogs))
+      if (isTextChannel(botLogs))
         await botLogs.send(`${formatUser(user)} stopped boosting`);
       if (!user.roles.cache.has(SkyClient.roles.GiveawayDonor))
         await user.roles.remove(
@@ -36,7 +36,7 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
         );
     } else if (!oldUser.premiumSince && user.premiumSince) {
       container.logger.info("Boost start", user.id);
-      if (isTextBasedChannel(botLogs))
+      if (isTextChannel(botLogs))
         await botLogs.send(`${formatUser(user)} started boosting`);
 
       await user.roles.add(
@@ -47,7 +47,7 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
       const general = await user.client.channels.fetch(
         SkyClient.channels.General,
       );
-      if (!isTextBasedChannel(general)) return;
+      if (!isTextChannel(general)) return;
 
       const compRow = new ActionRowBuilder<ButtonBuilder>();
       compRow.addComponents(

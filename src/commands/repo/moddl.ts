@@ -64,7 +64,7 @@ export class UserCommand extends Command {
     const totalLength = embeds.reduce((a, b) => a + b.description.length, 0);
     if (totalLength > 5000) {
       await interaction.reply({ embeds: embeds.slice(0, -1) });
-      await interaction.channel?.send({ embeds: embeds.slice(-1) });
+      await interaction.reply({ embeds: embeds.slice(-1) });
       return;
     }
     return interaction.reply({ embeds });
