@@ -86,10 +86,7 @@ export class ButtonHandler extends InteractionHandler {
       await Promise.all(tasks);
       if (!modData) throw new Error("this shouldn't happen");
 
-      await fs.writeFile(
-        `${tmp}/files/mods/${data.file}`,
-        Buffer.from(modData),
-      );
+      await Bun.write(`${tmp}/files/mods/${data.file}`, modData);
       data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/${data.file}`;
     } else {
       await Promise.all(tasks);
@@ -97,11 +94,7 @@ export class ButtonHandler extends InteractionHandler {
 
     await interaction.message.edit("pushing it out...");
 
-    let mods = JSON.parse(
-      await fs.readFile(`${tmp}/files/mods.json`, {
-        encoding: "utf8",
-      }),
-    ) as Mod[];
+    let mods = (await Bun.file(`${tmp}/files/mods.json`).json()) as Mod[];
     if (!isModList(mods)) throw new Error("failed to parse mods.json");
 
     let foundMods = 0;
@@ -116,11 +109,9 @@ export class ButtonHandler extends InteractionHandler {
     if (foundMods == 0) throw new Error("mod not found");
 
     if (data.beta) {
-      const betaMods = JSON.parse(
-        await fs.readFile(`${tmp}/files/mods_beta.json`, {
-          encoding: "utf8",
-        }),
-      ) as Mod[];
+      const betaMods = (await Bun.file(
+        `${tmp}/files/mods_beta.json`,
+      ).json()) as Mod[];
       if (!isModList(betaMods))
         throw new Error("failed to parse mods_beta.json");
 
@@ -131,12 +122,12 @@ export class ButtonHandler extends InteractionHandler {
         else betaMods[index] = mod;
       }
 
-      await fs.writeFile(
+      await Bun.write(
         `${tmp}/files/mods_beta.json`,
         await format(JSON.stringify(betaMods), { parser: "json", tabWidth: 4 }),
       );
     } else {
-      await fs.writeFile(
+      await Bun.write(
         `${tmp}/files/mods.json`,
         await format(JSON.stringify(mods), { parser: "json", tabWidth: 4 }),
       );
