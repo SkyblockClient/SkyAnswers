@@ -2,6 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import {
   InteractionHandler,
   InteractionHandlerTypes,
+  container,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
 import fs from "fs/promises";
@@ -75,12 +76,20 @@ export class ButtonHandler extends InteractionHandler {
       let modData: ArrayBuffer | undefined;
       tasks.push(
         (async () => {
-          const modResp = await fetch(data.url, {
-            headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
-          });
-          if (!modResp.ok)
-            throw new Error(`${modResp.statusText} while fetching ${data.url}`);
-          modData = await modResp.arrayBuffer();
+          try {
+            const modResp = await fetch(data.url, {
+              headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
+            });
+            if (!modResp.ok)
+              throw new Error(
+                `${modResp.statusText} while fetching ${data.url}`,
+              );
+            modData = await modResp.arrayBuffer();
+          } catch (e) {
+            container.logger.error("Failed to download mod", e);
+            await interaction.message.edit("failed to download mod");
+            throw e;
+          }
         })(),
       );
       await Promise.all(tasks);
