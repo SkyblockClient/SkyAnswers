@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "generate": "sapphire generate",
-    "watch": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "watch": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -14,6 +14,7 @@
     "@eslint/js": "^9.8.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/ts-config": "^5.0.1",
+    "@tsconfig/bun": "^1.0.7",
     "@types/bun": "latest",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/eslint__js": "^8.42.3",
@@ -22,7 +23,6 @@
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.8.0",
     "prettier": "^3.3.3",
-    "tsx": "^4.16.2",
     "typescript": "~5.4.5",
     "typescript-eslint": "8.0.0-alpha.54"
   },
@@ -43,7 +43,6 @@
     "@std/fmt": "npm:@jsr/std__fmt@^0.225.6",
     "@std/text": "npm:@jsr/std__text@1.0.0-rc.1",
     "@std/url": "npm:@jsr/std__url@1.0.0-rc.1",
-    "@tsconfig/bun": "^1.0.7",
     "dedent": "^1.5.3",
     "discord.js": "^14.15.3",
     "jszip": "^3.10.1",
