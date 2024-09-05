@@ -67,14 +67,15 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     try {
       await member.roles.add(noGiveawaysRole);
 
-      const message = `${author.id} (${author.username}) sent 6 low effort messages in a row, so they were blocked from giveaways`;
+      const message = `${member.toString()} (${member.id}) has been blocked from giveaways
+				**Reason:** 6 low effort messages in a row`;
       await channel.send(message);
 
-      const verboseBotLogs = client.channels.cache.get(botLogsChannel);
-      if (!isTextChannel(verboseBotLogs)) return;
+      const botLogs = client.channels.cache.get(botLogsChannel);
+      if (!isTextChannel(botLogs)) return;
 
       const list = unorderedList(streak.map((v) => escapeMarkdown(v)));
-      await verboseBotLogs.send({
+      await botLogs.send({
         content: `${message}\n${list}`,
         allowedMentions: { parse: [] },
       });
