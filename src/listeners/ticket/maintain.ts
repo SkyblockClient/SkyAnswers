@@ -14,6 +14,7 @@ import { Duration, Time } from "@sapphire/time-utilities";
 import { Stopwatch } from "@sapphire/stopwatch";
 import pMap from "p-map";
 import { expireBumps } from "./expireBumps.js";
+import dedent from "dedent";
 
 @ApplyOptions<Listener.Options>({
   once: true,
@@ -58,7 +59,12 @@ async function expireTickets(ticket: TextChannel) {
     const ownerId = await getTicketOwner(ticket);
     if (ownerId) {
       const owner = ticket.guild.members.resolve(ownerId);
-      if (!owner) return void pingStaff(ticket, "Owner left. Please close ticket.\n(I don't have hands to do it myself...)");
+      if (!owner)
+        return void pingStaff(
+          ticket,
+          dedent`Owner left. Please close ticket.
+            (I don't have hands to do it myself...)`,
+        );
     }
 
     if (isBumpMessage(lastMsg)) {
