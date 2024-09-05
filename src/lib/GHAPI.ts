@@ -123,39 +123,6 @@ async function createTree(
   return data.sha;
 }
 
-async function createCommit(
-  owner: string,
-  repo: string,
-  message: string,
-  treeSha: string,
-  parentSha: string,
-) {
-  const { data } = await octokit.git.createCommit({
-    owner,
-    repo,
-    message,
-    tree: treeSha,
-    parents: [parentSha],
-    committer,
-  });
-
-  return data.sha;
-}
-
-async function updateReference(
-  owner: string,
-  repo: string,
-  branch: string,
-  commitSha: string,
-) {
-  await octokit.git.updateRef({
-    owner,
-    repo,
-    ref: `heads/${branch}`,
-    sha: commitSha,
-  });
-}
-
 export interface FileToCommit {
   path: string;
   content: string | ArrayBuffer;
@@ -185,12 +152,20 @@ export async function commitFiles(
   );
 
   const treeSha = await createTree(owner, repo, baseTreeSha, blobs);
-  const commitSha = await createCommit(
+  const { data: commitData } = await octokit.git.createCommit({
     owner,
     repo,
     message,
-    treeSha,
-    baseTreeSha,
-  );
-  await updateReference(owner, repo, branch, commitSha);
+    tree: treeSha,
+    parents: [baseTreeSha],
+    committer,
+  });
+  const { sha: commitSha } = commitData;
+
+  await octokit.git.updateRef({
+    owner,
+    repo,
+    ref: `heads/${branch}`,
+    sha: commitSha,
+  });
 }
