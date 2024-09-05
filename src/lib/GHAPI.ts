@@ -32,6 +32,14 @@ export async function readGHFile(
   return { path, repo, content: atob(data.content), sha: data.sha };
 }
 
+export async function readGHContent(
+  repo: string,
+  path: string,
+): Promise<string> {
+  const { content } = await readGHFile(repo, path);
+  return content;
+}
+
 export async function writeGHFile(
   oldFile: GHContent,
   content: string,
@@ -49,4 +57,140 @@ export async function writeGHFile(
     content: btoa(content),
     sha: oldFile.sha,
   });
+}
+
+async function getBaseTreeSha(owner: string, repo: string, branch: string) {
+  const { data: refData } = await octokit.git.getRef({
+    owner,
+    repo,
+    ref: `heads/${branch}`,
+  });
+  const commitSha = refData.object.sha;
+
+  const { data: commitData } = await octokit.git.getCommit({
+    owner,
+    repo,
+    commit_sha: commitSha,
+  });
+
+  return commitData.tree.sha;
+}
+
+async function createBlob(
+  owner: string,
+  repo: string,
+  content: string,
+  encoding = "utf-8",
+) {
+  const { data } = await octokit.git.createBlob({
+    owner,
+    repo,
+    content,
+    encoding,
+  });
+  return data.sha;
+}
+
+async function createBinaryBlob(
+  owner: string,
+  repo: string,
+  content: ArrayBuffer,
+) {
+  const base64Content = Buffer.from(content).toString("base64");
+  return createBlob(owner, repo, base64Content, "base64");
+}
+
+async function createTree(
+  owner: string,
+  repo: string,
+  baseTreeSha: string,
+  files: Blob[],
+) {
+  const tree = files.map((file) => ({
+    path: file.path,
+    mode: "100644" as const,
+    type: "blob" as const,
+    sha: file.sha,
+  }));
+
+  const { data } = await octokit.git.createTree({
+    owner,
+    repo,
+    base_tree: baseTreeSha,
+    tree,
+  });
+
+  return data.sha;
+}
+
+async function createCommit(
+  owner: string,
+  repo: string,
+  message: string,
+  treeSha: string,
+  parentSha: string,
+) {
+  const { data } = await octokit.git.createCommit({
+    owner,
+    repo,
+    message,
+    tree: treeSha,
+    parents: [parentSha],
+    committer,
+  });
+
+  return data.sha;
+}
+
+async function updateReference(
+  owner: string,
+  repo: string,
+  branch: string,
+  commitSha: string,
+) {
+  await octokit.git.updateRef({
+    owner,
+    repo,
+    ref: `heads/${branch}`,
+    sha: commitSha,
+  });
+}
+
+export interface FileToCommit {
+  path: string;
+  content: string | ArrayBuffer;
+}
+
+interface Blob {
+  path: string;
+  sha: string;
+}
+
+export async function commitFiles(
+  owner: string,
+  repo: string,
+  branch: string,
+  message: string,
+  files: FileToCommit[],
+) {
+  const baseTreeSha = await getBaseTreeSha(owner, repo, branch);
+
+  const blobs: Blob[] = await Promise.all(
+    files.map(async (file) => {
+      const sha = await (typeof file.content == "string"
+        ? createBlob(owner, repo, file.content)
+        : createBinaryBlob(owner, repo, file.content));
+      return { path: file.path, sha };
+    }),
+  );
+
+  const treeSha = await createTree(owner, repo, baseTreeSha, blobs);
+  const commitSha = await createCommit(
+    owner,
+    repo,
+    message,
+    treeSha,
+    baseTreeSha,
+  );
+  await updateReference(owner, repo, branch, commitSha);
 }

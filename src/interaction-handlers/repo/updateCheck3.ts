@@ -5,18 +5,22 @@ import {
   container,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
-import fs from "fs/promises";
-import { add, clone, commit, push } from "isomorphic-git";
-import http from "isomorphic-git/http/node/index.js";
 import { format } from "prettier";
 import { checkMember } from "../../lib/update.js";
 import { Emojis, isDevUser } from "../../const.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
-import { tmpdir } from "os";
-import { join } from "path";
 import { Mod, invalidateTrackedData } from "../../lib/data.js";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
+import {
+  commitFiles,
+  readGHContent,
+  type FileToCommit,
+} from "../../lib/GHAPI.ts";
+
+const owner = "SkyBlockClient";
+const repo = "SkyblockClient-REPO";
+const branch = "main";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
@@ -59,57 +63,35 @@ export class ButtonHandler extends InteractionHandler {
       components: [],
     });
 
-    const tmp = await fs.mkdtemp(join(tmpdir(), "skyanswers-"));
+    const changes: FileToCommit[] = [];
 
-    const tasks = [];
-    tasks.push(
-      clone({
-        fs,
-        http,
-        url: `https://github.com/SkyblockClient/SkyblockClient-REPO`,
-        dir: tmp,
-        depth: 1,
-        singleBranch: true,
-      }),
-    );
     if (data.url.startsWith("https://cdn.discordapp.com/")) {
       let modData: ArrayBuffer | undefined;
-      tasks.push(
-        (async () => {
-          try {
-            const modResp = await fetch(data.url, {
-              headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
-            });
-            if (!modResp.ok)
-              throw new Error(
-                `${modResp.statusText} while fetching ${data.url}`,
-              );
-            modData = await modResp.arrayBuffer();
-          } catch (e) {
-            container.logger.error("Failed to download mod", e);
-            await interaction.message.edit("failed to download mod");
-            throw e;
-          }
-        })(),
-      );
-      await Promise.all(tasks);
-      if (!modData) throw new Error("this shouldn't happen");
+      try {
+        const modResp = await fetch(data.url, {
+          headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
+        });
+        if (!modResp.ok)
+          throw new Error(`${modResp.statusText} while fetching ${data.url}`);
+        modData = await modResp.arrayBuffer();
+      } catch (e) {
+        container.logger.error("Failed to download mod", e);
+        await interaction.message.edit("failed to download mod");
+        throw e;
+      }
+      // if (!modData) throw new Error("this shouldn't happen");
 
-      await fs.writeFile(
-        `${tmp}/files/mods/${data.file}`,
-        Buffer.from(modData),
-      );
+      changes.push({
+        path: `files/mods/${data.file}`,
+        content: modData,
+      });
       data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/${data.file}`;
-    } else {
-      await Promise.all(tasks);
     }
 
     await interaction.message.edit("pushing it out...");
 
     let mods = JSON.parse(
-      await fs.readFile(`${tmp}/files/mods.json`, {
-        encoding: "utf8",
-      }),
+      await readGHContent(`${owner}/${repo}`, "files/mods.json"),
     ) as Mod[];
     if (!isModList(mods)) throw new Error("failed to parse mods.json");
 
@@ -126,9 +108,7 @@ export class ButtonHandler extends InteractionHandler {
 
     if (data.beta) {
       const betaMods = JSON.parse(
-        await fs.readFile(`${tmp}/files/mods_beta.json`, {
-          encoding: "utf8",
-        }),
+        await readGHContent(`${owner}/${repo}`, "files/mods_beta.json"),
       ) as Mod[];
       if (!isModList(betaMods))
         throw new Error("failed to parse mods_beta.json");
@@ -140,42 +120,33 @@ export class ButtonHandler extends InteractionHandler {
         else betaMods[index] = mod;
       }
 
-      await fs.writeFile(
-        `${tmp}/files/mods_beta.json`,
-        await format(JSON.stringify(betaMods), { parser: "json", tabWidth: 4 }),
-      );
-    } else {
-      await fs.writeFile(
-        `${tmp}/files/mods.json`,
-        await format(JSON.stringify(mods), { parser: "json", tabWidth: 4 }),
-      );
-    }
+      changes.push({
+        path: "files/mods_beta.json",
+        content: await format(JSON.stringify(betaMods), {
+          parser: "json",
+          tabWidth: 4,
+        }),
+      });
+    } else
+      changes.push({
+        path: `files/mods.json`,
+        content: await format(JSON.stringify(mods), {
+          parser: "json",
+          tabWidth: 4,
+        }),
+      });
 
-    await add({
-      fs,
-      dir: tmp,
-      filepath: ".",
-    });
-    await commit({
-      fs,
-      dir: tmp,
-      author: {
-        name: "SkyClient-repo-bot",
-        email: "SkyClient-repo-bot@users.noreply.github.com",
-      },
-      message: `Update ${data.forge_id} to ${data.file}`,
-    });
-    await push({
-      fs,
-      http,
-      dir: tmp,
-      onAuth: () => ({ username: envParseString("GH_KEY") }),
-    });
+    await commitFiles(
+      owner,
+      repo,
+      branch,
+      `Update ${data.forge_id} to ${data.file}`,
+      changes,
+    );
 
     await PendingUpdatesDB.update((data) => {
       delete data[interaction.message.id];
     });
-
     invalidateTrackedData();
 
     return interaction.message.edit({
