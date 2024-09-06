@@ -125,7 +125,7 @@ async function createTree(
       type: "blob" as const,
       sha: file.sha,
     }));
-    container.logger.debug("tree", tree);
+    container.logger.info("tree", tree);
 
     const { data } = await octokit.git.createTree({
       owner,
@@ -201,7 +201,7 @@ export async function commitFiles(
   files: FileToCommit[],
 ) {
   const baseTreeSha = await getBaseTreeSha(owner, repo, branch);
-  container.logger.debug("baseTreeSha", baseTreeSha);
+  container.logger.info("baseTreeSha", baseTreeSha);
 
   const blobs: Blob[] = await pmap(files, async (file) => {
     const sha = await (typeof file.content == "string"
@@ -209,10 +209,10 @@ export async function commitFiles(
       : createBinaryBlob(owner, repo, file.content));
     return { path: file.path, sha };
   });
-  container.logger.debug("blobs", blobs);
+  container.logger.info("blobs", blobs);
 
   const treeSha = await createTree(owner, repo, baseTreeSha, blobs);
-  container.logger.debug("treeSha", treeSha);
+  container.logger.info("treeSha", treeSha);
   const commitSha = await createCommit(
     owner,
     repo,
@@ -220,6 +220,6 @@ export async function commitFiles(
     treeSha,
     baseTreeSha,
   );
-  container.logger.debug("commitSha", commitSha);
+  container.logger.info("commitSha", commitSha);
   await updateReference(owner, repo, branch, commitSha);
 }
