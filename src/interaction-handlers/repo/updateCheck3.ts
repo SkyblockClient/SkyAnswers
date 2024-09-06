@@ -56,16 +56,14 @@ export class ButtonHandler extends InteractionHandler {
       return;
     }
 
-    await interaction.update({
-      content: data.url.startsWith("https://cdn.discordapp.com/")
-        ? `hold on, we're downloading some stuff`
-        : `hold on, we're downloading the repo`,
-      components: [],
-    });
-
     const changes: FileToCommit[] = [];
 
     if (data.url.startsWith("https://cdn.discordapp.com/")) {
+      await interaction.update({
+        content: "one second we need to download then upload the file",
+        components: [],
+      });
+
       let modData: ArrayBuffer | undefined;
       try {
         const modResp = await fetch(data.url, {
@@ -88,7 +86,10 @@ export class ButtonHandler extends InteractionHandler {
       data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/${data.file}`;
     }
 
-    await interaction.message.edit("pushing it out...");
+    await interaction.message.edit({
+      content: "one second just need to scream commands at github",
+      components: [],
+    });
 
     let mods = JSON.parse(
       await readGHContent(`${owner}/${repo}`, "files/mods.json"),
