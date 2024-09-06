@@ -68,15 +68,16 @@ async function getBaseTreeSha(owner: string, repo: string, branch: string) {
       repo,
       ref: `heads/${branch}`,
     });
-    const commitSha = refData.object.sha;
+    const baseCommitSha = refData.object.sha;
 
-    const { data } = await octokit.git.getCommit({
+    const { data: treeData } = await octokit.git.getCommit({
       owner,
       repo,
-      commit_sha: commitSha,
+      commit_sha: baseCommitSha,
     });
+    const baseTreeSha = treeData.tree.sha;
 
-    return data.tree.sha;
+    return { baseCommitSha, baseTreeSha };
   } catch (error) {
     container.logger.error("Error retrieving base tree SHA:", error);
     throw error;
@@ -200,7 +201,12 @@ export async function commitFiles(
   message: string,
   files: FileToCommit[],
 ) {
-  const baseTreeSha = await getBaseTreeSha(owner, repo, branch);
+  const { baseCommitSha, baseTreeSha } = await getBaseTreeSha(
+    owner,
+    repo,
+    branch,
+  );
+  container.logger.info("baseCommit", baseCommitSha);
   container.logger.info("baseTreeSha", baseTreeSha);
 
   const blobs: Blob[] = await pmap(files, async (file) => {
@@ -218,7 +224,7 @@ export async function commitFiles(
     repo,
     message,
     treeSha,
-    baseTreeSha,
+    baseCommitSha,
   );
   container.logger.info("commitSha", commitSha);
   await updateReference(owner, repo, branch, commitSha);
