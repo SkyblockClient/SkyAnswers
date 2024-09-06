@@ -1,6 +1,6 @@
 #!/usr/bin/env -S pnpm tsx
 
-import { SapphireClient } from "@sapphire/framework";
+import { LogLevel, SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
 import "@sapphire/plugin-logger/register";
 import "@sapphire/plugin-editable-commands/register";
@@ -19,6 +19,7 @@ const client = new SapphireClient({
   ],
   partials: [Partials.Channel],
   loadMessageCommandListeners: true,
+  logger: { level: LogLevel.Debug },
 });
 
 client.logger.info("Connecting...");
