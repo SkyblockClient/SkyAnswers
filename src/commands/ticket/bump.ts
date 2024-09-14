@@ -1,7 +1,12 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import { Colors, hyperlink, time } from "discord.js";
-import { getTicketTop, getTicketOwner, isTicket } from "../../lib/ticket.js";
+import {
+  getTicketTop,
+  getTicketOwner,
+  isTicket,
+  isSupportTeam,
+} from "../../lib/ticket.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import { Duration } from "@sapphire/time-utilities";
 
@@ -20,6 +25,11 @@ export class UserCommand extends Command {
     interaction: Command.ChatInputCommandInteraction,
   ) {
     const { channel } = interaction;
+    if (!isSupportTeam(interaction.member))
+      return interaction.reply({
+        content: "❔",
+        ephemeral: true,
+      });
     if (!isTicket(channel))
       return interaction.reply({
         content: "Bold of you to assume this is a ticket...",
