@@ -18,6 +18,7 @@ import {
 import { envParseString } from "@skyra/env-utilities";
 import { type Nullish } from "@sapphire/utilities";
 import { extname } from "path";
+import dedent from "dedent";
 
 const ModInfo = z.array(z.object({ modid: z.string() }));
 
@@ -294,10 +295,12 @@ function retMessage(
     content: "👀 does this look alright?",
     embeds: [
       {
-        description: `id: ${data.id}
-url: ${data.url}
-file: ${data.file}
-md5: ${data.hash}`,
+        description: dedent`
+          id: ${data.id}
+          url: ${data.url}
+          file: ${data.file}
+          md5: ${data.hash}
+        `,
       },
     ],
     components: [

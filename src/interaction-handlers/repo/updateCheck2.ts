@@ -151,7 +151,7 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public override parse(interaction: ButtonInteraction) {
-    if (interaction.customId !== "updateCheck3") return this.none();
+    if (interaction.customId !== "updateCheck2") return this.none();
     return this.some();
   }
 }
