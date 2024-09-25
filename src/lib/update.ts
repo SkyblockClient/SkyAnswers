@@ -25,7 +25,6 @@ export async function checkMember(member: GuildMember): Promise<
       packs?: Record<string, Permission>;
     }
 > {
-  if (member.permissions.has("Administrator")) return { all: true };
   if (member.roles.cache.has(SkyClient.roles.GitHubKeeper))
     return { all: true };
   if (isDevUser && member.id == Users.BotDev) return { all: true };
