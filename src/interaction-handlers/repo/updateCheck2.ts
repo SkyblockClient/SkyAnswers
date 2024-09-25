@@ -63,17 +63,18 @@ export class ButtonHandler extends InteractionHandler {
       });
 
     const approver = { name: member.user.tag, id: member.user.id };
-    data.approvers.push(approver);
+    const approvers = [...data.approvers, approver];
     await PendingUpdatesDB.update((db) => {
       db[interaction.message.id].approvers.push(approver);
     });
+
     await interaction.message.edit({
       embeds: [
         interaction.message.embeds[0],
         {
           title: "Approvers",
           description: unorderedList(
-            data.approvers.map(({ id }) => `${userMention(id)} (${id})`),
+            approvers.map(({ id }) => `${userMention(id)} (${id})`),
           ),
         },
       ],
