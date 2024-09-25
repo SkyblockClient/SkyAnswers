@@ -14,23 +14,23 @@ export const BoostersDB = await JSONFilePreset<BoostersDB>(
   {},
 );
 
-export type ModUpdate = {
-  type: "mod";
-  forge_id: string;
+export type Approver = {
+  name: string;
+  id: Snowflake;
+};
+export type PartialUpdate = {
+  id: string;
   url: string;
   hash: string;
   file: string;
-  initiator: string;
+  pingMsg?: string;
+  approvers: Approver[];
+};
+export type ModUpdate = PartialUpdate & {
+  type: "mod";
   beta: boolean;
 };
-export type PackUpdate = {
-  type: "pack";
-  packId: string;
-  url: string;
-  hash: string;
-  file: string;
-  initiator: string;
-};
+export type PackUpdate = PartialUpdate & { type: "pack" };
 
 export type PendingUpdate = ModUpdate | PackUpdate;
 type PendingUpdatesDB = Record<string, PendingUpdate>;

@@ -6,12 +6,16 @@ import { SkyClient, isDevUser, Users } from "../const.js";
 const Permission = z.enum(["update", "approve"]);
 type Permission = z.infer<typeof Permission>;
 
-const ModOwner = z.object({
+const UpdatePerm = z.object({
   github: z.string(),
   mods: z.record(Permission).optional(),
   packs: z.record(Permission).optional(),
 });
-const ModOwners = z.record(ModOwner);
+const UpdatePerms = z.record(UpdatePerm);
+
+export async function getUpdatePerms() {
+  return UpdatePerms.parse(await getJSON("update_perms"));
+}
 
 export async function checkMember(member: GuildMember): Promise<
   | { all: true }
@@ -26,7 +30,7 @@ export async function checkMember(member: GuildMember): Promise<
     return { all: true };
   if (isDevUser && member.id == Users.BotDev) return { all: true };
 
-  const owners = ModOwners.parse(await getJSON("update_perms"));
+  const owners = await getUpdatePerms();
   const data = owners[member.id];
   if (data) return { all: false, mods: data.mods, packs: data.packs };
   return { all: false };

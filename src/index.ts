@@ -19,6 +19,7 @@ const client = new SapphireClient({
   ],
   partials: [Partials.Channel],
   loadMessageCommandListeners: true,
+  logger: { level: LogLevel.Info },
 });
 
 client.logger.info("Connecting...");

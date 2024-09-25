@@ -9,7 +9,12 @@ import { checkMember } from "../../lib/update.js";
 import { SkyClient, Emojis } from "../../const.js";
 import z from "zod";
 import { basename } from "node:path/posix";
-import { PendingUpdatesDB } from "../../lib/db.js";
+import {
+  PendingUpdatesDB,
+  type ModUpdate,
+  type PackUpdate,
+  type PartialUpdate,
+} from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 import { type Nullish } from "@sapphire/utilities";
 import { extname } from "path";
@@ -145,15 +150,18 @@ export class UserCommand extends Subcommand {
     if (!perms.all && (perms.mods ? perms.mods[modId] != "update" : false))
       return int.editReply(`🫨 you can't update that mod`);
 
-    const data = {
-      forge_id: modId,
+    const isBeta = int.options.getBoolean("beta") || false;
+    const data: ModUpdate = {
+      type: "mod",
+      id: modId,
       url,
       file: decodeURIComponent(
         int.options.getString("filename") || basename(url),
       ),
       hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
+      beta: isBeta,
+      approvers: [],
     };
-    const isBeta = int.options.getBoolean("beta") || false;
 
     const modsRef = Mod.array().parse(await getMods());
     const mods = isBeta
@@ -182,36 +190,10 @@ export class UserCommand extends Subcommand {
     await PendingUpdatesDB.update((pending) => {
       pending[id] = {
         ...data,
-        initiator: member.id,
-        beta: isBeta,
-        type: "mod",
       };
     });
 
-    return int.editReply({
-      content: "👀 does this look alright?",
-      embeds: [
-        {
-          description: `forge_id: ${data.forge_id}
-url: ${data.url}
-file: ${data.file}
-md5: ${data.hash}`,
-        },
-      ],
-      components: [
-        {
-          type: ComponentType.ActionRow,
-          components: [
-            {
-              type: ComponentType.Button,
-              customId: "updateCheck1",
-              label: "Start double-check",
-              style: ButtonStyle.Success,
-            },
-          ],
-        },
-      ],
-    });
+    return retMessage(int, data);
   }
 
   public async updatePack(int: Subcommand.ChatInputCommandInteraction) {
@@ -266,13 +248,15 @@ md5: ${data.hash}`,
     if (!perms.all && (perms.packs ? perms.packs[packId] != "update" : false))
       return int.editReply(`🫨 you can't update that pack`);
 
-    const data = {
-      packId,
+    const data: PackUpdate = {
+      type: "pack",
+      id: packId,
       url,
       file: decodeURIComponent(
         int.options.getString("filename") || basename(url),
       ),
       hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
+      approvers: [],
     };
 
     const packs = Pack.array().parse(await getPacks());
@@ -295,36 +279,39 @@ md5: ${data.hash}`,
 
     const { id } = await int.fetchReply();
     await PendingUpdatesDB.update((pending) => {
-      pending[id] = {
-        ...data,
-        initiator: member.id,
-        type: "pack",
-      };
+      pending[id] = data;
     });
 
-    return int.editReply({
-      content: "👀 does this look alright?",
-      embeds: [
-        {
-          description: `packId: ${data.packId}
+    return retMessage(int, data);
+  }
+}
+
+function retMessage(
+  int: Subcommand.ChatInputCommandInteraction,
+  data: PartialUpdate,
+) {
+  return int.editReply({
+    content: "👀 does this look alright?",
+    embeds: [
+      {
+        description: `id: ${data.id}
 url: ${data.url}
 file: ${data.file}
 md5: ${data.hash}`,
-        },
-      ],
-      components: [
-        {
-          type: ComponentType.ActionRow,
-          components: [
-            {
-              type: ComponentType.Button,
-              customId: "updateCheck2",
-              label: "Continue",
-              style: ButtonStyle.Success,
-            },
-          ],
-        },
-      ],
-    });
-  }
+      },
+    ],
+    components: [
+      {
+        type: ComponentType.ActionRow,
+        components: [
+          {
+            type: ComponentType.Button,
+            customId: "updateCheck1",
+            label: "Continue",
+            style: ButtonStyle.Success,
+          },
+        ],
+      },
+    ],
+  });
 }
