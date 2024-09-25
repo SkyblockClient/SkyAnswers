@@ -68,7 +68,7 @@ export class ButtonHandler extends InteractionHandler {
       db[interaction.message.id].approvers.push(approver);
     });
 
-    await interaction.message.edit({
+    await interaction.update({
       embeds: [
         interaction.message.embeds[0],
         {
