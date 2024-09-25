@@ -14,7 +14,8 @@ export const BoostersDB = await JSONFilePreset<BoostersDB>(
   {},
 );
 
-type PendingUpdate = {
+export type ModUpdate = {
+  type: "mod";
   forge_id: string;
   url: string;
   hash: string;
@@ -22,6 +23,16 @@ type PendingUpdate = {
   initiator: string;
   beta: boolean;
 };
+export type PackUpdate = {
+  type: "pack";
+  packId: string;
+  url: string;
+  hash: string;
+  file: string;
+  initiator: string;
+};
+
+export type PendingUpdate = ModUpdate | PackUpdate;
 type PendingUpdatesDB = Record<string, PendingUpdate>;
 export const PendingUpdatesDB = await JSONFilePreset<PendingUpdatesDB>(
   "db/pendingUpdates.json",

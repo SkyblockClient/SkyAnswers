@@ -8,7 +8,8 @@ type Permission = z.infer<typeof Permission>;
 
 const ModOwner = z.object({
   github: z.string(),
-  mods: z.record(Permission),
+  mods: z.record(Permission).optional(),
+  packs: z.record(Permission).optional(),
 });
 const ModOwners = z.record(ModOwner);
 
@@ -16,15 +17,17 @@ export async function checkMember(member: GuildMember): Promise<
   | { all: true }
   | {
       all: false;
-      perms?: Record<string, Permission>;
+      mods?: Record<string, Permission>;
+      packs?: Record<string, Permission>;
     }
 > {
+  if (member.permissions.has("Administrator")) return { all: true };
   if (member.roles.cache.has(SkyClient.roles.GitHubKeeper))
     return { all: true };
   if (isDevUser && member.id == Users.BotDev) return { all: true };
 
-  const owners = ModOwners.parse(await getJSON("mod_owners"));
+  const owners = ModOwners.parse(await getJSON("update_perms"));
   const data = owners[member.id];
-  if (data) return { all: false, perms: data.mods };
+  if (data) return { all: false, mods: data.mods, packs: data.packs };
   return { all: false };
 }
