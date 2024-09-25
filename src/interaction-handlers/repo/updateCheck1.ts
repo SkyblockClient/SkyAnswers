@@ -58,6 +58,8 @@ export class ButtonHandler extends InteractionHandler {
       content: dedent`
         Double-check that this mod doesn't have a rat in it before approving!
         **(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)**
+
+        ${interaction.user.toString()} don't forget to approve your own update
       `,
       embeds: [
         interaction.message.embeds[0],
