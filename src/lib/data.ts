@@ -1,5 +1,5 @@
 import { fetch, FetchResultTypes } from "@sapphire/fetch";
-import { z } from "zod";
+import * as v from "valibot";
 import { repoFilesURL } from "../const.js";
 import { levenshteinDistance } from "@std/text";
 import { container } from "@sapphire/framework";
@@ -30,17 +30,15 @@ export const getJSON = (jsonFilename: string) =>
   getTrackedData(`${repoFilesURL}/${jsonFilename}.json`);
 export const invalidateTrackedData = () => memoizeClear(getTrackedData);
 
-export const DataType = z.enum(["mods", "packs"]);
-export type DataType = z.infer<typeof DataType>;
+export const DataType = v.picklist(["mods", "packs"]);
+export type DataType = v.InferOutput<typeof DataType>;
 
-export const Data = z
-  .object({
-    id: z.string(),
-    nicknames: z.string().array().optional(),
-    display: z.string().optional(),
-  })
-  .passthrough();
-export type Data = z.infer<typeof Data>;
+export const Data = v.looseObject({
+  id: v.string(),
+  nicknames: v.optional(v.array(v.string())),
+  display: v.optional(v.string()),
+});
+export type Data = v.InferOutput<typeof Data>;
 
 // const Action = z.object({
 // 	icon: z.string().optional(),
@@ -50,69 +48,79 @@ export type Data = z.infer<typeof Data>;
 // 	document: z.string().optional()
 // });
 
-export const Downloadable = Data.extend({
-  display: z.string(),
+export const Downloadable = v.looseObject({
+  ...Data.entries,
+  display: v.string(),
   // enabled: z.boolean().optional(),
-  creator: z.string().optional(),
-  description: z.string(),
-  icon: z.string().optional(),
+  creator: v.optional(v.string()),
+  description: v.string(),
+  icon: v.optional(v.string()),
   // icon_scaling: z.literal('pixel').optional(),
   // discordcode: z.string().optional(),
   // actions: Action.array().optional(),
-  categories: z.string().array().optional(),
-  hidden: z.boolean().optional(),
+  categories: v.optional(v.array(v.string())),
+  hidden: v.optional(v.boolean()),
 
-  file: z.string(),
-  url: z.string().optional(),
-  hash: z.string().optional(),
-}).passthrough();
-export type Downloadable = z.infer<typeof Downloadable>;
+  file: v.string(),
+  url: v.optional(v.string()),
+  hash: v.optional(v.string()),
+});
+export type Downloadable = v.InferOutput<typeof Downloadable>;
 
-export const Mod = Downloadable.extend({
-  command: z.string().optional(),
-  // warning: z
-  // 	.object({
-  // 		lines: z.string().array()
-  // 	})
-  // 	.optional(),
-  // update_to_ids: z.string().array().optional(),
-  // files: z.string().array().optional(),
-  forge_id: z.string().optional(),
-  packages: z.string().array().optional(),
-})
-  .passthrough()
-  .transform((v) => ({
+export const Mod = v.pipe(
+  v.looseObject({
+    ...Downloadable.entries,
+    command: v.optional(v.string()),
+    // warning: z
+    // 	.object({
+    // 		lines: z.string().array()
+    // 	})
+    // 	.optional(),
+    // update_to_ids: z.string().array().optional(),
+    // files: z.string().array().optional(),
+    forge_id: v.optional(v.string()),
+    packages: v.optional(v.array(v.string())),
+  }),
+  v.transform((v) => ({
     ...v,
     download: v.url || `${repoFilesURL}/mods/${v.file}`,
-  }));
-export type Mod = z.infer<typeof Mod>;
+  })),
+);
+export type Mod = v.InferOutput<typeof Mod>;
 
-export const Pack = Downloadable.extend({
-  screenshot: z.string().optional(),
-})
-  .passthrough()
-  .transform((v) => ({
+export const Pack = v.pipe(
+  v.looseObject({
+    ...Downloadable.entries,
+    screenshot: v.optional(v.string()),
+  }),
+  v.transform((v) => ({
     ...v,
     download: v.url || `${repoFilesURL}/packs/${v.file}`,
-  }));
-export type Pack = z.infer<typeof Pack>;
+  })),
+);
+export type Pack = v.InferOutput<typeof Pack>;
 
-export const Discord = Data.extend({
-  icon: z.string().optional(),
-  description: z.string().optional(),
+export const Discord = v.looseObject({
+  ...Data.entries,
+  icon: v.optional(v.string()),
+  description: v.optional(v.string()),
   // partner: z.boolean().optional(),
   // type: DataType.optional(),
-  code: z.string(),
-  fancyname: z.string().optional(),
+  code: v.string(),
+  fancyname: v.optional(v.string()),
   // mods: z.string().array().optional(),
   // packs: z.string().array().optional()
-}).passthrough();
-export type Discord = z.infer<typeof Discord>;
+});
+export type Discord = v.InferOutput<typeof Discord>;
 
-export const getMods = async () => Mod.array().parse(await getJSON("mods"));
-export const getPacks = async () => Pack.array().parse(await getJSON("packs"));
+export const Mods = v.array(Mod);
+export const Packs = v.array(Pack);
+export const Discords = v.array(Discord);
+
+export const getMods = async () => v.parse(Mods, await getJSON("mods"));
+export const getPacks = async () => v.parse(Packs, await getJSON("packs"));
 export const getDiscords = async () =>
-  Discord.array().parse(await getJSON("discords"));
+  v.parse(Discords, await getJSON("discords"));
 
 export const queryData = <T extends Data>(items: T[], query: string) =>
   items.find((opt) => getDistance(opt, query) == 0);
@@ -133,8 +141,8 @@ export function getDistance(item: Data, query: string) {
   return Math.min(...distances);
 }
 
-const isMod = (obj: unknown): obj is Mod => Mod.safeParse(obj).success;
-const isPack = (obj: unknown): obj is Pack => Pack.safeParse(obj).success;
+const isMod = (obj: unknown): obj is Mod => v.safeParse(Mod, obj).success;
+const isPack = (obj: unknown): obj is Pack => v.safeParse(Pack, obj).success;
 
 export async function getDownloadableMessage(
   downloadable: Mod | Pack,
@@ -165,7 +173,7 @@ export async function getDownloadableMessage(
           : "It might be internal or outdated."),
     });
 
-  const mods = Mod.array().parse(await getMods());
+  const mods = v.parse(Mods, await getMods());
   const downloads: string[] = [
     hyperlink(downloadable.file, encodeURI(downloadable.download)),
   ];

@@ -4,10 +4,10 @@ import { Subcommand } from "@sapphire/plugin-subcommands";
 import { createHash } from "crypto";
 import { ButtonStyle, ComponentType } from "discord.js";
 import JSZip from "jszip";
-import { Mod, Pack, getJSON, getMods, getPacks } from "../../lib/data.js";
+import { Mods, Packs, getJSON, getMods, getPacks } from "../../lib/data.js";
 import { checkMember } from "../../lib/update.js";
 import { SkyClient, Emojis } from "../../const.js";
-import z from "zod";
+import * as v from "valibot";
 import { basename } from "node:path/posix";
 import {
   PendingUpdatesDB,
@@ -20,7 +20,8 @@ import { type Nullish } from "@sapphire/utilities";
 import { extname } from "path";
 import dedent from "dedent";
 
-const ModInfo = z.array(z.object({ modid: z.string() }));
+const ModInfo = v.array(v.object({ modid: v.string() }));
+const URL = v.pipe(v.string(), v.url());
 
 @ApplyOptions<Subcommand.Options>({
   description: "Updates a mod / pack",
@@ -115,7 +116,7 @@ export class UserCommand extends Subcommand {
         ephemeral: true,
       });
     const url = int.options.getString("url", true);
-    if (!z.string().url().safeParse(url).success)
+    if (!v.safeParse(URL, url).success)
       return int.reply("this doesn't look like a URL to me 🤔");
 
     await int.deferReply();
@@ -138,7 +139,7 @@ export class UserCommand extends Subcommand {
       const modInfoFile = modZip.file("mcmod.info");
       if (modInfoFile) {
         const modInfoStr = await modInfoFile.async("text");
-        const modInfo = ModInfo.parse(JSON.parse(modInfoStr));
+        const modInfo = v.parse(ModInfo, JSON.parse(modInfoStr));
         modId = modInfo[0].modid;
       }
     } catch (e) {
@@ -164,10 +165,8 @@ export class UserCommand extends Subcommand {
       approvers: [],
     };
 
-    const modsRef = Mod.array().parse(await getMods());
-    const mods = isBeta
-      ? Mod.array().parse(await getJSON("mods_beta"))
-      : modsRef;
+    const modsRef = v.parse(Mods, await getMods());
+    const mods = isBeta ? v.parse(Mods, await getJSON("mods_beta")) : modsRef;
 
     const existingMod =
       mods.find((mod) => mod.forge_id == modId) ||
@@ -218,7 +217,7 @@ export class UserCommand extends Subcommand {
         ephemeral: true,
       });
     const url = int.options.getString("url", true);
-    if (!z.string().url().safeParse(url).success)
+    if (!v.safeParse(URL, url).success)
       return int.reply("this doesn't look like a URL to me 🤔");
 
     await int.deferReply();
@@ -260,7 +259,7 @@ export class UserCommand extends Subcommand {
       approvers: [],
     };
 
-    const packs = Pack.array().parse(await getPacks());
+    const packs = v.parse(Packs, await getPacks());
 
     const existingPack = packs.find((pack) => pack.id == packId);
     if (!existingPack) return int.editReply("🤔 that pack doesn't exist");

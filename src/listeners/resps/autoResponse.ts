@@ -4,7 +4,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { Events, Listener, container } from "@sapphire/framework";
 import { Message } from "discord.js";
 import { Polyfrost, SkyClient } from "../../const.js";
-import { z } from "zod";
+import * as v from "valibot";
 import { isTicket } from "../../lib/ticket.js";
 import { buildDeleteBtnRow } from "../../lib/builders.js";
 import { isTruthy } from "remeda";
@@ -47,23 +47,24 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
   }
 }
 
-const AutoResp = z.object({
-  triggers: z.string().array().optional(),
-  skyclient: z.boolean().optional(),
-  response: z.string(),
+const AutoResp = v.object({
+  triggers: v.optional(v.array(v.string())),
+  skyclient: v.optional(v.boolean()),
+  response: v.string(),
 });
-type AutoResp = z.infer<typeof AutoResp>;
+type AutoResp = v.InferOutput<typeof AutoResp>;
+const AutoResps = v.array(AutoResp);
 
-const Resp = z.object({
-  response: z.string(),
-  tag: z.boolean(),
+const Resp = v.object({
+  response: v.string(),
+  tag: v.boolean(),
 });
-type Resp = z.infer<typeof Resp>;
+type Resp = v.InferOutput<typeof Resp>;
 
 export async function findAutoresps(message: string, isSkyClient: boolean) {
   let resps: AutoResp[];
   try {
-    resps = AutoResp.array().parse(await getJSON("botautoresponse"));
+    resps = v.parse(AutoResps, await getJSON("botautoresponse"));
   } catch (e) {
     container.logger.error("Failed to read botautoresponse.json!", e);
     return [];

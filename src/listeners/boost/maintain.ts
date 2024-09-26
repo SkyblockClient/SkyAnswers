@@ -3,7 +3,7 @@ import { Client } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { BoostersDB } from "../../lib/db.js";
 import { SkyClient } from "../../const.js";
-import { z } from "zod";
+import * as v from "valibot";
 import { readGHFile, writeGHFile } from "../../lib/GHAPI.js";
 import { format } from "prettier";
 import { Time } from "@sapphire/time-utilities";
@@ -23,13 +23,14 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
   }
 }
 
-const TagsJSON = z.object({
-  tags: z.record(
-    z.union([z.tuple([z.string(), z.string()]), z.tuple([z.string()])]),
+const TagsJSON = v.object({
+  tags: v.record(
+    v.string(),
+    v.union([v.tuple([v.string(), v.string()]), v.tuple([v.string()])]),
   ),
-  perms: z.record(z.string().array()),
-  whitelist: z.boolean(),
-  whitelisted: z.string().array(),
+  perms: v.record(v.string(), v.array(v.string())),
+  whitelist: v.boolean(),
+  whitelisted: v.array(v.string()),
 });
 
 export async function run(client: Client<true>) {
@@ -57,7 +58,7 @@ export async function run(client: Client<true>) {
 
 async function updateBoosters(repo: string, path: string, boosters: string[]) {
   const oldFile = await readGHFile(repo, path);
-  const tags = TagsJSON.parse(JSON.parse(oldFile.content));
+  const tags = v.parse(TagsJSON, JSON.parse(oldFile.content));
   tags.perms["Booster"] = boosters;
 
   const content = await format(JSON.stringify(tags), { parser: "json" });

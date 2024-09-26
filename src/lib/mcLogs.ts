@@ -1,24 +1,26 @@
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { Time } from "@sapphire/time-utilities";
 import memoize from "memoize";
-import z from "zod";
+import * as v from "valibot";
 
 const baseURL = "https://api.mclo.gs/1";
 
-const APIError = z.object({
-  success: z.literal(false),
-  error: z.string(),
-});
-type APIError = z.infer<typeof APIError>;
+const URL = v.pipe(v.string(), v.url());
 
-const PostLog = z.object({
-  success: z.literal(true),
-  id: z.string(),
-  url: z.string().url(),
-  raw: z.string().url(),
+const APIError = v.object({
+  success: v.literal(false),
+  error: v.string(),
 });
-type PostLog = z.input<typeof PostLog>;
-const PostLogRes = z.discriminatedUnion("success", [PostLog, APIError]);
+type APIError = v.InferOutput<typeof APIError>;
+
+const PostLog = v.object({
+  success: v.literal(true),
+  id: v.string(),
+  url: URL,
+  raw: URL,
+});
+type PostLog = v.InferInput<typeof PostLog>;
+const PostLogRes = v.variant("success", [PostLog, APIError]);
 type PostLogRes = PostLog | APIError;
 
 export type Log = Omit<PostLog, "success"> & {
@@ -33,13 +35,13 @@ export async function postLog(log: string): Promise<Log> {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
   });
-  const res = PostLogRes.parse(data);
+  const res = v.parse(PostLogRes, data);
   if (!res.success) throw new Error(res.error);
   return getMCLog(res.id);
 }
 
 function isPostLog(res: unknown): res is PostLog {
-  return PostLog.safeParse(res).success;
+  return v.safeParse(PostLog, res).success;
 }
 
 const getMCLogID = (log: string | PostLog) =>
@@ -75,60 +77,76 @@ enum Level {
   DEBUG,
 }
 
-const EntryLevel = z.nativeEnum(Level);
-type EntryLevel = z.infer<typeof EntryLevel>;
-const EntryLine = z.object({
-  number: z.number(),
-  content: z.string().describe("The full content of the line."),
+const EntryLevel = v.enum(Level);
+type EntryLevel = v.InferOutput<typeof EntryLevel>;
+const EntryLine = v.object({
+  number: v.number(),
+  content: v.pipe(v.string(), v.description("The full content of the line.")),
 });
-const AnalysisEntry = z.object({
+const AnalysisEntry = v.object({
   level: EntryLevel,
-  time: z.null(),
-  prefix: z
-    .string()
-    .describe(
+  time: v.null(),
+  prefix: v.pipe(
+    v.string(),
+    v.description(
       "The prefix of this entry, usually the part containing time and loglevel.",
     ),
-  lines: z.array(EntryLine),
+  ),
+  lines: v.array(EntryLine),
 });
 
-const LogInsights = z.object({
-  id: z.string().describe("name/type"),
-  name: z.string().describe("Software name, e.g. Vanilla").nullable(),
-  type: z.string().describe("Type name, e.g. Server Log"),
-  version: z.string().describe("Version, e.g. 1.12.2").nullable(),
-  title: z.string().describe("Combined title, e.g. Vanilla 1.12.2 Server Log"),
-  analysis: z.object({
-    problems: z.array(
-      z.object({
-        message: z.string().describe("A message explaining the problem."),
-        counter: z.number(),
+const LogInsights = v.object({
+  id: v.pipe(v.string(), v.description("name/type")),
+  name: v.nullable(
+    v.pipe(v.string(), v.description("Software name, e.g. Vanilla")),
+  ),
+  type: v.pipe(v.string(), v.description("Type name, e.g. Server Log")),
+  version: v.nullable(
+    v.pipe(v.string(), v.description("Version, e.g. 1.12.2")),
+  ),
+  title: v.pipe(
+    v.string(),
+    v.description("Combined title, e.g. Vanilla 1.12.2 Server Log"),
+  ),
+  analysis: v.object({
+    problems: v.array(
+      v.object({
+        message: v.pipe(
+          v.string(),
+          v.description("A message explaining the problem."),
+        ),
+        counter: v.number(),
         entry: AnalysisEntry,
-        solutions: z.array(
-          z.object({
-            message: z
-              .string()
-              .describe("A message explaining a possible solution."),
+        solutions: v.array(
+          v.object({
+            message: v.pipe(
+              v.string(),
+              v.description("A message explaining a possible solution."),
+            ),
           }),
         ),
       }),
     ),
-    information: z.array(
-      z.object({
-        message: z.string().describe("Label: value"),
-        counter: z.number(),
-        label: z
-          .string()
-          .describe("The label of this information, e.g. Minecraft version"),
-        value: z
-          .string()
-          .describe("The value of this information, e.g. 1.12.2"),
+    information: v.array(
+      v.object({
+        message: v.pipe(v.string(), v.description("Label: value")),
+        counter: v.number(),
+        label: v.pipe(
+          v.string(),
+          v.description(
+            "The label of this information, e.g. Minecraft version",
+          ),
+        ),
+        value: v.pipe(
+          v.string(),
+          v.description("The value of this information, e.g. 1.12.2"),
+        ),
         entry: AnalysisEntry,
       }),
     ),
   }),
 });
-type LogInsights = z.infer<typeof LogInsights>;
+type LogInsights = v.InferOutput<typeof LogInsights>;
 
 async function _getLogInsights(log: string | PostLog) {
   const id = getMCLogID(log);
@@ -136,7 +154,7 @@ async function _getLogInsights(log: string | PostLog) {
     `https://api.mclo.gs/1/insights/${encodeURIComponent(id)}`,
     FetchResultTypes.JSON,
   );
-  return LogInsights.parse(data);
+  return v.parse(LogInsights, data);
 }
 export const getLogInsights = memoize(_getLogInsights, {
   cacheKey: ([log]) => getMCLogID(log),

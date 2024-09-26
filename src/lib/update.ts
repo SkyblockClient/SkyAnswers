@@ -1,20 +1,20 @@
 import { GuildMember } from "discord.js";
 import { getJSON } from "./data.js";
-import z from "zod";
+import * as v from "valibot";
 import { SkyClient, isDevUser, Users } from "../const.js";
 
-const Permission = z.enum(["update", "approve"]);
-type Permission = z.infer<typeof Permission>;
+const Permission = v.picklist(["update", "approve"]);
+type Permission = v.InferOutput<typeof Permission>;
 
-const UpdatePerm = z.object({
-  github: z.string(),
-  mods: z.record(Permission).optional(),
-  packs: z.record(Permission).optional(),
+const UpdatePerm = v.object({
+  github: v.string(),
+  mods: v.optional(v.record(v.string(), Permission)),
+  packs: v.optional(v.record(v.string(), Permission)),
 });
-const UpdatePerms = z.record(UpdatePerm);
+const UpdatePerms = v.record(v.string(), UpdatePerm);
 
 export async function getUpdatePerms() {
-  return UpdatePerms.parse(await getJSON("update_perms"));
+  return v.parse(UpdatePerms, await getJSON("update_perms"));
 }
 
 export async function checkMember(member: GuildMember): Promise<

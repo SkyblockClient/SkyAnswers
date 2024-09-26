@@ -9,7 +9,13 @@ import { format } from "prettier";
 import { checkMember } from "../../lib/update.js";
 import { Emojis } from "../../const.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
-import { Mod, Pack, invalidateTrackedData } from "../../lib/data.js";
+import {
+  Mod,
+  Mods,
+  Pack,
+  Packs,
+  invalidateTrackedData,
+} from "../../lib/data.js";
 import {
   PendingUpdatesDB,
   type ModUpdate,
@@ -22,6 +28,7 @@ import {
   type FileToCommit,
 } from "../../lib/GHAPI.ts";
 import dedent from "dedent";
+import * as v from "valibot";
 
 const owner = "SkyBlockClient";
 const repo = "SkyblockClient-REPO";
@@ -235,8 +242,8 @@ async function updatePack(data: PackUpdate, changes: FileToCommit[]) {
 }
 
 function isModList(obj: unknown): obj is Mod[] {
-  return Mod.array().safeParse(obj).success;
+  return v.safeParse(Mods, obj).success;
 }
 function isPackList(obj: unknown): obj is Pack[] {
-  return Pack.array().safeParse(obj).success;
+  return v.safeParse(Packs, obj).success;
 }

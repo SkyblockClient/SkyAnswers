@@ -1,20 +1,25 @@
 import { fetch } from "@sapphire/fetch";
-import { ZodError, z } from "zod";
+import * as v from "valibot";
 
-const MCUsername = z.string().min(3).max(25).regex(/^\w+$/i);
-const MCProfile = z.object({
-  id: z.string().length(32),
+const MCUsername = v.pipe(
+  v.string(),
+  v.minLength(3),
+  v.maxLength(25),
+  v.regex(/^\w+$/i),
+);
+const MCProfile = v.object({
+  id: v.pipe(v.string(), v.length(32)),
   name: MCUsername,
 });
-type MCProfile = z.infer<typeof MCProfile>;
+type MCProfile = v.InferOutput<typeof MCProfile>;
 
 export async function getMCProfile(mcName: string): Promise<MCProfile | null> {
   try {
-    MCUsername.parse(mcName);
+    v.parse(MCUsername, mcName);
     const url = `https://api.mojang.com/users/profiles/minecraft/${mcName}`;
-    return MCProfile.parse(await fetch(url));
+    return v.parse(MCProfile, await fetch(url));
   } catch (e) {
-    if (e instanceof ZodError) return null;
+    if (e instanceof v.ValiError) return null;
     throw e;
   }
 }

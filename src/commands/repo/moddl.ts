@@ -1,7 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Mod, getMods } from "../../lib/data.js";
+import { Mod, Mods, getMods } from "../../lib/data.js";
 import { type APIEmbed, hyperlink, unorderedList } from "discord.js";
+import * as v from "valibot";
 
 enum ItemType {
   Bundle,
@@ -24,9 +25,7 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    const items = Mod.array()
-      .parse(await getMods())
-      .filter((item) => !item.hidden);
+    const items = v.parse(Mods, await getMods()).filter((item) => !item.hidden);
     const categorizeItem = (item: Mod) =>
       item.packages
         ? ItemType.Bundle

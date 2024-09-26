@@ -11,7 +11,7 @@ import {
   type MessageActionRowComponentData,
   blockQuote,
 } from "discord.js";
-import { z } from "zod";
+import * as v from "valibot";
 import { SkyClient } from "../../const.js";
 import { type Log, getMCLog, postLog } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
@@ -168,26 +168,26 @@ function findLogs(txt: string) {
   return ret;
 }
 
-const CrashCause = z.object({
-  method: z.enum(["contains", "contains_not", "regex"]),
-  value: z.string(),
+const CrashCause = v.object({
+  method: v.picklist(["contains", "contains_not", "regex"]),
+  value: v.string(),
 });
-const CrashFix = z.object({
-  name: z.string().optional(),
-  fixtype: z.number().optional(),
-  onlySkyClient: z.boolean().optional(),
-  fix: z.string(),
-  causes: CrashCause.array(),
+const CrashFix = v.object({
+  name: v.optional(v.string()),
+  fixtype: v.optional(v.number()),
+  onlySkyClient: v.optional(v.boolean()),
+  fix: v.string(),
+  causes: v.array(CrashCause),
 });
-const FixType = z.object({
-  name: z.string(),
+const FixType = v.object({
+  name: v.string(),
 });
-const Crashes = z.object({
-  fixes: CrashFix.array(),
-  fixtypes: FixType.array(),
-  default_fix_type: z.number(),
+const Crashes = v.object({
+  fixes: v.array(CrashFix),
+  fixtypes: v.array(FixType),
+  default_fix_type: v.number(),
 });
-type Crashes = z.infer<typeof Crashes>;
+type Crashes = v.InferOutput<typeof Crashes>;
 
 async function verbalizeCrash(
   log: string,
@@ -198,7 +198,8 @@ async function verbalizeCrash(
   const profileRoot = isSkyClient ? ".minecraft/skyclient" : ".minecraft";
   let crashData: Crashes;
   try {
-    crashData = Crashes.parse(
+    crashData = v.parse(
+      Crashes,
       await getTrackedData(
         "https://github.com/SkyblockClient/CrashData/raw/main/crashes.json",
       ),

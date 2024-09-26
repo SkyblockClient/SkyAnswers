@@ -1,12 +1,13 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Discord, getJSON, queryData } from "../../lib/data.js";
+import { Discord, Discords, getJSON, queryData } from "../../lib/data.js";
 import {
   ApplicationCommandOptionType,
   EmbedBuilder,
   type InteractionReplyOptions,
 } from "discord.js";
 import { repoFilesURL } from "../../const.js";
+import * as v from "valibot";
 
 @ApplyOptions<Command.Options>({
   description: "Gives the link to a discord",
@@ -34,7 +35,7 @@ export class UserCommand extends Command {
     const query = interaction.options.getString("discord", true);
 
     const data = await getJSON("discords");
-    const items = Discord.array().parse(data);
+    const items = v.parse(Discords, data);
     const item = queryData(items, query);
     if (!item) return interaction.reply({ content: `No Discord found` });
 
