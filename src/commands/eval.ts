@@ -18,7 +18,7 @@ export class UserCommand extends Command {
   public override async messageRun(message: Message, args: Args) {
     const code = await args.rest("string");
 
-    const { result, success } = await this.eval(message, code, {
+    const { result, success, type } = await this.eval(message, code, {
       async: args.getFlags("async"),
       depth: Number(args.getOption("depth")) || 0,
       showHidden: args.getFlags("hidden", "showHidden"),
@@ -29,8 +29,7 @@ export class UserCommand extends Command {
       : `**ERROR**: ${codeBlock("bash", result)}`;
     if (args.getFlags("silent", "s")) return null;
 
-    // const typeFooter = `**Type**: ${codeBlock("typescript", type)}`;
-    const typeFooter = "";
+    const typeFooter = `**Type**: ${codeBlock("typescript", type)}`;
 
     if (output.length > 2000) {
       return send(message, {
@@ -66,7 +65,7 @@ export class UserCommand extends Command {
       success = false;
     }
 
-    // const type = new Type(ret).toString();
+    const type = "unknown"; // new Type(ret).toString();
     // eslint-disable-next-line @typescript-eslint/await-thenable
     if (isThenable(ret)) ret = await ret;
 
@@ -77,7 +76,6 @@ export class UserCommand extends Command {
             depth: flags.depth,
             showHidden: flags.showHidden,
           });
-    // return { result, success, type };
-    return { result, success };
+    return { result, success, type };
   }
 }
