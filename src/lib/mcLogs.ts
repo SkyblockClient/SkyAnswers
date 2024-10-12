@@ -4,8 +4,7 @@ import memoize from "memoize";
 import * as v from "valibot";
 
 const baseURL = "https://api.mclo.gs/1";
-
-const URL = v.pipe(v.string(), v.url());
+export const maxSize = 10_485_760;
 
 const APIError = v.object({
   success: v.literal(false),
@@ -16,20 +15,38 @@ type APIError = v.InferOutput<typeof APIError>;
 const PostLog = v.object({
   success: v.literal(true),
   id: v.string(),
-  url: URL,
-  raw: URL,
 });
 type PostLog = v.InferInput<typeof PostLog>;
+
 const PostLogRes = v.variant("success", [PostLog, APIError]);
 type PostLogRes = PostLog | APIError;
 
-export type Log = Omit<PostLog, "success"> & {
-  getRaw: () => Promise<string>;
-  getInsights: () => Promise<LogInsights>;
-};
+type LogType = { id: string };
 
-export async function postLog(log: string): Promise<Log> {
-  const params = new URLSearchParams({ content: log });
+export class Log {
+  readonly id: string;
+  constructor(id: string | LogType) {
+    this.id = getMCLogID(id);
+  }
+
+  get url() {
+    return `https://mclo.gs/${this.id}`;
+  }
+
+  get raw() {
+    return `${baseURL}/raw/${this.id}`;
+  }
+
+  getRaw() {
+    return getRawLog(this.id);
+  }
+  getInsights() {
+    return getLogInsights(this.id);
+  }
+}
+
+export async function postLog(text: string): Promise<Log> {
+  const params = new URLSearchParams({ content: text.substring(0, maxSize) });
   const data = await fetch(`${baseURL}/log`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -37,29 +54,17 @@ export async function postLog(log: string): Promise<Log> {
   });
   const res = v.parse(PostLogRes, data);
   if (!res.success) throw new Error(res.error);
-  return getMCLog(res.id);
+  return new Log(res);
 }
 
-function isPostLog(res: unknown): res is PostLog {
-  return v.safeParse(PostLog, res).success;
-}
+const getMCLogID = (log: string | LogType) =>
+  encodeURIComponent(
+    typeof log == "string" ? log.split("/").pop() || "" : log.id,
+  );
 
-const getMCLogID = (log: string | PostLog) =>
-  encodeURIComponent(isPostLog(log) ? log.id : log.split("/").pop() || "");
-export function getMCLog(log: string | PostLog): Log {
+async function _getRawLog(log: string | LogType): Promise<string> {
   const id = getMCLogID(log);
-  return {
-    id,
-    url: `https://mclo.gs/${id}`,
-    raw: `https://api.mclo.gs/1/raw/${id}`,
-    getRaw: () => getRawLog(id),
-    getInsights: () => getLogInsights(id),
-  };
-}
-
-async function _getRawLog(log: string | PostLog): Promise<string> {
-  const id = getMCLogID(log);
-  return fetch(`https://api.mclo.gs/1/raw/${id}`, FetchResultTypes.Text);
+  return fetch(`${baseURL}/raw/${id}`, FetchResultTypes.Text);
 }
 export const getRawLog = memoize(_getRawLog, {
   cacheKey: ([log]) => getMCLogID(log),
@@ -148,12 +153,9 @@ const LogInsights = v.object({
 });
 type LogInsights = v.InferOutput<typeof LogInsights>;
 
-async function _getLogInsights(log: string | PostLog) {
+async function _getLogInsights(log: string | LogType) {
   const id = getMCLogID(log);
-  const data = await fetch(
-    `https://api.mclo.gs/1/insights/${encodeURIComponent(id)}`,
-    FetchResultTypes.JSON,
-  );
+  const data = await fetch(`${baseURL}/insights/${id}`);
   return v.parse(LogInsights, data);
 }
 export const getLogInsights = memoize(_getLogInsights, {

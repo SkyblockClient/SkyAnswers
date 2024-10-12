@@ -13,7 +13,7 @@ import {
 } from "discord.js";
 import * as v from "valibot";
 import { SkyClient } from "../../const.js";
-import { type Log, getMCLog, postLog } from "../../lib/mcLogs.js";
+import { Log, postLog, maxSize } from "../../lib/mcLogs.js";
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { filterNullAndUndefined } from "@sapphire/utilities";
 import { format as formatBytes } from "@std/fmt/bytes";
@@ -24,7 +24,6 @@ const mclogsRegex = /https:\/\/(?:mclo\.gs|api.mclo\.gs\/1\/raw)\/([a-z0-9]+)/i;
 const hstshRegex = /https:\/\/hst\.sh\/(?:raw\/)?([a-z]+)/i;
 const mclogsRegexG = new RegExp(mclogsRegex, "gi");
 const hstshRegexG = new RegExp(hstshRegex, "gi");
-const tenMiB = 10_485_760;
 
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
@@ -32,10 +31,13 @@ const tenMiB = 10_485_760;
 })
 export class UserEvent extends Listener<typeof Events.MessageCreate> {
   public override async run(message: Message<true>) {
+    if (message.content.toLowerCase().includes("sky ignore")) return;
+
     const msgLogs = message.attachments
       .filter(
         (attachment) =>
-          attachment.name.endsWith(".txt") || attachment.name.endsWith(".log"),
+          attachment.name.toLowerCase() == "message.txt" ||
+          attachment.name.endsWith(".log"),
       )
       .map((attachment) => attachment.url);
 
@@ -67,12 +69,12 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
       const logSize = text.length;
       const logFileSize = formatBytes(logSize, { binary: true });
       const logLines = text.split("\n").length;
-      const truncated = logLines == 25_000 || logSize == tenMiB;
+      const truncated = logLines == 25_000 || logSize == maxSize;
       let footer = `${logFileSize} / ${logLines} lines`;
-      if (truncated) footer += " (**truncated**)";
+      if (truncated) footer += " (truncated)";
       embeds.push({
         title: insights.title,
-        url: mcLog.raw,
+        url: mcLog.url,
         color: 0x2d3943,
         thumbnail: { url: mclogsLogo },
         fields: insights.analysis.information.map((v) => ({
@@ -83,7 +85,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         footer: { text: footer },
       });
 
-      if (insights.id == "vanilla/server")
+      if (insights.id == "unknown/unknown" || insights.id == "vanilla/server")
         embeds.push({
           title: "This may be an incomplete log",
           color: Colors.Yellow,
@@ -149,10 +151,9 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
 // We want to use mclo.gs to censor logs,
 // but we don't need to upload if the log is already from MCLogs.
 async function getNewLog(url: string): Promise<Log> {
-  if (url.includes("mclo.gs")) return getMCLog(url);
+  if (url.includes("mclo.gs")) return new Log(url);
 
-  const origText = await fetch(url, FetchResultTypes.Text);
-  const text = origText.substring(0, tenMiB);
+  const text = await fetch(url, FetchResultTypes.Text);
   return await postLog(text);
 }
 
