@@ -36,8 +36,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
     const msgLogs = message.attachments
       .filter(
         (attachment) =>
-          attachment.name.toLowerCase() == "message.txt" ||
-          attachment.name.endsWith(".log"),
+          attachment.name.endsWith(".txt") || attachment.name.endsWith(".log"),
       )
       .map((attachment) => attachment.url);
 
