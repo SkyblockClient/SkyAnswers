@@ -1,5 +1,3 @@
-#!/usr/bin/env -S pnpm tsx
-
 import { LogLevel, SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
 import "@sapphire/plugin-logger/register";
