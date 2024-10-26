@@ -11,18 +11,18 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.11.1",
+    "@eslint/js": "^9.13.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/ts-config": "^5.0.1",
     "@tsconfig/bun": "^1.0.7",
-    "@types/bun": "^1.1.10",
+    "@types/bun": "^1.1.12",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/eslint__js": "^8.42.3",
-    "eslint": "^9.11.1",
+    "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
-    "globals": "^15.9.0",
+    "globals": "^15.11.0",
     "prettier": "^3.3.3",
-    "typescript-eslint": "^8.7.0"
+    "typescript-eslint": "^8.11.0"
   },
   "dependencies": {
     "@octokit/core": "^6.1.2",
@@ -41,12 +41,12 @@
     "@std/fmt": "npm:@jsr/std__fmt",
     "@std/text": "npm:@jsr/std__text",
     "dedent": "^1.5.3",
-    "discord.js": "^14.16.2",
+    "discord.js": "^14.16.3",
     "jszip": "^3.10.1",
     "lowdb": "^7.0.1",
     "memoize": "^10.0.0",
     "p-map": "^7.0.2",
-    "remeda": "^2.14.0",
+    "remeda": "^2.16.0",
     "valibot": "^0.42.1"
   },
   "peerDependencies": {
