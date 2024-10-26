@@ -18,10 +18,10 @@ const ignoredChannels = [
   // Polyfrost
   "1053827347469570158", // #bot-land
   "1057847561597239336", // #counting
-  "984850370834620416", //  #testers-chat
+  Polyfrost.channels.TestingChat,
 
   // SkyClient
-  "796546551878516766", //  #bot-commands
+  SkyClient.channels.BotCommands,
   "1135190905373081650", // #the-void
   SkyClient.channels.Trolling,
 ];
