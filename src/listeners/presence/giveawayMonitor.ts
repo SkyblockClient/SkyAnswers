@@ -7,6 +7,7 @@ import {
   isTextChannel,
 } from "@sapphire/discord.js-utilities";
 import { isTicket } from "../../lib/ticket.js";
+import dedent from "dedent";
 
 const streaks: Record<string, string[]> = {};
 const ignoredChannels = [
@@ -67,7 +68,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     try {
       await member.roles.add(noGiveawaysRole);
 
-      const message = `${member.toString()} (${member.id}) has been blocked from giveaways
+      const message = dedent`${member.toString()} (${member.id}) has been blocked from giveaways
 				**Reason:** 6 low effort messages in a row`;
       await channel.send(message);
 
