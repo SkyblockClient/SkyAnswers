@@ -1,9 +1,8 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { isGuildMember, isTextChannel } from "@sapphire/discord.js-utilities";
 import { Command, container } from "@sapphire/framework";
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Polyfrost, SkyClient } from "../const.ts";
-import dedent from "dedent";
 
 @ApplyOptions<Command.Options>({
   description: "Blacklist a user from giveaways",
@@ -68,28 +67,36 @@ export class UserCommand extends Command {
     try {
       await member.roles.add(noGiveawaysRole);
 
-      const reason = interaction.options.getString("reason");
-      const reasonLine = reason
-        ? `**Reason:** ${reason}`
-        : "No reason provided";
+      const reason =
+        interaction.options.getString("reason") || "No reason provided";
 
-      const message = dedent`
-				${member.toString()} has been blocked from giveaways
-				${reasonLine}
-			`;
+      const embed = new EmbedBuilder()
+        .setColor("Red")
+        .setTitle("Blocked from Giveaways")
+        .setFooter({
+          text: `${member.displayName} (${member.id})`,
+          iconURL: member.displayAvatarURL(),
+        })
+        .addFields({ name: "Reason", value: reason });
+
+      const message = `${member.toString()} has been blocked from giveaways`;
       await interaction.reply({
         content: message,
+        embeds: [embed],
         ephemeral: !!interaction.options.getBoolean("silent"),
+        allowedMentions: { users: [member.id] },
       });
 
       const botLogs = interaction.client.channels.cache.get(botLogsChannel);
       if (!isTextChannel(botLogs)) return;
 
+      embed.setAuthor({
+        name: `${interaction.user.displayName} (${interaction.user.id})`,
+        iconURL: interaction.user.displayAvatarURL(),
+      });
       await botLogs.send({
-        content: dedent`
-					${message}
-					**Moderator:** ${interaction.user.toString()} (${interaction.user.id})
-				`,
+        content: message,
+        embeds: [embed],
         allowedMentions: { parse: [] },
       });
     } catch (e) {

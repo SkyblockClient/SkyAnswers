@@ -1,4 +1,9 @@
-import { Message, escapeMarkdown, unorderedList } from "discord.js";
+import {
+  EmbedBuilder,
+  Message,
+  escapeMarkdown,
+  unorderedList,
+} from "discord.js";
 import { Polyfrost, SkyClient } from "../../const.js";
 import { Events, Listener, container } from "@sapphire/framework";
 import { ApplyOptions } from "@sapphire/decorators";
@@ -7,7 +12,6 @@ import {
   isTextChannel,
 } from "@sapphire/discord.js-utilities";
 import { isTicket } from "../../lib/ticket.js";
-import dedent from "dedent";
 
 const streaks: Record<string, string[]> = {};
 const ignoredChannels = [
@@ -49,7 +53,8 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     const roles = member.roles.cache;
 
     if (ignoredChannels.includes(channel.id)) return;
-    if (roles.has(SkyClient.roles.CoolPeople)) return; // cool people
+    if (roles.has(SkyClient.roles.CoolPeople)) return;
+    if (roles.has(SkyClient.roles.GiveawayBypass)) return;
     if (roles.has(noGiveawaysRole)) return; // already has no giveaways
 
     let streak = streaks[author.id];
@@ -68,16 +73,37 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
     try {
       await member.roles.add(noGiveawaysRole);
 
-      const message = dedent`${member.toString()} (${member.id}) has been blocked from giveaways
-				**Reason:** 6 low effort messages in a row`;
-      await channel.send(message);
+      const embed = new EmbedBuilder()
+        .setColor("Red")
+        .setTitle("Blocked from Giveaways")
+        .setFooter({
+          text: `${member.displayName} (${member.id})`,
+          iconURL: member.displayAvatarURL(),
+        })
+        .addFields({
+          name: "Reason",
+          value: "6 low effort messages in a row",
+        });
+
+      const message = `${member.toString()} has been blocked from giveaways`;
+      await channel.send({
+        content: message,
+        embeds: [embed],
+        allowedMentions: { users: [member.id] },
+      });
 
       const botLogs = client.channels.cache.get(botLogsChannel);
       if (!isTextChannel(botLogs)) return;
 
-      const list = unorderedList(streak.map((v) => escapeMarkdown(v)));
+      embed.addFields({
+        name: "Messages",
+        value: unorderedList(
+          streak.map((v) => escapeMarkdown(v) || "*(No text)*"),
+        ),
+      });
       await botLogs.send({
-        content: `${message}\n${list}`,
+        content: message,
+        embeds: [embed],
         allowedMentions: { parse: [] },
       });
     } catch (e) {
