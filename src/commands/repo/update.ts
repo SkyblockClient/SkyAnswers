@@ -2,7 +2,7 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { container } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { createHash } from "crypto";
-import { ButtonStyle, ComponentType } from "discord.js";
+import { ButtonStyle, ComponentType, escapeMarkdown } from "discord.js";
 import JSZip from "jszip";
 import { Mods, Packs, getJSON, getMods, getPacks } from "../../lib/data.js";
 import { checkMember } from "../../lib/update.js";
@@ -150,7 +150,9 @@ export class UserCommand extends Subcommand {
 
     if (!modId) return int.editReply("🫨 this mod doesn't have a mod id");
     if (!perms.all && (perms.mods ? perms.mods[modId] != "update" : false))
-      return int.editReply(`🫨 you can't update that mod`);
+      return int.editReply(
+        `🫨 you aren't allowed to update \`${escapeMarkdown(modId)}\``,
+      );
 
     const isBeta = int.options.getBoolean("beta") || false;
     const data: ModUpdate = {
