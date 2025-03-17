@@ -60,7 +60,7 @@ export class UserEvent extends Listener<typeof Events.GuildMemberUpdate> {
       return general.send({
         content: dedent`
           ${user.toString()} **Thank you for boosting!!!** <3
-          Use the \`/claimboost\` command on Discord to claim your in-game rank.
+          Use the \`/supporter\` command on Discord to claim your in-game rank.
         `,
         allowedMentions: { users: [user.id] },
         // components: [compRow] // TODO

@@ -1,8 +1,8 @@
 import { Events, Listener, container } from "@sapphire/framework";
-import { Client } from "discord.js";
+import { Client, type UserResolvable } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { BoostersDB } from "../../lib/db.js";
-import { SkyClient } from "../../const.js";
+import { Polyfrost, SkyClient } from "../../const.js";
 import * as v from "valibot";
 import { readGHFile, writeGHFile } from "../../lib/GHAPI.js";
 import { format } from "prettier";
@@ -23,12 +23,19 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
   }
 }
 
+const repo = "SkyblockClient/Website";
+const path = "docs/assets/tags.json";
+const TagName = "Supporter";
+
 const TagsJSON = v.object({
   tags: v.record(
     v.string(),
     v.union([v.tuple([v.string(), v.string()]), v.tuple([v.string()])]),
   ),
-  perms: v.record(v.string(), v.array(v.string())),
+  perms: v.intersect([
+    v.record(v.string(), v.array(v.string())),
+    v.object({ [TagName]: v.array(v.string()) }),
+  ]),
   whitelist: v.boolean(),
   whitelisted: v.array(v.string()),
 });
@@ -38,29 +45,43 @@ export async function run(client: Client<true>) {
     const members = client.guilds.cache.get(SkyClient.id)?.members;
     if (!members) return;
     const db = BoostersDB.data;
-    const boosters: string[] = [];
+    const supporters: string[] = [];
     for (const [discordID, mcUUID] of Object.entries(db)) {
-      const member = members.resolve(discordID);
-      if (!member || !member.premiumSince) continue;
-      boosters.push(mcUUID);
+      if (await isSupporter(discordID)) supporters.push(mcUUID);
     }
-    boosters.sort();
+    supporters.sort();
 
-    await updateBoosters(
-      "SkyblockClient/Website",
-      "docs/assets/tags.json",
-      boosters,
-    );
+    await updateBoosters(supporters);
   } catch (e) {
-    container.logger.error("Failed to update boosters", e);
+    container.logger.error("Failed to update tags", e);
   }
 }
 
-async function updateBoosters(repo: string, path: string, boosters: string[]) {
+export async function isSupporter(userID: UserResolvable) {
+  const { client } = container;
+
+  {
+    const guild = await client.guilds.fetch(SkyClient.id);
+    const members = guild?.members;
+    const member = await members.fetch(userID);
+    if (member && member.premiumSince) return true;
+  }
+
+  {
+    const guild = await client.guilds.fetch(Polyfrost.id);
+    const members = guild?.members;
+    const member = await members.fetch(userID);
+    if (member && member.roles.cache.has(Polyfrost.roles.Testers)) return true;
+  }
+
+  return false;
+}
+
+async function updateBoosters(supporters: string[]) {
   const oldFile = await readGHFile(repo, path);
   const tags = v.parse(TagsJSON, JSON.parse(oldFile.content));
-  tags.perms["Booster"] = boosters;
+  tags.perms[TagName] = supporters;
 
   const content = await format(JSON.stringify(tags), { parser: "json" });
-  await writeGHFile(oldFile, content, "chore: update booster list");
+  await writeGHFile(oldFile, content, "chore: update supporter list");
 }

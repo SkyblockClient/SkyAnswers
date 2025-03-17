@@ -1,13 +1,14 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command, container } from "@sapphire/framework";
-import { ApplicationCommandOptionType } from "discord.js";
-import { SkyClient } from "../const.js";
-import { getMCProfile } from "../lib/mcAPI.js";
-import { BoostersDB } from "../lib/db.js";
+import { ApplicationCommandOptionType, channelMention } from "discord.js";
+import { Polyfrost, SkyClient } from "../const.ts";
+import { getMCProfile } from "../lib/mcAPI.ts";
+import { BoostersDB } from "../lib/db.ts";
 import dedent from "dedent";
+import { isSupporter } from "../listeners/boost/maintain.ts";
 
 @ApplyOptions<Command.Options>({
-  description: "Claims your in-game rank for boosting",
+  description: "Claims your in-game rank for supporting",
 })
 export class UserCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
@@ -28,11 +29,7 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    if (interaction.guildId != SkyClient.id) return;
-
-    const member = interaction.guild?.members.resolve(interaction.user);
-    if (!member) return;
-    const hasNitro = !!member.premiumSince;
+    const supporter = await isSupporter(interaction.user);
 
     const mcName = interaction.options.getString("username", true);
     const profile = await getMCProfile(mcName);
@@ -43,31 +40,47 @@ export class UserCommand extends Command {
         ephemeral: true,
       });
 
-    await BoostersDB.update((data) => {
-      data[interaction.user.id] = profile.id;
-    });
     container.logger.info(
-      "Saving Booster",
-      hasNitro,
+      "Saving Supporter",
+      supporter,
       interaction.user.id,
       profile.id,
     );
-    if (hasNitro)
+    await BoostersDB.update((data) => {
+      data[interaction.user.id] = profile.id;
+    });
+
+    if (supporter)
       return interaction.reply({
         content: dedent`
-          # Thanks for the boost! <3
+          # Thanks for the support! <3
           Your in-game rank will be applied to ${profile.name} in 5-10 minutes.
           -# [SkyClient Cosmetics](<https://modrinth.com/mod/scc>) is required to see the rank.
           -# If you don't see it, you may have to type \`/scc reload\` in game.
         `,
         ephemeral: true,
       });
-    else
+    else if (interaction.guildId == SkyClient.id)
       return interaction.reply({
         content: dedent`
-          **You don't appear to be Server Boosting.**
+          **You don't appear to be supporting us.**
           Give us a boost to receive an in-game role with SkyClient Cosmetics!
         `,
+        ephemeral: true,
+      });
+    else if (interaction.guildId == Polyfrost.id)
+      return interaction.reply({
+        content: dedent`
+          **You don't appear to be supporting us.**
+          Join our Patreon to receive an in-game role with SkyClient Cosmetics!
+          Find out more here: ${channelMention(Polyfrost.channels.PatreonAd)}
+        `,
+        ephemeral: true,
+      });
+    // This will happen in DMs
+    else
+      return interaction.reply({
+        content: "**You don't appear to be supporting us.**",
         ephemeral: true,
       });
   }

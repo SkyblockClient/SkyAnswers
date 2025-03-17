@@ -34,6 +34,7 @@ export const Polyfrost = {
     General: "832981571077537823",
     TestingChat: "1262485089615351829",
     BotLogs: "1225178336532369598",
+    PatreonAd: "1336584021458681876",
   },
   forums: {
     Suggestions: "1265704794778243276",
@@ -44,6 +45,7 @@ export const Polyfrost = {
   roles: {
     NoGiveaways: "1182506496156766250",
     SupportTeam: "997376364460114001",
+    Testers: "1262485117549412487",
   },
 };
 
