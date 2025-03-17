@@ -60,19 +60,19 @@ export async function run(client: Client<true>) {
 export async function isSupporter(userID: UserResolvable) {
   const { client } = container;
 
-  {
+  try {
     const guild = await client.guilds.fetch(SkyClient.id);
     const members = guild?.members;
     const member = await members.fetch(userID);
     if (member && member.premiumSince) return true;
-  }
+  } catch {}
 
-  {
+  try {
     const guild = await client.guilds.fetch(Polyfrost.id);
     const members = guild?.members;
     const member = await members.fetch(userID);
     if (member && member.roles.cache.has(Polyfrost.roles.Testers)) return true;
-  }
+  } catch {}
 
   return false;
 }
