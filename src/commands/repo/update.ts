@@ -137,18 +137,21 @@ export class UserCommand extends Subcommand {
     try {
       const modZip = await JSZip.loadAsync(modFile);
       const modInfoFile = modZip.file("mcmod.info");
-      if (modInfoFile) {
-        const modInfoStr = await modInfoFile.async("text");
-        const modInfo = v.parse(ModInfo, JSON.parse(modInfoStr));
-        modId = modInfo[0].modid;
-      }
+      if (modInfoFile)
+        try {
+          const modInfoStr = await modInfoFile.async("text");
+          const modInfo = v.parse(ModInfo, JSON.parse(modInfoStr));
+          modId = modInfo[0].modid;
+        } catch (e) {
+          container.logger.error("Failed to read mcmod.info", e);
+        }
     } catch (e) {
       container.logger.error("Failed to read ZIP", e);
       return int.editReply("Failed to read ZIP. Is the URL correct?");
     }
     modId = modId || int.options.getString("forge_id");
 
-    if (!modId) return int.editReply("🫨 this mod doesn't have a mod id");
+    if (!modId) return int.editReply("🫨 Failed to find modid in mcmod.info!");
     if (!perms.all && (perms.mods ? perms.mods[modId] != "update" : false))
       return int.editReply(
         `🫨 you aren't allowed to update \`${escapeMarkdown(modId)}\``,
