@@ -65,6 +65,7 @@ export async function isSupporter(userID: UserResolvable) {
     const members = guild?.members;
     const member = await members.fetch(userID);
     if (member && member.premiumSince) return true;
+    // eslint-disable-next-line no-empty
   } catch {}
 
   try {
@@ -72,6 +73,7 @@ export async function isSupporter(userID: UserResolvable) {
     const members = guild?.members;
     const member = await members.fetch(userID);
     if (member && member.roles.cache.has(Polyfrost.roles.Testers)) return true;
+    // eslint-disable-next-line no-empty
   } catch {}
 
   return false;
