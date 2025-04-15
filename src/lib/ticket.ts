@@ -34,33 +34,39 @@ async function _getTicketTop(ticket: ChannelTypes) {
   if (!isTicket(ticket)) return;
 
   await sleep(Time.Second * 2);
-  const msgs = await ticket.messages.fetch({ limit: 1, after: "0" });
-  const msg = msgs.first();
-  if (!msg || !msg.author.bot) return;
-  return msg;
+  const msgs = await ticket.messages.fetch({ limit: 3, after: "0" });
+  for (const msg of msgs.values()) {
+    if (!msg) continue;
+    if (!msg.author.bot) continue;
+    if (!getMentionInMessage(msg)) continue;
+    return msg;
+  }
+  return;
 }
 export const getTicketTop = memoize(_getTicketTop, {
   cacheKey: ([channel]) => channel.id,
 });
 
 const mentionRegex = /<@!?(?<id>\d{17,20})>/;
-async function _getTicketOwner(ticket: ChannelTypes) {
+function getMentionInMessage(msg: Message) {
+  const match = msg.content.match(mentionRegex);
+  if (match) return match[1];
+
+  for (const embed of msg.embeds) {
+    const match = embed.description?.match(mentionRegex);
+    if (match) return match[1];
+  }
+  return;
+}
+
+export async function getTicketOwner(ticket: ChannelTypes) {
   if (!isTicket(ticket)) return;
 
   const pin = await getTicketTop(ticket);
   if (!pin) return;
 
-  const contentMatch = pin.content.match(mentionRegex);
-  if (contentMatch) return contentMatch[1];
-
-  const embedMatch = pin.embeds[0]?.description?.match(mentionRegex);
-  if (embedMatch) return embedMatch[1];
-
-  return;
+  return getMentionInMessage(pin);
 }
-export const getTicketOwner = memoize(_getTicketOwner, {
-  cacheKey: ([channel]) => channel.id,
-});
 
 export function isTicket(
   channel: ChannelTypes | Nullish,
