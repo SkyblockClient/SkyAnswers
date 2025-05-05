@@ -1,13 +1,14 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import dedent from "dedent";
 import {
   ButtonBuilder,
   ButtonStyle,
   ContainerBuilder,
   MessageFlags,
   SectionBuilder,
+  SeparatorBuilder,
   TextDisplayBuilder,
+  unorderedList,
 } from "discord.js";
 import { EmojiIDs } from "../../const.ts";
 
@@ -35,60 +36,78 @@ export class UserCommand extends Command {
     return interaction.reply({
       flags: MessageFlags.IsComponentsV2,
       components: [
-        new ContainerBuilder().setAccentColor(0x00a4ef).addSectionComponents(
-          new SectionBuilder()
-            .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(dedent`
-                ## Windows Installer
-                - **Recommended**
-                - Requires Windows 10 / 11
-              `),
-            )
-            .setButtonAccessory(
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setEmoji(EmojiIDs.Windows)
-                .setLabel("Download")
-                .setURL(windowsURL),
+        new ContainerBuilder()
+          .setAccentColor(0x00a4ef)
+          .addSectionComponents(
+            new SectionBuilder()
+              .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent("# Windows Installer"),
+              )
+              .setButtonAccessory(
+                new ButtonBuilder()
+                  .setStyle(ButtonStyle.Link)
+                  .setEmoji(EmojiIDs.Windows)
+                  .setLabel("Download")
+                  .setURL(windowsURL),
+              ),
+          )
+          .addSeparatorComponents(new SeparatorBuilder())
+          .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+              unorderedList(["**Recommended**", "Requires Windows 10 / 11"]),
             ),
-        ),
-        new ContainerBuilder().setAccentColor(0xec2024).addSectionComponents(
-          new SectionBuilder()
-            .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(dedent`
-                ## Java Installer
-                - Recommended for **Mac and Linux**
-                - Works on Windows, Mac, and Linux
-                - **Requires Java** to be installed
-              `),
-            )
-            .setButtonAccessory(
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setEmoji(EmojiIDs.Java)
-                .setLabel("Download")
-                .setURL(javaURL),
+          ),
+        new ContainerBuilder()
+          .setAccentColor(0xe76f00)
+          .addSectionComponents(
+            new SectionBuilder()
+              .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent("# Java Installer"),
+              )
+              .setButtonAccessory(
+                new ButtonBuilder()
+                  .setStyle(ButtonStyle.Link)
+                  .setEmoji(EmojiIDs.Java)
+                  .setLabel("Download")
+                  .setURL(javaURL),
+              ),
+          )
+          .addSeparatorComponents(new SeparatorBuilder())
+          .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+              unorderedList([
+                "Recommended for **Mac and Linux**",
+                "Works on Windows, Mac, and Linux",
+                "**Requires Java** to be installed",
+              ]),
             ),
-        ),
-        new ContainerBuilder().setAccentColor(0x00ff00).addSectionComponents(
-          new SectionBuilder()
-            .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(dedent`
-                ## Web Installer (Mart)
-                - Runs in your **web browser**
-                - **No download required**
-                - Recommended for **Steam Deck**
-                - Does not work in some browsers, like Brave and Firefox
-              `),
-            )
-            .setButtonAccessory(
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Link)
-                .setEmoji(EmojiIDs.Chrome)
-                .setLabel("Open")
-                .setURL(martURL),
+          ),
+        new ContainerBuilder()
+          .setAccentColor(0x00ff00)
+          .addSectionComponents(
+            new SectionBuilder()
+              .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent("# Web Installer (Mart)"),
+              )
+              .setButtonAccessory(
+                new ButtonBuilder()
+                  .setStyle(ButtonStyle.Link)
+                  .setEmoji(EmojiIDs.Chrome)
+                  .setLabel("Launch")
+                  .setURL(martURL),
+              ),
+          )
+          .addSeparatorComponents(new SeparatorBuilder())
+          .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(
+              unorderedList([
+                "Runs in your **web browser**",
+                "**No download required**",
+                "Recommended for **Steam Deck**",
+                "Does not work in some browsers, like Brave and Firefox",
+              ]),
             ),
-        ),
+          ),
       ],
     });
   }
