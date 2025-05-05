@@ -4,7 +4,22 @@ import {
   InteractionHandlerTypes,
   container,
 } from "@sapphire/framework";
-import { unorderedList, userMention, type ButtonInteraction } from "discord.js";
+import {
+  BaseInteraction,
+  ButtonBuilder,
+  ButtonStyle,
+  ContainerBuilder,
+  MessageFlags,
+  SectionBuilder,
+  SeparatorBuilder,
+  TextDisplayBuilder,
+  unorderedList,
+  userMention,
+  type APIMessageTopLevelComponent,
+  type ButtonInteraction,
+  type JSONEncodable,
+  type MessageEditOptions,
+} from "discord.js";
 import { format } from "prettier";
 import { checkMember } from "../../lib/update.js";
 import { Emojis } from "../../const.js";
@@ -20,6 +35,7 @@ import {
   PendingUpdatesDB,
   type ModUpdate,
   type PackUpdate,
+  type PartialUpdate,
 } from "../../lib/db.js";
 import { envParseString } from "@skyra/env-utilities";
 import {
@@ -43,8 +59,7 @@ export class ButtonHandler extends InteractionHandler {
       return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
     if (notSkyClient(interaction.guildId)) return;
 
-    const pendingUpdates = PendingUpdatesDB.data;
-    const data = pendingUpdates[interaction.message.id];
+    const data = PendingUpdatesDB.data[interaction.message.id];
     if (!data)
       return interaction.reply({
         content: "update not found. this shouldn't happen!",
@@ -70,28 +85,19 @@ export class ButtonHandler extends InteractionHandler {
       });
 
     const approver = { name: member.user.tag, id: member.user.id };
-    const approvers = [...data.approvers, approver];
     await PendingUpdatesDB.update((db) => {
       db[interaction.message.id].approvers.push(approver);
     });
+    if (data.approvers.length < 3)
+      return await interaction.update(generateMessage(interaction, data));
 
-    await interaction.update({
-      embeds: [
-        interaction.message.embeds[0],
-        {
-          title: "Approvers",
-          description: unorderedList(
-            approvers.map(({ id }) => `${userMention(id)} (${id})`),
-          ),
-        },
-      ],
-    });
-    if (data.approvers.length < 3) return;
-
-    await interaction.message.edit({
-      content: "one second",
-      components: [],
-    });
+    await interaction.update(
+      generateMessage(
+        interaction,
+        data,
+        new TextDisplayBuilder().setContent("one second"),
+      ),
+    );
 
     if (data.pingMsg) {
       const msg = await interaction.channel?.messages.fetch(data.pingMsg);
@@ -101,9 +107,15 @@ export class ButtonHandler extends InteractionHandler {
     const changes: FileToCommit[] = [];
 
     if (data.url.startsWith("https://cdn.discordapp.com/")) {
-      await interaction.update({
-        content: "one second we need to download then upload the file",
-      });
+      await interaction.update(
+        generateMessage(
+          interaction,
+          data,
+          new TextDisplayBuilder().setContent(
+            "one second we need to download then upload the file",
+          ),
+        ),
+      );
 
       let fileData: ArrayBuffer;
       try {
@@ -115,7 +127,13 @@ export class ButtonHandler extends InteractionHandler {
         fileData = await fileResp.arrayBuffer();
       } catch (e) {
         container.logger.error("Failed to download file", e);
-        await interaction.message.edit("failed to download file");
+        await interaction.update(
+          generateMessage(
+            interaction,
+            data,
+            new TextDisplayBuilder().setContent("failed to download file"),
+          ),
+        );
         throw e;
       }
       // if (!modData) throw new Error("this shouldn't happen");
@@ -125,9 +143,15 @@ export class ButtonHandler extends InteractionHandler {
       data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/${path}`;
     }
 
-    await interaction.message.edit({
-      content: "one second just need to scream commands at github",
-    });
+    await interaction.update(
+      generateMessage(
+        interaction,
+        data,
+        new TextDisplayBuilder().setContent(
+          "one second just need to scream commands at github",
+        ),
+      ),
+    );
 
     const itemName =
       data.type == "mod"
@@ -152,10 +176,13 @@ export class ButtonHandler extends InteractionHandler {
     });
     invalidateTrackedData();
 
-    return interaction.message.edit({
-      content: `✅ pushed it out`,
-      components: [],
-    });
+    return await interaction.update(
+      generateMessage(
+        interaction,
+        data,
+        new TextDisplayBuilder().setContent("✅ pushed it out"),
+      ),
+    );
   }
 
   public override parse(interaction: ButtonInteraction) {
@@ -176,6 +203,7 @@ async function updateMod(data: ModUpdate, changes: FileToCommit[]) {
     mod.url = data.url;
     mod.file = data.file;
     mod.hash = data.hash;
+    mod.sha256 = data.sha256;
     retName = retName || mod.display;
     return mod;
   });
@@ -216,7 +244,7 @@ async function updateMod(data: ModUpdate, changes: FileToCommit[]) {
 async function updatePack(data: PackUpdate, changes: FileToCommit[]) {
   let packs = JSON.parse(
     await readGHContent(`${owner}/${repo}`, "files/packs.json"),
-  ) as Mod[];
+  ) as Pack[];
   if (!isPackList(packs)) throw new Error("failed to parse packs.json");
 
   let retName = "";
@@ -225,6 +253,7 @@ async function updatePack(data: PackUpdate, changes: FileToCommit[]) {
     pack.url = data.url;
     pack.file = data.file;
     pack.hash = data.hash;
+    pack.sha256 = data.sha256;
     retName = retName || pack.display;
     return pack;
   });
@@ -246,4 +275,77 @@ function isModList(obj: unknown): obj is Mod[] {
 }
 function isPackList(obj: unknown): obj is Pack[] {
   return v.safeParse(Packs, obj).success;
+}
+
+export function generateMessage(
+  int: BaseInteraction,
+  data: PartialUpdate,
+  ...additionalComponents: JSONEncodable<APIMessageTopLevelComponent>[]
+): MessageEditOptions {
+  const { approvers } = data;
+  const done = approvers.length >= 3;
+  const approvedOwn = approvers.map(({ id }) => id).includes(int.user.id);
+  const ratURL = `https://ktibow.github.io/RatRater2/?rat-to-peer-url=${encodeURIComponent(
+    data.url,
+  )}`;
+
+  const components: JSONEncodable<APIMessageTopLevelComponent>[] = [
+    new ContainerBuilder().addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(dedent`
+            id: ${data.id}
+            url: ${data.url}
+            file: ${data.file}
+            md5: ${data.hash}
+            sha256: ${data.sha256}
+          `),
+    ),
+    new ContainerBuilder()
+      .addSectionComponents(
+        new SectionBuilder()
+          .addTextDisplayComponents(
+            new TextDisplayBuilder().setContent("## Approvers"),
+          )
+          .setButtonAccessory(
+            new ButtonBuilder()
+              .setStyle(ButtonStyle.Success)
+              .setLabel("Approve")
+              .setCustomId("updateCheck2"),
+          ),
+      )
+      .addSeparatorComponents(new SeparatorBuilder())
+      .addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(
+          approvers.length > 0
+            ? unorderedList(approvers.map(({ id }) => userMention(id)))
+            : "None yet",
+        ),
+      ),
+  ];
+  if (!done) {
+    components.push(
+      new SectionBuilder()
+        .addTextDisplayComponents(
+          new TextDisplayBuilder().setContent(dedent`
+            Double-check that this mod doesn't have a rat in it before approving!
+            **(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)**
+          `),
+        )
+        .setButtonAccessory(
+          new ButtonBuilder()
+            .setStyle(ButtonStyle.Link)
+            .setEmoji("🐀")
+            .setLabel("RatRater")
+            .setURL(ratURL),
+        ),
+    );
+    if (!approvedOwn)
+      new TextDisplayBuilder().setContent(
+        `${int.user.toString()} don't forget to approve your own update`,
+      );
+  }
+  return {
+    flags: MessageFlags.IsComponentsV2,
+    allowedMentions: { parse: [], users: approvedOwn ? [] : [int.user.id] },
+    components: [...components, ...additionalComponents],
+  };
 }

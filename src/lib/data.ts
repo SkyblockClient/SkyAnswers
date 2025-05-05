@@ -64,6 +64,7 @@ export const Downloadable = v.looseObject({
   file: v.string(),
   url: v.optional(v.string()),
   hash: v.optional(v.string()),
+  sha256: v.optional(v.string()),
 });
 export type Downloadable = v.InferOutput<typeof Downloadable>;
 

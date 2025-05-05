@@ -2,7 +2,15 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { container } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { createHash } from "crypto";
-import { ButtonStyle, ComponentType, escapeMarkdown } from "discord.js";
+import {
+  ButtonBuilder,
+  ButtonStyle,
+  ContainerBuilder,
+  escapeMarkdown,
+  MessageFlags,
+  SectionBuilder,
+  TextDisplayBuilder,
+} from "discord.js";
 import JSZip from "jszip";
 import { Mods, Packs, getJSON, getMods, getPacks } from "../../lib/data.js";
 import { checkMember } from "../../lib/update.js";
@@ -166,6 +174,9 @@ export class UserCommand extends Subcommand {
         int.options.getString("filename") || basename(url),
       ),
       hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
+      sha256: createHash("sha256")
+        .update(new Uint8Array(modFile))
+        .digest("hex"),
       beta: isBeta,
       approvers: [],
     };
@@ -261,6 +272,9 @@ export class UserCommand extends Subcommand {
         int.options.getString("filename") || basename(url),
       ),
       hash: createHash("md5").update(new Uint8Array(modFile)).digest("hex"),
+      sha256: createHash("sha256")
+        .update(new Uint8Array(modFile))
+        .digest("hex"),
       approvers: [],
     };
 
@@ -296,29 +310,28 @@ function retMessage(
   data: PartialUpdate,
 ) {
   return int.editReply({
-    content: "👀 does this look alright?",
-    embeds: [
-      {
-        description: dedent`
+    flags: MessageFlags.IsComponentsV2,
+    allowedMentions: { parse: [] },
+    components: [
+      new ContainerBuilder().addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(dedent`
           id: ${data.id}
           url: ${data.url}
           file: ${data.file}
           md5: ${data.hash}
-        `,
-      },
-    ],
-    components: [
-      {
-        type: ComponentType.ActionRow,
-        components: [
-          {
-            type: ComponentType.Button,
-            customId: "updateCheck1",
-            label: "Continue",
-            style: ButtonStyle.Success,
-          },
-        ],
-      },
+          sha256: ${data.sha256}
+        `),
+      ),
+      new SectionBuilder()
+        .addTextDisplayComponents(
+          new TextDisplayBuilder().setContent("👀 does this look alright?"),
+        )
+        .setButtonAccessory(
+          new ButtonBuilder()
+            .setStyle(ButtonStyle.Success)
+            .setLabel("Continue")
+            .setCustomId("updateCheck1"),
+        ),
     ],
   });
 }

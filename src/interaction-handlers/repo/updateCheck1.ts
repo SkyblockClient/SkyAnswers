@@ -4,18 +4,13 @@ import {
   InteractionHandlerTypes,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
-import {
-  ButtonStyle,
-  ComponentType,
-  roleMention,
-  userMention,
-} from "discord.js";
+import { roleMention, userMention } from "discord.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { isGuildBasedChannel } from "@sapphire/discord.js-utilities";
 import { SkyClient } from "../../const.ts";
-import dedent from "dedent";
 import { getUpdatePerms } from "../../lib/update.ts";
+import { generateMessage } from "./updateCheck2.ts";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
@@ -46,50 +41,16 @@ export class ButtonHandler extends InteractionHandler {
       }
 
       const pingMsg = await channel.send(`${mentions.join(" ")} ${url}`);
-      await PendingUpdatesDB.update((data) => {
-        return (data[interaction.message.id] = {
-          ...data[interaction.message.id],
-          pingMsg: pingMsg.id,
-        });
-      });
+      await PendingUpdatesDB.update(
+        (data) =>
+          (data[interaction.message.id] = {
+            ...data[interaction.message.id],
+            pingMsg: pingMsg.id,
+          }),
+      );
     }
 
-    return interaction.update({
-      content: dedent`
-        Double-check that this mod doesn't have a rat in it before approving!
-        **(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)**
-
-        ${interaction.user.toString()} don't forget to approve your own update
-      `,
-      embeds: [
-        interaction.message.embeds[0],
-        {
-          title: "Approvers",
-          description: "None yet",
-        },
-      ],
-      components: [
-        {
-          type: ComponentType.ActionRow,
-          components: [
-            {
-              type: ComponentType.Button,
-              url: `https://ktibow.github.io/RatRater2/?rat-to-peer-url=${encodeURIComponent(
-                data.url,
-              )}`,
-              label: "RatRater",
-              style: ButtonStyle.Link,
-            },
-            {
-              type: ComponentType.Button,
-              customId: "updateCheck2",
-              label: "Approve",
-              style: ButtonStyle.Success,
-            },
-          ],
-        },
-      ],
-    });
+    return interaction.update(generateMessage(interaction, data));
   }
 
   public override parse(interaction: ButtonInteraction) {

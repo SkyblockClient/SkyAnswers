@@ -22,6 +22,7 @@ export type PartialUpdate = {
   id: string;
   url: string;
   hash: string;
+  sha256: string;
   file: string;
   pingMsg?: string;
   approvers: Approver[];
