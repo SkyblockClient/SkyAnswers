@@ -41,7 +41,7 @@ export class UserCommand extends Command {
           .addSectionComponents(
             new SectionBuilder()
               .addTextDisplayComponents(
-                new TextDisplayBuilder().setContent("# Windows Installer"),
+                new TextDisplayBuilder().setContent("## Windows Installer"),
               )
               .setButtonAccessory(
                 new ButtonBuilder()
@@ -62,7 +62,7 @@ export class UserCommand extends Command {
           .addSectionComponents(
             new SectionBuilder()
               .addTextDisplayComponents(
-                new TextDisplayBuilder().setContent("# Java Installer"),
+                new TextDisplayBuilder().setContent("## Java Installer"),
               )
               .setButtonAccessory(
                 new ButtonBuilder()
@@ -87,7 +87,7 @@ export class UserCommand extends Command {
           .addSectionComponents(
             new SectionBuilder()
               .addTextDisplayComponents(
-                new TextDisplayBuilder().setContent("# Web Installer (Mart)"),
+                new TextDisplayBuilder().setContent("## Web Installer (Mart)"),
               )
               .setButtonAccessory(
                 new ButtonBuilder()
