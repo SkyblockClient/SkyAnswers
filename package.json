@@ -11,24 +11,24 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.26.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/ts-config": "^5.0.1",
     "@tsconfig/bun": "^1.0.7",
-    "@types/bun": "^1.2.5",
-    "eslint": "^9.22.0",
-    "eslint-config-prettier": "^10.1.1",
+    "@types/bun": "^1.2.12",
+    "eslint": "^9.26.0",
+    "eslint-config-prettier": "^10.1.2",
     "globals": "^16.0.0",
     "prettier": "^3.5.3",
-    "typescript-eslint": "^8.26.1"
+    "typescript-eslint": "^8.32.0"
   },
   "dependencies": {
-    "@octokit/core": "^6.1.4",
+    "@octokit/core": "^6.1.5",
     "@octokit/rest": "^21.1.1",
     "@sapphire/decorators": "^6.1.1",
     "@sapphire/discord.js-utilities": "^7.3.2",
     "@sapphire/fetch": "^3.0.5",
-    "@sapphire/framework": "^5.3.2",
+    "@sapphire/framework": "^5.3.4",
     "@sapphire/plugin-editable-commands": "^4.0.4",
     "@sapphire/plugin-logger": "^4.0.2",
     "@sapphire/plugin-subcommands": "^7.0.1",
@@ -38,14 +38,14 @@
     "@skyra/env-utilities": "^2.0.0",
     "@std/fmt": "npm:@jsr/std__fmt",
     "@std/text": "npm:@jsr/std__text",
-    "dedent": "^1.5.3",
-    "discord.js": "^14.18.0",
+    "dedent": "^1.6.0",
+    "discord.js": "^14.19.3",
     "jszip": "^3.10.1",
     "lowdb": "^7.0.1",
     "memoize": "^10.1.0",
     "p-map": "^7.0.3",
-    "remeda": "^2.21.2",
-    "valibot": "^1.0.0-rc.4"
+    "remeda": "^2.21.3",
+    "valibot": "^1.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.8.2"

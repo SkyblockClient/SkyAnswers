@@ -1,3 +1,5 @@
+import { formatEmoji } from "discord.js";
+
 const DevUser = "ethan";
 const user = process.env["USER"] || process.env["USERNAME"];
 export const isDevUser = user == DevUser;
@@ -63,9 +65,24 @@ export const Users = {
   nacrt: "435443705055543306",
 };
 
+export const EmojiIDs = {
+  Windows: "1369004272880189611",
+  Java: "1369004299182407853",
+  Chrome: "1369004226000322600",
+  YouWhat: "889306727953104936",
+  BlameWyvest: "1001055682289741864",
+};
+
+// Animated Emojis
+export const AEmojiIDs: Record<string, string> = {};
+
 export const Emojis = {
-  YouWhat: "<:youwhat:889306727953104936>",
-  BlameWyvest: "<:blamewyvest:1001055682289741864>",
+  ...(Object.fromEntries(
+    Object.entries(EmojiIDs).map(([k, v]) => [k, formatEmoji(v)]),
+  ) as Record<keyof typeof EmojiIDs, `<:_:${string}>`>),
+  ...(Object.fromEntries(
+    Object.entries(AEmojiIDs).map(([k, v]) => [k, formatEmoji(v, true)]),
+  ) as Record<keyof typeof EmojiIDs, `<a:_:${string}>`>),
 };
 
 export const SupportTeams: Record<string, string> = {
