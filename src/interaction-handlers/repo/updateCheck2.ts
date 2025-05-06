@@ -107,7 +107,7 @@ export class ButtonHandler extends InteractionHandler {
     const changes: FileToCommit[] = [];
 
     if (data.url.startsWith("https://cdn.discordapp.com/")) {
-      await interaction.update(
+      await interaction.message.edit(
         generateMessage(
           interaction,
           data,
@@ -127,7 +127,7 @@ export class ButtonHandler extends InteractionHandler {
         fileData = await fileResp.arrayBuffer();
       } catch (e) {
         container.logger.error("Failed to download file", e);
-        await interaction.update(
+        await interaction.message.edit(
           generateMessage(
             interaction,
             data,
@@ -143,7 +143,7 @@ export class ButtonHandler extends InteractionHandler {
       data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/${path}`;
     }
 
-    await interaction.update(
+    await interaction.message.edit(
       generateMessage(
         interaction,
         data,
@@ -176,7 +176,7 @@ export class ButtonHandler extends InteractionHandler {
     });
     invalidateTrackedData();
 
-    return await interaction.update(
+    return await interaction.message.edit(
       generateMessage(
         interaction,
         data,
@@ -289,18 +289,11 @@ export function generateMessage(
     data.url,
   )}`;
 
-  const components: JSONEncodable<APIMessageTopLevelComponent>[] = [
-    new ContainerBuilder().addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(dedent`
-            id: ${data.id}
-            url: ${data.url}
-            file: ${data.file}
-            md5: ${data.hash}
-            sha256: ${data.sha256}
-          `),
-    ),
-    new ContainerBuilder()
-      .addSectionComponents(
+  const approversContainer = done
+    ? new ContainerBuilder().addTextDisplayComponents(
+        new TextDisplayBuilder().setContent("## Approvers"),
+      )
+    : new ContainerBuilder().addSectionComponents(
         new SectionBuilder()
           .addTextDisplayComponents(
             new TextDisplayBuilder().setContent("## Approvers"),
@@ -311,15 +304,28 @@ export function generateMessage(
               .setLabel("Approve")
               .setCustomId("updateCheck2"),
           ),
-      )
-      .addSeparatorComponents(new SeparatorBuilder())
-      .addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(
-          approvers.length > 0
-            ? unorderedList(approvers.map(({ id }) => userMention(id)))
-            : "None yet",
-        ),
+      );
+  approversContainer
+    .addSeparatorComponents(new SeparatorBuilder())
+    .addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(
+        approvers.length > 0
+          ? unorderedList(approvers.map(({ id }) => userMention(id)))
+          : "None yet",
       ),
+    );
+
+  const components: JSONEncodable<APIMessageTopLevelComponent>[] = [
+    new ContainerBuilder().addTextDisplayComponents(
+      new TextDisplayBuilder().setContent(dedent`
+            id: ${data.id}
+            url: ${data.url}
+            file: ${data.file}
+            md5: ${data.hash}
+            sha256: ${data.sha256}
+          `),
+    ),
+    approversContainer,
   ];
   if (!done) {
     components.push(
