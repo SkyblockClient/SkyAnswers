@@ -6,6 +6,8 @@ export const isDevUser = user == DevUser;
 export const repoFilesURL =
   "https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files";
 export const shrug = "¯\\_(ツ)_/¯";
+export const assetsBase =
+  "https://github.com/SkyblockClient/SkyAnswers/raw/rewrite/assets";
 
 export const SkyClient = {
   id: "780181693100982273",

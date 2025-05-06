@@ -4,13 +4,16 @@ import {
   ButtonBuilder,
   ButtonStyle,
   ContainerBuilder,
+  MediaGalleryBuilder,
+  MediaGalleryItemBuilder,
   MessageFlags,
   SectionBuilder,
   SeparatorBuilder,
   TextDisplayBuilder,
   unorderedList,
 } from "discord.js";
-import { EmojiIDs } from "../../const.ts";
+import { assetsBase, EmojiIDs } from "../../const.ts";
+import { isTextBasedChannel } from "@sapphire/discord.js-utilities";
 
 const windowsURL = "https://github.com/nacrt/SkyblockClient/releases/latest";
 const javaURL =
@@ -33,9 +36,16 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    return interaction.reply({
+    const { channel } = interaction;
+    if (!isTextBasedChannel(channel)) return;
+    await channel.send({
       flags: MessageFlags.IsComponentsV2,
       components: [
+        new MediaGalleryBuilder().addItems(
+          new MediaGalleryItemBuilder()
+            .setURL(`${assetsBase}/header.png`)
+            .setDescription("SkyClient Logo"),
+        ),
         new ContainerBuilder()
           .setAccentColor(0x00a4ef)
           .addSectionComponents(
@@ -83,7 +93,7 @@ export class UserCommand extends Command {
             ),
           ),
         new ContainerBuilder()
-          .setAccentColor(0x00ff00)
+          .setAccentColor(0x229342)
           .addSectionComponents(
             new SectionBuilder()
               .addTextDisplayComponents(
@@ -109,6 +119,10 @@ export class UserCommand extends Command {
             ),
           ),
       ],
+    });
+    return interaction.reply({
+      content: "✅",
+      ephemeral: true,
     });
   }
 }

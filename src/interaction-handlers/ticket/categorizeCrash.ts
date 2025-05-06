@@ -6,9 +6,7 @@ import {
 import type { ButtonInteraction } from "discord.js";
 import { isTicket, setTicketOpen } from "../../lib/ticket.js";
 import dedent from "dedent";
-
-const assetsBase =
-  "https://github.com/SkyblockClient/SkyAnswers/raw/rewrite/assets";
+import { assetsBase } from "../../const.ts";
 
 @ApplyOptions<InteractionHandler.Options>({
   interactionHandlerType: InteractionHandlerTypes.Button,
