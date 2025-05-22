@@ -44,7 +44,6 @@ import {
   type FileToCommit,
 } from "../../lib/GHAPI.ts";
 import dedent from "dedent";
-import * as v from "valibot";
 
 const owner = "SkyBlockClient";
 const repo = "SkyblockClient-REPO";
@@ -283,10 +282,10 @@ async function updatePack(data: PackUpdate, changes: FileToCommit[]) {
 }
 
 function isModList(obj: unknown): obj is Mod[] {
-  return v.safeParse(Mods, obj).success;
+  return Mods.safeParse(obj).success;
 }
 function isPackList(obj: unknown): obj is Pack[] {
-  return v.safeParse(Packs, obj).success;
+  return Packs.safeParse(obj).success;
 }
 
 function isUpdateApproved(data: PartialUpdate) {

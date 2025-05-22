@@ -7,7 +7,6 @@ import {
   type InteractionReplyOptions,
 } from "discord.js";
 import { repoFilesURL } from "../../const.js";
-import * as v from "valibot";
 
 @ApplyOptions<Command.Options>({
   description: "Gives the link to a discord",
@@ -34,8 +33,7 @@ export class UserCommand extends Command {
   ) {
     const query = interaction.options.getString("discord", true);
 
-    const data = await getJSON("discords");
-    const items = v.parse(Discords, data);
+    const items = await getJSON("discords", Discords);
     const item = queryData(items, query);
     if (!item) return interaction.reply({ content: `No Discord found` });
 

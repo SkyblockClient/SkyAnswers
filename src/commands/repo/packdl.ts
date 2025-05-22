@@ -1,8 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Pack, Packs, getPacks } from "../../lib/data.js";
+import { Pack, getPacks } from "../../lib/data.js";
 import { type APIEmbed, hyperlink, unorderedList } from "discord.js";
-import * as v from "valibot";
 
 enum ItemType {
   Skyblock,
@@ -24,9 +23,7 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    const items = v
-      .parse(Packs, await getPacks())
-      .filter((item) => !item.hidden);
+    const items = (await getPacks()).filter((item) => !item.hidden);
     const categorizeItem = (item: Pack) =>
       item.categories?.includes("2;All Skyblock") ||
       item.categories?.includes("1;All Skyblock")

@@ -3,7 +3,7 @@ import { Client, type UserResolvable } from "discord.js";
 import { ApplyOptions } from "@sapphire/decorators";
 import { BoostersDB } from "../../lib/db.js";
 import { Polyfrost, SkyClient } from "../../const.js";
-import * as v from "valibot";
+import { z } from "zod/v4-mini";
 import { readGHFile, writeGHFile } from "../../lib/GHAPI.js";
 import { format } from "prettier";
 import { Time } from "@sapphire/time-utilities";
@@ -27,17 +27,17 @@ const repo = "SkyblockClient/Website";
 const path = "docs/assets/tags.json";
 const TagName = "Supporter";
 
-const TagsJSON = v.object({
-  tags: v.record(
-    v.string(),
-    v.union([v.tuple([v.string(), v.string()]), v.tuple([v.string()])]),
+const TagsJSON = z.object({
+  tags: z.record(
+    z.string(),
+    z.union([z.tuple([z.string(), z.string()]), z.tuple([z.string()])]),
   ),
-  perms: v.intersect([
-    v.record(v.string(), v.array(v.string())),
-    v.object({ [TagName]: v.array(v.string()) }),
-  ]),
-  whitelist: v.boolean(),
-  whitelisted: v.array(v.string()),
+  perms: z.intersection(
+    z.record(z.string(), z.array(z.string())),
+    z.object({ [TagName]: z.array(z.string()) }),
+  ),
+  whitelist: z.boolean(),
+  whitelisted: z.array(z.string()),
 });
 
 export async function run(client: Client<true>) {
@@ -81,7 +81,7 @@ export async function isSupporter(userID: UserResolvable) {
 
 async function updateBoosters(supporters: string[]) {
   const oldFile = await readGHFile(repo, path);
-  const tags = v.parse(TagsJSON, JSON.parse(oldFile.content));
+  const tags = TagsJSON.parse(JSON.parse(oldFile.content));
   tags.perms[TagName] = supporters;
 
   const content = await format(JSON.stringify(tags), { parser: "json" });

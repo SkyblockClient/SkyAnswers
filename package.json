@@ -36,6 +36,7 @@
     "@sapphire/time-utilities": "^1.7.14",
     "@sapphire/utilities": "^3.18.2",
     "@skyra/env-utilities": "^2.0.0",
+    "@standard-schema/spec": "^1.0.0",
     "@std/fmt": "npm:@jsr/std__fmt",
     "@std/text": "npm:@jsr/std__text",
     "dedent": "^1.6.0",
@@ -45,7 +46,7 @@
     "memoize": "^10.1.0",
     "p-map": "^7.0.3",
     "remeda": "^2.21.3",
-    "valibot": "^1.0.0"
+    "zod": "^3.25.20"
   },
   "peerDependencies": {
     "typescript": "^5.8.2"
