@@ -13,7 +13,8 @@ const UpdatePerm = z.object({
 });
 const UpdatePerms = z.record(z.string(), UpdatePerm);
 
-const getUpdatePerms = async () => await getJSON("update_perms", UpdatePerms);
+export const getUpdatePerms = async () =>
+  await getJSON("update_perms", UpdatePerms);
 
 export async function checkMember(member: GuildMember): Promise<
   | { all: true }
