@@ -36,7 +36,7 @@ export async function getTrackedData(
   url: string,
   schema: StandardSchemaV1 = z.unknown(),
 ): Promise<unknown> {
-  const resp = getTrackedURL(url);
+  const resp = await getTrackedURL(url);
   let ret = schema["~standard"].validate(resp);
   if (ret instanceof Promise) ret = await ret;
 
