@@ -204,9 +204,7 @@ export class UserCommand extends Subcommand {
 
     const { id } = await int.fetchReply();
     await PendingUpdatesDB.update((pending) => {
-      pending[id] = {
-        ...data,
-      };
+      pending[id] = { ...data };
     });
 
     return retMessage(int, data);
