@@ -4,6 +4,8 @@ import logger from "../../lib/logger.ts";
 import { invalidateTrackedData } from "../../lib/data.js";
 import { Polyfrost, SkyClient, shrug } from "../../const.js";
 import { formatUser } from "../../lib/logHelper.js";
+import { MessageFlags } from "discord.js";
+import dedent from "dedent";
 
 @ApplyOptions<Command.Options>({
   description: "Clears the data (eg mods, autoresponses, etc) caches",
@@ -33,11 +35,13 @@ export class UserCommand extends Command {
     if (!canDo) {
       logger.info(`${formatUser(user)} has been validated.`);
       return interaction.reply({
-        content: `No permissions, so
-You have been validated.
-Welp, at least you tried.
-(A haiku)`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
+        content: dedent`
+          No permissions, so
+          You have been validated.
+          Welp, at least you tried.
+          (A haiku)
+        `,
       });
     }
 

@@ -4,7 +4,7 @@ import {
   InteractionHandlerTypes,
 } from "@sapphire/framework";
 import logger from "./../lib/logger.ts";
-import type { ButtonInteraction } from "discord.js";
+import { MessageFlags, type ButtonInteraction } from "discord.js";
 import { Polyfrost, SkyClient } from "../const.js";
 
 @ApplyOptions<InteractionHandler.Options>({
@@ -26,14 +26,14 @@ export class ButtonHandler extends InteractionHandler {
         return interaction.message.delete();
       else
         return interaction.reply({
+          flags: MessageFlags.Ephemeral,
           content: "You don't have permission to delete this.",
-          ephemeral: true,
         });
     } catch (e) {
       logger.warn("could not delete", interaction.message, e);
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "could not delete",
-        ephemeral: true,
       });
     }
   }

@@ -7,7 +7,7 @@ import {
   probableMatches,
   queryData,
 } from "../../lib/data.js";
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, MessageFlags } from "discord.js";
 import { isSupportTeam } from "../../lib/ticket.js";
 import dedent from "dedent";
 
@@ -68,8 +68,8 @@ export class UserCommand extends Command {
       if (getDistance(best, query) <= 3)
         reply += `\nDid you mean ${best.display}?`;
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: reply,
-        ephemeral: true,
       });
     }
 
@@ -100,8 +100,8 @@ export class UserCommand extends Command {
         const { command } = item;
         if (!command)
           return interaction.reply({
+            flags: MessageFlags.Ephemeral,
             content: `${item.display} doesn't have a config command!`,
-            ephemeral: true,
           });
         instText = `You can configure ${item.display} using the command \`${command}\` in-game.`;
       }
@@ -112,7 +112,8 @@ export class UserCommand extends Command {
       reply.content = `${pingText} ${instText}`;
       reply.allowedMentions = { users: ping ? [ping.id] : [] };
     }
-    reply.ephemeral = !!interaction.options.getBoolean("hidden", false);
+    if (interaction.options.getBoolean("hidden", false))
+      reply.flags = MessageFlags.Ephemeral;
     return interaction.reply(reply);
   }
 }

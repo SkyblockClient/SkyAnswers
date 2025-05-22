@@ -121,8 +121,8 @@ export class UserCommand extends Command {
       ],
     });
     return interaction.reply({
+      flags: MessageFlags.Ephemeral,
       content: "✅",
-      ephemeral: true,
     });
   }
 }

@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { unorderedList } from "discord.js";
+import dedent from "dedent";
+import { MessageFlags, unorderedList } from "discord.js";
 
 @ApplyOptions<Command.Options>({
   description: "See what servers SkyAnswers got into.",
@@ -21,9 +22,11 @@ export class UserCommand extends Command {
 
     const list = guilds.map((guild) => `${guild.name} (${guild.id})`);
     await interaction.reply({
-      content: `${guilds.size} servers:
-${unorderedList(list)}`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
+      content: dedent`
+        ${guilds.size} servers:
+        ${unorderedList(list)}
+      `,
     });
   }
 }

@@ -1,7 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { getTicketOwner, getTicketTop, isTicket } from "../lib/ticket.js";
-import { ChannelType, userMention } from "discord.js";
+import { ChannelType, MessageFlags, userMention } from "discord.js";
 
 @ApplyOptions<Subcommand.Options>({
   description: "Debug commands... for debugging... (DEBUG)",
@@ -30,7 +30,7 @@ export class UserCommand extends Subcommand {
   public async ticketDebug(
     interaction: Subcommand.ChatInputCommandInteraction,
   ) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const channel =
       interaction.options.getChannel("channel", false, [

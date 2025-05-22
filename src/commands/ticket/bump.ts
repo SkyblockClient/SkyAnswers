@@ -1,6 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
-import { Colors, hyperlink, time } from "discord.js";
+import { Colors, hyperlink, MessageFlags, time } from "discord.js";
 import {
   getTicketTop,
   getTicketOwner,
@@ -27,13 +27,13 @@ export class UserCommand extends Command {
     const { channel } = interaction;
     if (!isSupportTeam(interaction.member))
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "❔",
-        ephemeral: true,
       });
     if (!isTicket(channel))
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "Bold of you to assume this is a ticket...",
-        ephemeral: true,
       });
 
     const pinMsg = await getTicketTop(channel);

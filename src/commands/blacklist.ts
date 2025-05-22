@@ -2,7 +2,11 @@ import { ApplyOptions } from "@sapphire/decorators";
 import { isGuildMember, isTextChannel } from "@sapphire/discord.js-utilities";
 import { Command } from "@sapphire/framework";
 import logger from "../lib/logger.ts";
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  EmbedBuilder,
+  MessageFlags,
+} from "discord.js";
 import { Polyfrost, SkyClient } from "../const.ts";
 
 @ApplyOptions<Command.Options>({
@@ -56,13 +60,13 @@ export class UserCommand extends Command {
 
     if (roles.has(noGiveawaysRole))
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "User is already blacklisted",
-        ephemeral: true,
       });
     if (roles.has(SkyClient.roles.CoolPeople))
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "User is too cool 😎",
-        ephemeral: true,
       });
 
     try {
@@ -82,9 +86,11 @@ export class UserCommand extends Command {
 
       const message = `${member.toString()} has been blocked from giveaways`;
       await interaction.reply({
+        flags: interaction.options.getBoolean("silent")
+          ? MessageFlags.Ephemeral
+          : undefined,
         content: message,
         embeds: [embed],
-        ephemeral: !!interaction.options.getBoolean("silent"),
         allowedMentions: { users: [member.id] },
       });
 

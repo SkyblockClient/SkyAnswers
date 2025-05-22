@@ -4,7 +4,7 @@ import {
   InteractionHandlerTypes,
 } from "@sapphire/framework";
 import type { ButtonInteraction } from "discord.js";
-import { roleMention, userMention } from "discord.js";
+import { MessageFlags, roleMention, userMention } from "discord.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
 import { PendingUpdatesDB } from "../../lib/db.js";
 import { isGuildBasedChannel } from "@sapphire/discord.js-utilities";
@@ -24,8 +24,8 @@ export class ButtonHandler extends InteractionHandler {
     const data = pendingUpdates[interaction.message.id];
     if (!data)
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "no update found (this shouldn't happen)",
-        ephemeral: true,
       });
 
     if (isGuildBasedChannel(channel)) {

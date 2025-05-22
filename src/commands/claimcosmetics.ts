@@ -1,7 +1,11 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import logger from "../lib/logger.ts";
-import { ApplicationCommandOptionType, channelMention } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  channelMention,
+  MessageFlags,
+} from "discord.js";
 import { Polyfrost, SkyClient } from "../const.ts";
 import { getMCProfile } from "../lib/mcAPI.ts";
 import { BoostersDB } from "../lib/db.ts";
@@ -36,9 +40,9 @@ export class UserCommand extends Command {
     const profile = await getMCProfile(mcName);
     if (!profile)
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content:
           "Couldn't find this Minecraft account. Did you type it correctly?",
-        ephemeral: true,
       });
 
     logger.info("Saving Supporter", supporter, interaction.user.id, profile.id);
@@ -48,36 +52,36 @@ export class UserCommand extends Command {
 
     if (supporter)
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: dedent`
           # Thanks for the support! <3
           Your in-game rank will be applied to ${profile.name} in 5-10 minutes.
           -# [SkyClient Cosmetics](<https://modrinth.com/mod/scc>) is required to see the rank.
           -# If you don't see it, you may have to type \`/scc reload\` in game.
         `,
-        ephemeral: true,
       });
     else if (interaction.guildId == SkyClient.id)
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: dedent`
           **You don't appear to be supporting us.**
           Give us a boost to receive an in-game role with SkyClient Cosmetics!
         `,
-        ephemeral: true,
       });
     else if (interaction.guildId == Polyfrost.id)
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: dedent`
           **You don't appear to be supporting us.**
           Join our Patreon to receive an in-game role with SkyClient Cosmetics!
           Find out more here: ${channelMention(Polyfrost.channels.PatreonAd)}
         `,
-        ephemeral: true,
       });
     // This will happen in DMs
     else
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "**You don't appear to be supporting us.**",
-        ephemeral: true,
       });
   }
 }

@@ -114,14 +114,14 @@ export class UserCommand extends Subcommand {
     const perms = await checkMember(member);
     if (!perms.all && !perms.mods)
       return int.reply({
+        flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any mods`,
-        ephemeral: true,
       });
 
     if (channel.id != SkyClient.channels.ModUpdating)
       return int.reply({
+        flags: MessageFlags.Ephemeral,
         content: `💡 this command is only available in <#${SkyClient.channels.ModUpdating}>`,
-        ephemeral: true,
       });
     const url = int.options.getString("url", true);
     if (!URL.safeParse(url).success)
@@ -223,14 +223,14 @@ export class UserCommand extends Subcommand {
     const perms = await checkMember(member);
     if (!perms.all && !perms.packs)
       return int.reply({
+        flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any packs`,
-        ephemeral: true,
       });
 
     if (channel.id != SkyClient.channels.ModUpdating)
       return int.reply({
+        flags: MessageFlags.Ephemeral,
         content: `💡 this command is only available in <#${SkyClient.channels.ModUpdating}>`,
-        ephemeral: true,
       });
     const url = int.options.getString("url", true);
     if (!URL.safeParse(url).success)
