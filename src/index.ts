@@ -1,6 +1,7 @@
 import { SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
 import "@sapphire/plugin-editable-commands/register";
+import "@sapphire/plugin-logger/register";
 import { setup } from "@skyra/env-utilities";
 import logger from "./lib/logger.ts";
 
