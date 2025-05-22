@@ -11,24 +11,24 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^9.27.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/ts-config": "^5.0.1",
     "@tsconfig/bun": "^1.0.7",
-    "@types/bun": "^1.2.12",
-    "eslint": "^9.26.0",
-    "eslint-config-prettier": "^10.1.2",
-    "globals": "^16.0.0",
+    "@types/bun": "^1.2.14",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "globals": "^16.1.0",
     "prettier": "^3.5.3",
-    "typescript-eslint": "^8.32.0"
+    "typescript-eslint": "^8.32.1"
   },
   "dependencies": {
-    "@octokit/core": "^6.1.5",
+    "@octokit/core": "^7.0.2",
     "@octokit/rest": "^21.1.1",
     "@sapphire/decorators": "^6.1.1",
-    "@sapphire/discord.js-utilities": "^7.3.2",
+    "@sapphire/discord.js-utilities": "^7.3.3",
     "@sapphire/fetch": "^3.0.5",
-    "@sapphire/framework": "^5.3.4",
+    "@sapphire/framework": "^5.3.5",
     "@sapphire/plugin-editable-commands": "^4.0.4",
     "@sapphire/plugin-logger": "^4.0.2",
     "@sapphire/plugin-subcommands": "^7.0.1",
@@ -45,7 +45,7 @@
     "lowdb": "^7.0.1",
     "memoize": "^10.1.0",
     "p-map": "^7.0.3",
-    "remeda": "^2.21.3",
+    "remeda": "^2.21.8",
     "zod": "^3.25.20"
   },
   "peerDependencies": {
