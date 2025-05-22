@@ -1,8 +1,8 @@
-import { LogLevel, SapphireClient } from "@sapphire/framework";
+import { SapphireClient } from "@sapphire/framework";
 import { GatewayIntentBits, Partials } from "discord.js";
-import "@sapphire/plugin-logger/register";
 import "@sapphire/plugin-editable-commands/register";
 import { setup } from "@skyra/env-utilities";
+import logger from "./lib/logger.ts";
 
 setup();
 
@@ -17,12 +17,12 @@ const client = new SapphireClient({
   ],
   partials: [Partials.Channel],
   loadMessageCommandListeners: true,
-  logger: { level: LogLevel.Info },
+  logger,
 });
 
-client.logger.info("Connecting...");
+logger.info("Connecting...");
 await client.login();
-client.logger.info("Connected");
+logger.info("Connected");
 
 declare module "@skyra/env-utilities" {
   interface Env {

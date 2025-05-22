@@ -2,8 +2,8 @@ import { ApplyOptions } from "@sapphire/decorators";
 import {
   InteractionHandler,
   InteractionHandlerTypes,
-  container,
 } from "@sapphire/framework";
+import logger from "../../lib/logger.ts";
 import {
   BaseInteraction,
   ButtonBuilder,
@@ -125,7 +125,7 @@ export class ButtonHandler extends InteractionHandler {
           throw new Error(`${fileResp.statusText} while fetching ${data.url}`);
         fileData = await fileResp.arrayBuffer();
       } catch (e) {
-        container.logger.error("Failed to download file", e);
+        logger.error("Failed to download file", e);
         await interaction.message.edit(
           generateMessage(
             interaction,
@@ -184,7 +184,7 @@ export class ButtonHandler extends InteractionHandler {
         ),
       );
     } catch (e) {
-      container.logger.error("Failed to update", data, e);
+      logger.error("Failed to update", data, e);
       return await interaction.message.edit({
         flags: MessageFlags.IsComponentsV2,
         allowedMentions: { parse: [] },

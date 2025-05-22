@@ -2,8 +2,8 @@ import { fetch, FetchResultTypes } from "@sapphire/fetch";
 import { z } from "zod/v4-mini";
 import { repoFilesURL } from "../const.js";
 import { levenshteinDistance } from "@std/text";
-import { container } from "@sapphire/framework";
-import memoize, { memoizeClear } from "memoize";
+import pMemoize, { pMemoizeClear } from "p-memoize";
+import ExpiryMap from "expiry-map";
 import { Time } from "@sapphire/time-utilities";
 import { filterNullish } from "@sapphire/utilities";
 import {
@@ -13,19 +13,22 @@ import {
 } from "discord.js";
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
+import logger from "./logger.ts";
 
-async function _getTrackedURL(url: string): Promise<unknown> {
-  container.logger.info("refetching", url);
+async function _getTrackedJSON(url: string): Promise<unknown> {
+  logger.info("refetching", url);
   try {
     const resp = await fetch(url, FetchResultTypes.Result);
     if (!resp.ok) throw new Error(`http error ${resp.statusText}`);
     return resp.json();
   } catch (e) {
-    container.logger.error(`error while fetching ${url}`, e);
+    console.error(`error while fetching ${url}`, e);
     throw new Error(`error while fetching ${url}`);
   }
 }
-const getTrackedURL = memoize(_getTrackedURL, { maxAge: Time.Hour });
+const getTrackedJSON = pMemoize(_getTrackedJSON, {
+  cache: new ExpiryMap(Time.Hour),
+});
 
 export async function getTrackedData(url: string): Promise<unknown>;
 export async function getTrackedData<T extends StandardSchemaV1>(
@@ -36,7 +39,7 @@ export async function getTrackedData(
   url: string,
   schema: StandardSchemaV1 = z.unknown(),
 ): Promise<unknown> {
-  const resp = await getTrackedURL(url);
+  const resp = await getTrackedJSON(url);
   let ret = schema["~standard"].validate(resp);
   if (ret instanceof Promise) ret = await ret;
 
@@ -56,7 +59,7 @@ export async function getJSON(
   return await getTrackedData(`${repoFilesURL}/${filename}.json`, schema);
 }
 
-export const invalidateTrackedData = () => memoizeClear(getTrackedURL);
+export const invalidateTrackedData = () => pMemoizeClear(getTrackedJSON);
 
 export const DataType = z.enum(["mods", "packs"]);
 export type DataType = z.infer<typeof DataType>;

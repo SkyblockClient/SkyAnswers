@@ -1,5 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command, container } from "@sapphire/framework";
+import { Command } from "@sapphire/framework";
+import logger from "../../lib/logger.ts";
 import { invalidateTrackedData } from "../../lib/data.js";
 import { Polyfrost, SkyClient, shrug } from "../../const.js";
 import { formatUser } from "../../lib/logHelper.js";
@@ -30,7 +31,7 @@ export class UserCommand extends Command {
       false;
 
     if (!canDo) {
-      container.logger.info(`${formatUser(user)} has been validated.`);
+      logger.info(`${formatUser(user)} has been validated.`);
       return interaction.reply({
         content: `No permissions, so
 You have been validated.

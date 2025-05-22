@@ -41,10 +41,11 @@
     "@std/text": "npm:@jsr/std__text",
     "dedent": "^1.6.0",
     "discord.js": "^14.19.3",
+    "expiry-map": "^2.0.0",
     "jszip": "^3.10.1",
     "lowdb": "^7.0.1",
-    "memoize": "^10.1.0",
     "p-map": "^7.0.3",
+    "p-memoize": "^7.1.1",
     "remeda": "^2.21.8",
     "zod": "^3.25.20"
   },

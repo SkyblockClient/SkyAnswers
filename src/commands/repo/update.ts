@@ -1,5 +1,5 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { container } from "@sapphire/framework";
+import logger from "./../../lib/logger.ts";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { createHash } from "crypto";
 import {
@@ -133,7 +133,7 @@ export class UserCommand extends Subcommand {
       headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
     });
     if (!modResp.ok) {
-      container.logger.error(
+      logger.error(
         `${modResp.statusText} while fetching ${url}`,
         await modResp.text(),
       );
@@ -151,10 +151,10 @@ export class UserCommand extends Subcommand {
           const modInfo = ModInfo.parse(JSON.parse(modInfoStr));
           modId = modInfo[0].modid;
         } catch (e) {
-          container.logger.error("Failed to read mcmod.info", e);
+          logger.error("Failed to read mcmod.info", e);
         }
     } catch (e) {
-      container.logger.error("Failed to read ZIP", e);
+      logger.error("Failed to read ZIP", e);
       return int.editReply("Failed to read ZIP. Is the URL correct?");
     }
     modId = modId || int.options.getString("forge_id");
@@ -242,7 +242,7 @@ export class UserCommand extends Subcommand {
       headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
     });
     if (!modResp.ok) {
-      container.logger.error(
+      logger.error(
         `${modResp.statusText} while fetching ${url}`,
         await modResp.text(),
       );
@@ -255,7 +255,7 @@ export class UserCommand extends Subcommand {
       const modInfoFile = modZip.file("pack.mcmeta");
       if (!modInfoFile) throw new Error();
     } catch (e) {
-      container.logger.error("Failed to read ZIP", e);
+      logger.error("Failed to read ZIP", e);
       return int.editReply("Failed to read ZIP. Is the URL correct?");
     }
 

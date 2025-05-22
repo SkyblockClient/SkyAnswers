@@ -1,5 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Command, container } from "@sapphire/framework";
+import { Command } from "@sapphire/framework";
+import logger from "../lib/logger.ts";
 import { ApplicationCommandOptionType, channelMention } from "discord.js";
 import { Polyfrost, SkyClient } from "../const.ts";
 import { getMCProfile } from "../lib/mcAPI.ts";
@@ -40,12 +41,7 @@ export class UserCommand extends Command {
         ephemeral: true,
       });
 
-    container.logger.info(
-      "Saving Supporter",
-      supporter,
-      interaction.user.id,
-      profile.id,
-    );
+    logger.info("Saving Supporter", supporter, interaction.user.id, profile.id);
     await BoostersDB.update((data) => {
       data[interaction.user.id] = profile.id;
     });

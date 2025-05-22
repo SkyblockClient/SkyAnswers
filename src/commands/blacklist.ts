@@ -1,6 +1,7 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { isGuildMember, isTextChannel } from "@sapphire/discord.js-utilities";
-import { Command, container } from "@sapphire/framework";
+import { Command } from "@sapphire/framework";
+import logger from "../lib/logger.ts";
 import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { Polyfrost, SkyClient } from "../const.ts";
 
@@ -100,7 +101,7 @@ export class UserCommand extends Command {
         allowedMentions: { parse: [] },
       });
     } catch (e) {
-      container.logger.error(e);
+      logger.error(e);
     }
     return;
   }

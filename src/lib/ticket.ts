@@ -3,11 +3,11 @@ import {
   isGuildMember,
   isTextChannel,
 } from "@sapphire/discord.js-utilities";
-import { container } from "@sapphire/framework";
+import logger from "./logger.ts";
 import { Time } from "@sapphire/time-utilities";
 import { type FirstArgument, type Nullish, sleep } from "@sapphire/utilities";
 import { Message, roleMention, TextChannel } from "discord.js";
-import memoize from "memoize";
+import pMemoize from "p-memoize";
 import { formatChannel } from "./logHelper.js";
 import { DevServer, Polyfrost, SkyClient, SupportTeams } from "../const.js";
 
@@ -19,15 +19,15 @@ export async function setTicketOpen(
     throw new Error(`open undefined WHY IS THIS HAPPENING`);
   const header = `${open ? "Opening" : "Closing"} ${formatChannel(channel)}`;
   if (!isTicket(channel)) {
-    container.logger.warn(header, "Not a ticket");
+    logger.warn(header, "Not a ticket");
     return;
   }
 
   const owner = await getTicketOwner(channel);
   if (owner) {
-    container.logger.info(header, "for", owner);
+    logger.info(header, "for", owner);
     await channel.permissionOverwrites.edit(owner, { SendMessages: open });
-  } else container.logger.warn(header, "Failed to find owner");
+  } else logger.warn(header, "Failed to find owner");
 }
 
 async function _getTicketTop(ticket: ChannelTypes) {
@@ -43,7 +43,7 @@ async function _getTicketTop(ticket: ChannelTypes) {
   }
   return;
 }
-export const getTicketTop = memoize(_getTicketTop, {
+export const getTicketTop = pMemoize(_getTicketTop, {
   cacheKey: ([channel]) => channel.id,
 });
 

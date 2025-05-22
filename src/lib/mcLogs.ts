@@ -1,6 +1,7 @@
 import { FetchResultTypes, fetch } from "@sapphire/fetch";
 import { Time } from "@sapphire/time-utilities";
-import memoize from "memoize";
+import ExpiryMap from "expiry-map";
+import pMemoize from "p-memoize";
 import { z } from "zod/v4-mini";
 
 const baseURL = "https://api.mclo.gs/1";
@@ -66,9 +67,9 @@ async function _getRawLog(log: string | LogType): Promise<string> {
   const id = getMCLogID(log);
   return fetch(`${baseURL}/raw/${id}`, FetchResultTypes.Text);
 }
-export const getRawLog = memoize(_getRawLog, {
+export const getRawLog = pMemoize(_getRawLog, {
   cacheKey: ([log]) => getMCLogID(log),
-  maxAge: Time.Hour,
+  cache: new ExpiryMap(Time.Hour),
 });
 
 enum Level {
@@ -128,7 +129,7 @@ async function _getLogInsights(log: string | LogType) {
   const data = await fetch(`${baseURL}/insights/${id}`);
   return LogInsights.parse(data);
 }
-export const getLogInsights = memoize(_getLogInsights, {
+export const getLogInsights = pMemoize(_getLogInsights, {
   cacheKey: ([log]) => getMCLogID(log),
-  maxAge: Time.Hour,
+  cache: new ExpiryMap(Time.Hour),
 });

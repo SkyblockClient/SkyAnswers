@@ -1,5 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
-import { Events, Listener, container } from "@sapphire/framework";
+import { Events, Listener } from "@sapphire/framework";
+import logger from "../../lib/logger.ts";
 import { getTrackedData } from "../../lib/data.js";
 import {
   type APIEmbed,
@@ -59,7 +60,7 @@ export class UserEvent extends Listener<typeof Events.MessageCreate> {
         await message.delete();
       } catch (e) {
         // message may have already been deleted by another bot
-        container.logger.error("Failed to delete log message", e);
+        logger.error("Failed to delete log message", e);
       }
       text = await mcLog.getRaw();
       const insights = await mcLog.getInsights();
@@ -203,7 +204,7 @@ async function verbalizeCrash(
       Crashes,
     );
   } catch (e) {
-    container.logger.error("Failed to parse crashes.json", e);
+    logger.error("Failed to parse crashes.json", e);
     return [
       {
         name: "Failed to parse crashes.json",
