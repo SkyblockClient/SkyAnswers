@@ -8,7 +8,9 @@ import {
   BaseInteraction,
   ButtonBuilder,
   ButtonStyle,
+  Colors,
   ContainerBuilder,
+  Message,
   MessageFlags,
   SectionBuilder,
   SeparatorBuilder,
@@ -61,13 +63,13 @@ export class ButtonHandler extends InteractionHandler {
     const data = PendingUpdatesDB.data[interaction.message.id];
     if (!data)
       return interaction.reply({
-        content: "update not found. this shouldn't happen!",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
+        content: "Update not found. This shouldn't happen!",
       });
     if (data.approvers.map(({ id }) => id).includes(interaction.user.id))
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "You already approved this update",
-        ephemeral: true,
       });
 
     const member = interaction.guild?.members.resolve(interaction.user);
@@ -79,24 +81,17 @@ export class ButtonHandler extends InteractionHandler {
       (data.type == "pack" && perms.packs && data.id in perms.packs);
     if (!approved)
       return interaction.reply({
+        flags: MessageFlags.Ephemeral,
         content: "You can't approve this update",
-        ephemeral: true,
       });
 
     const approver = { name: member.user.tag, id: member.user.id };
     await PendingUpdatesDB.update((db) => {
       db[interaction.message.id].approvers.push(approver);
     });
-    if (!isUpdateApproved(data))
-      return await interaction.update(generateMessage(interaction, data));
 
-    await interaction.update(
-      generateMessage(
-        interaction,
-        data,
-        new TextDisplayBuilder().setContent("one second"),
-      ),
-    );
+    await interaction.update(generateMessage(interaction, data));
+    if (!isUpdateApproved(data)) return;
 
     if (data.pingMsg) {
       const msg = await interaction.channel?.messages.fetch(data.pingMsg);
@@ -110,9 +105,7 @@ export class ButtonHandler extends InteractionHandler {
         generateMessage(
           interaction,
           data,
-          new TextDisplayBuilder().setContent(
-            "one second we need to download then upload the file",
-          ),
+          new TextDisplayBuilder().setContent("Downloading the file..."),
         ),
       );
 
@@ -127,10 +120,9 @@ export class ButtonHandler extends InteractionHandler {
       } catch (e) {
         logger.error("Failed to download file", e);
         await interaction.message.edit(
-          generateMessage(
-            interaction,
+          errorMessage(
             data,
-            new TextDisplayBuilder().setContent("failed to download file"),
+            new TextDisplayBuilder().setContent("❌ Failed to download file"),
           ),
         );
         throw e;
@@ -146,9 +138,7 @@ export class ButtonHandler extends InteractionHandler {
       generateMessage(
         interaction,
         data,
-        new TextDisplayBuilder().setContent(
-          "one second just need to scream commands at github",
-        ),
+        new TextDisplayBuilder().setContent("Sending to GitHub..."),
       ),
     );
 
@@ -180,19 +170,17 @@ export class ButtonHandler extends InteractionHandler {
         generateMessage(
           interaction,
           data,
-          new TextDisplayBuilder().setContent("✅ pushed it out"),
+          new TextDisplayBuilder().setContent("✅ Pushed it out"),
         ),
       );
     } catch (e) {
       logger.error("Failed to update", data, e);
-      return await interaction.message.edit({
-        flags: MessageFlags.IsComponentsV2,
-        allowedMentions: { parse: [] },
-        components: [
-          generateDataComponent(data),
-          new TextDisplayBuilder().setContent("❌ failed to push it out :("),
-        ],
-      });
+      return await interaction.message.edit(
+        errorMessage(
+          data,
+          new TextDisplayBuilder().setContent("❌ Failed to push it out"),
+        ),
+      );
     }
   }
 
@@ -337,6 +325,20 @@ export function generateApproversComponent(data: PartialUpdate) {
   return container;
 }
 
+function errorMessage(
+  data: PartialUpdate,
+  ...additionalComponents: JSONEncodable<APIMessageTopLevelComponent>[]
+): MessageEditOptions {
+  return {
+    flags: MessageFlags.IsComponentsV2,
+    allowedMentions: { parse: [] },
+    components: [
+      generateDataComponent(data).setAccentColor(Colors.Red),
+      ...additionalComponents,
+    ],
+  };
+}
+
 export function generateMessage(
   int: BaseInteraction,
   data: PartialUpdate,
@@ -350,10 +352,7 @@ export function generateMessage(
     data.url,
   )}`;
 
-  const components: JSONEncodable<APIMessageTopLevelComponent>[] = [
-    generateDataComponent(data),
-    generateApproversComponent(data),
-  ];
+  const components: JSONEncodable<APIMessageTopLevelComponent>[] = [];
   if (!approved) {
     components.push(
       new SectionBuilder()
@@ -381,6 +380,11 @@ export function generateMessage(
   return {
     flags: MessageFlags.IsComponentsV2,
     allowedMentions: { parse: [], users: approvedOwn ? [] : [int.user.id] },
-    components: [...components, ...additionalComponents],
+    components: [
+      generateDataComponent(data),
+      generateApproversComponent(data),
+      ...components,
+      ...additionalComponents,
+    ],
   };
 }
