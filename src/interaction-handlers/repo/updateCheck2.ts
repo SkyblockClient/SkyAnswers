@@ -88,7 +88,7 @@ export class ButtonHandler extends InteractionHandler {
     await PendingUpdatesDB.update((db) => {
       db[interaction.message.id].approvers.push(approver);
     });
-    if (data.approvers.length < 3)
+    if (!isUpdateApproved(data))
       return await interaction.update(generateMessage(interaction, data));
 
     await interaction.update(
@@ -159,30 +159,42 @@ export class ButtonHandler extends InteractionHandler {
         : await updatePack(data, changes);
     const displayName = `${itemName} (\`${data.id}\`)`;
 
-    await commitFiles(
-      owner,
-      repo,
-      branch,
-      dedent`
-        Update ${data.type} ${displayName}
-        Approved by:
-        ${unorderedList(data.approvers.map(({ name, id }) => `${name} (${id})`))}
-      `,
-      changes,
-    );
+    try {
+      await commitFiles(
+        owner,
+        repo,
+        branch,
+        dedent`
+          Update ${data.type} ${displayName}
+          Approved by:
+          ${unorderedList(data.approvers.map(({ name, id }) => `${name} (${id})`))}
+        `,
+        changes,
+      );
 
-    await PendingUpdatesDB.update((data) => {
-      delete data[interaction.message.id];
-    });
-    invalidateTrackedData();
+      await PendingUpdatesDB.update((data) => {
+        delete data[interaction.message.id];
+      });
+      invalidateTrackedData();
 
-    return await interaction.message.edit(
-      generateMessage(
-        interaction,
-        data,
-        new TextDisplayBuilder().setContent("✅ pushed it out"),
-      ),
-    );
+      return await interaction.message.edit(
+        generateMessage(
+          interaction,
+          data,
+          new TextDisplayBuilder().setContent("✅ pushed it out"),
+        ),
+      );
+    } catch (e) {
+      container.logger.error("Failed to update", data, e);
+      return await interaction.message.edit({
+        flags: MessageFlags.IsComponentsV2,
+        allowedMentions: { parse: [] },
+        components: [
+          generateDataComponent(data),
+          new TextDisplayBuilder().setContent("❌ failed to push it out :("),
+        ],
+      });
+    }
   }
 
   public override parse(interaction: ButtonInteraction) {
@@ -277,35 +289,44 @@ function isPackList(obj: unknown): obj is Pack[] {
   return v.safeParse(Packs, obj).success;
 }
 
-export function generateMessage(
-  int: BaseInteraction,
-  data: PartialUpdate,
-  ...additionalComponents: JSONEncodable<APIMessageTopLevelComponent>[]
-): MessageEditOptions {
-  const { approvers } = data;
-  const done = approvers.length >= 3;
-  const approvedOwn = approvers.map(({ id }) => id).includes(int.user.id);
-  const ratURL = `https://ktibow.github.io/RatRater2/?rat-to-peer-url=${encodeURIComponent(
-    data.url,
-  )}`;
+function isUpdateApproved(data: PartialUpdate) {
+  return data.approvers.length >= 3;
+}
 
-  const approversContainer = done
-    ? new ContainerBuilder().addTextDisplayComponents(
-        new TextDisplayBuilder().setContent("## Approvers"),
-      )
-    : new ContainerBuilder().addSectionComponents(
-        new SectionBuilder()
-          .addTextDisplayComponents(
-            new TextDisplayBuilder().setContent("## Approvers"),
-          )
-          .setButtonAccessory(
-            new ButtonBuilder()
-              .setStyle(ButtonStyle.Success)
-              .setLabel("Approve")
-              .setCustomId("updateCheck2"),
-          ),
-      );
-  approversContainer
+export function generateDataComponent(data: PartialUpdate) {
+  return new ContainerBuilder().addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(dedent`
+      id: ${data.id}
+      url: ${data.url}
+      file: ${data.file}
+      md5: ${data.hash}
+      sha256: ${data.sha256}
+    `),
+  );
+}
+
+export function generateApproversComponent(data: PartialUpdate) {
+  const { approvers } = data;
+
+  const container = new ContainerBuilder();
+  if (isUpdateApproved(data))
+    container.addTextDisplayComponents(
+      new TextDisplayBuilder().setContent("## Approvers"),
+    );
+  else
+    container.addSectionComponents(
+      new SectionBuilder()
+        .addTextDisplayComponents(
+          new TextDisplayBuilder().setContent("## Approvers"),
+        )
+        .setButtonAccessory(
+          new ButtonBuilder()
+            .setStyle(ButtonStyle.Success)
+            .setLabel("Approve")
+            .setCustomId("updateCheck2"),
+        ),
+    );
+  container
     .addSeparatorComponents(new SeparatorBuilder())
     .addTextDisplayComponents(
       new TextDisplayBuilder().setContent(
@@ -314,20 +335,27 @@ export function generateMessage(
           : "None yet",
       ),
     );
+  return container;
+}
+
+export function generateMessage(
+  int: BaseInteraction,
+  data: PartialUpdate,
+  ...additionalComponents: JSONEncodable<APIMessageTopLevelComponent>[]
+): MessageEditOptions {
+  const { approvers } = data;
+  const approved = isUpdateApproved(data);
+  const approvedOwn =
+    approved || approvers.map(({ id }) => id).includes(int.user.id);
+  const ratURL = `https://ktibow.github.io/RatRater2/?rat-to-peer-url=${encodeURIComponent(
+    data.url,
+  )}`;
 
   const components: JSONEncodable<APIMessageTopLevelComponent>[] = [
-    new ContainerBuilder().addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(dedent`
-            id: ${data.id}
-            url: ${data.url}
-            file: ${data.file}
-            md5: ${data.hash}
-            sha256: ${data.sha256}
-          `),
-    ),
-    approversContainer,
+    generateDataComponent(data),
+    generateApproversComponent(data),
   ];
-  if (!done) {
+  if (!approved) {
     components.push(
       new SectionBuilder()
         .addTextDisplayComponents(
@@ -345,8 +373,10 @@ export function generateMessage(
         ),
     );
     if (!approvedOwn)
-      new TextDisplayBuilder().setContent(
-        `${int.user.toString()} don't forget to approve your own update`,
+      components.push(
+        new TextDisplayBuilder().setContent(
+          `${int.user.toString()} don't forget to approve your own update`,
+        ),
       );
   }
   return {
