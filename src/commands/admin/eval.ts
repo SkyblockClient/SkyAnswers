@@ -29,7 +29,8 @@ export class UserCommand extends Command {
       : `**ERROR**: ${codeBlock("bash", result)}`;
     if (args.getFlags("silent", "s")) return null;
 
-    const typeFooter = `**Type**: ${codeBlock("typescript", type)}`;
+    const typeFooter =
+      type == "unknown" ? "" : `\n**Type**: ${codeBlock("typescript", type)}`;
 
     if (output.length > 2000) {
       return send(message, {
@@ -38,7 +39,7 @@ export class UserCommand extends Command {
       });
     }
 
-    return send(message, `${output}\n${typeFooter}`);
+    return send(message, output + typeFooter);
   }
 
   private async eval(
