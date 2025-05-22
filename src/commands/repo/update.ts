@@ -5,7 +5,6 @@ import { createHash } from "crypto";
 import {
   ButtonBuilder,
   ButtonStyle,
-  ContainerBuilder,
   escapeMarkdown,
   MessageFlags,
   SectionBuilder,
@@ -26,7 +25,7 @@ import {
 import { envParseString } from "@skyra/env-utilities";
 import { type Nullish } from "@sapphire/utilities";
 import { extname } from "path";
-import dedent from "dedent";
+import { generateDataComponent } from "../../interaction-handlers/repo/updateCheck2.ts";
 
 const ModInfo = z.array(z.object({ modid: z.string() }));
 const URL = z.string().check(z.url());
@@ -311,15 +310,7 @@ function retMessage(
     flags: MessageFlags.IsComponentsV2,
     allowedMentions: { parse: [] },
     components: [
-      new ContainerBuilder().addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(dedent`
-          id: ${data.id}
-          url: ${data.url}
-          file: ${data.file}
-          md5: ${data.hash}
-          sha256: ${data.sha256}
-        `),
-      ),
+      generateDataComponent(data),
       new SectionBuilder()
         .addTextDisplayComponents(
           new TextDisplayBuilder().setContent("👀 does this look alright?"),

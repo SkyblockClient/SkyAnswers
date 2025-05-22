@@ -10,7 +10,6 @@ import {
   ButtonStyle,
   Colors,
   ContainerBuilder,
-  Message,
   MessageFlags,
   SectionBuilder,
   SeparatorBuilder,
