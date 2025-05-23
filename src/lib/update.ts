@@ -20,8 +20,8 @@ export async function checkMember(member: GuildMember): Promise<
   | { all: true }
   | {
       all: false;
-      mods?: Record<string, Permission>;
-      packs?: Record<string, Permission>;
+      mods: Record<string, Permission>;
+      packs: Record<string, Permission>;
     }
 > {
   if (member.roles.cache.has(SkyClient.roles.GitHubKeeper))
@@ -30,6 +30,9 @@ export async function checkMember(member: GuildMember): Promise<
 
   const owners = await getUpdatePerms();
   const data = owners[member.id];
-  if (data) return { all: false, mods: data.mods, packs: data.packs };
-  return { all: false };
+  return {
+    all: false,
+    mods: data?.mods || {},
+    packs: data?.packs || {},
+  };
 }

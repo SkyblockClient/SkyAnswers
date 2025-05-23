@@ -111,7 +111,7 @@ export class UserCommand extends Subcommand {
     const member = int.guild?.members.resolve(int.user);
     if (!member) return;
     const perms = await checkMember(member);
-    if (!perms.all && !perms.mods)
+    if (!perms.all && Object.keys(perms.mods).length == 0)
       return int.reply({
         flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any mods`,
@@ -218,7 +218,7 @@ export class UserCommand extends Subcommand {
     const member = int.guild?.members.resolve(int.user);
     if (!member) return;
     const perms = await checkMember(member);
-    if (!perms.all && !perms.packs)
+    if (!perms.all && Object.keys(perms.packs).length == 0)
       return int.reply({
         flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any packs`,

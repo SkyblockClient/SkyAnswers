@@ -76,8 +76,8 @@ export class ButtonHandler extends InteractionHandler {
     const perms = await checkMember(member);
     const approved =
       perms.all ||
-      (data.type == "mod" && perms.mods && data.id in perms.mods) ||
-      (data.type == "pack" && perms.packs && data.id in perms.packs);
+      (data.type == "mod" && data.id in perms.mods) ||
+      (data.type == "pack" && data.id in perms.packs);
     if (!approved)
       return interaction.reply({
         flags: MessageFlags.Ephemeral,
