@@ -57,6 +57,12 @@ async function expireTickets(ticket: TextChannel) {
     if (!lastMsg) return;
     if (isStaffPing(lastMsg)) return;
 
+    const lastPing = messages.filter((message) => isStaffPing(message)).first();
+    if (lastPing) {
+      const oneHr = new Duration("1h").dateFrom(lastPing.createdAt);
+      if (oneHr < new Date()) return;
+    }
+
     const ownerId = await getTicketOwner(ticket);
     if (ownerId) {
       const owner = ticket.guild.members.resolve(ownerId);
