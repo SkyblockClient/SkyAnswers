@@ -11,32 +11,33 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
+    "@eslint/js": "^9.28.0",
     "@sapphire/cli": "^1.9.3",
     "@sapphire/ts-config": "^5.0.1",
-    "@tsconfig/bun": "^1.0.7",
-    "@types/bun": "^1.2.14",
-    "eslint": "^9.27.0",
+    "@tsconfig/bun": "^1.0.8",
+    "@types/bun": "^1.2.15",
+    "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
-    "globals": "^16.1.0",
+    "globals": "^16.2.0",
     "prettier": "^3.5.3",
-    "typescript-eslint": "^8.32.1"
+    "typescript-eslint": "^8.33.1"
   },
   "dependencies": {
     "@octokit/core": "^7.0.2",
-    "@octokit/rest": "^21.1.1",
+    "@octokit/rest": "^22.0.0",
     "@sapphire/decorators": "^6.1.1",
     "@sapphire/discord.js-utilities": "^7.3.3",
     "@sapphire/fetch": "^3.0.5",
-    "@sapphire/framework": "^5.3.5",
+    "@sapphire/framework": "^5.3.6",
     "@sapphire/plugin-editable-commands": "^4.0.4",
     "@sapphire/plugin-logger": "^4.0.2",
     "@sapphire/plugin-subcommands": "^7.0.1",
     "@sapphire/stopwatch": "^1.5.4",
     "@sapphire/time-utilities": "^1.7.14",
     "@sapphire/utilities": "^3.18.2",
-    "@skyra/env-utilities": "^2.0.0",
+    "@skyra/env-utilities": "^2.0.1",
     "@standard-schema/spec": "^1.0.0",
+    "@std/assert": "npm:@jsr/std__assert",
     "@std/fmt": "npm:@jsr/std__fmt",
     "@std/text": "npm:@jsr/std__text",
     "dedent": "^1.6.0",
@@ -46,8 +47,8 @@
     "lowdb": "^7.0.1",
     "p-map": "^7.0.3",
     "p-memoize": "^7.1.1",
-    "remeda": "^2.21.8",
-    "zod": "^3.25.20"
+    "remeda": "^2.23.0",
+    "zod": "^3.25.56"
   },
   "peerDependencies": {
     "typescript": "^5.8.2"

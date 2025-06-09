@@ -24,7 +24,8 @@ export class ReadyListener extends Listener<typeof Events.ClientReady> {
   }
 }
 
-const repo = "SkyblockClient/Website";
+const owner = "SkyblockClient";
+const repo = "Website";
 const path = "docs/assets/tags.json";
 const TagName = "Supporter";
 
@@ -81,7 +82,7 @@ export async function isSupporter(userID: UserResolvable) {
 }
 
 async function updateBoosters(supporters: string[]) {
-  const oldFile = await readGHFile(repo, path);
+  const oldFile = await readGHFile(owner, repo, path);
   const tags = TagsJSON.parse(JSON.parse(oldFile.content));
   tags.perms[TagName] = supporters;
 

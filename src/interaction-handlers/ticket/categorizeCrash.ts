@@ -17,7 +17,7 @@ export class ButtonHandler extends InteractionHandler {
     if (!isTicket(channel)) return;
 
     const origContent = interaction.message.content;
-    const crashType = interaction.customId.split("|")[1];
+    const crashType = interaction.customId.split("|")[1] || "";
     const crashTypeName = {
       CP: "CrashPatch",
       launcher: "Launcher",

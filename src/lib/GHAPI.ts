@@ -1,6 +1,7 @@
 import logger from "./logger.ts";
 import { Octokit } from "@octokit/rest";
 import { envParseString } from "@skyra/env-utilities";
+import { assert } from "@std/assert";
 import pmap from "p-map";
 
 export const octokit = new Octokit({ auth: envParseString("GH_KEY", null) });
@@ -10,35 +11,38 @@ export const committer = {
 };
 
 type GHContent = {
-  path: string;
+  owner: string;
   repo: string;
+  path: string;
   content: string;
   sha: string;
 };
 
 export async function readGHFile(
+  owner: string,
   repo: string,
   path: string,
 ): Promise<GHContent> {
   const { data: rawData } = await octokit.rest.repos.getContent({
-    owner: repo.split("/")[0],
-    repo: repo.split("/")[1],
+    owner,
+    repo,
     path,
   });
 
   const data = Array.isArray(rawData) ? rawData[0] : rawData;
+  assert(data);
+  assert(data.type == "file", "not a file");
+  assert(data.content, "no content");
 
-  if (data.type != "file") throw new Error("not a file");
-  if (!data.content) throw new Error("no content");
-
-  return { path, repo, content: atob(data.content), sha: data.sha };
+  return { owner, repo, path, content: atob(data.content), sha: data.sha };
 }
 
 export async function readGHContent(
+  owner: string,
   repo: string,
   path: string,
 ): Promise<string> {
-  const { content } = await readGHFile(repo, path);
+  const { content } = await readGHFile(owner, repo, path);
   return content;
 }
 
@@ -50,8 +54,8 @@ export async function writeGHFile(
   if (oldFile.content == content) return;
 
   await octokit.rest.repos.createOrUpdateFileContents({
-    owner: oldFile.repo.split("/")[0],
-    repo: oldFile.repo.split("/")[1],
+    owner: oldFile.owner,
+    repo: oldFile.repo,
     path: oldFile.path,
 
     committer,

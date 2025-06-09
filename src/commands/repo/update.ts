@@ -12,7 +12,7 @@ import {
 } from "discord.js";
 import JSZip from "jszip";
 import { Mods, getJSON, getMods, getPacks } from "../../lib/data.js";
-import { checkMember } from "../../lib/update.js";
+import { checkMember, hasPermission } from "../../lib/update.js";
 import { SkyClient, Emojis } from "../../const.js";
 import { z } from "zod/v4-mini";
 import { basename } from "node:path/posix";
@@ -38,7 +38,7 @@ const URL = z.string().check(z.url());
   ],
 })
 export class UserCommand extends Subcommand {
-  registerApplicationCommands(registry: Subcommand.Registry) {
+  public override registerApplicationCommands(registry: Subcommand.Registry) {
     registry.registerChatInputCommand((builder) =>
       builder
         .setName(this.name)
@@ -111,7 +111,7 @@ export class UserCommand extends Subcommand {
     const member = int.guild?.members.resolve(int.user);
     if (!member) return;
     const perms = await checkMember(member);
-    if (!perms.all && Object.keys(perms.mods).length == 0)
+    if (!perms.all)
       return int.reply({
         flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any mods`,
@@ -148,7 +148,7 @@ export class UserCommand extends Subcommand {
         try {
           const modInfoStr = await modInfoFile.async("text");
           const modInfo = ModInfo.parse(JSON.parse(modInfoStr));
-          modId = modInfo[0].modid;
+          modId = modInfo[0]?.modid;
         } catch (e) {
           logger.error("Failed to read mcmod.info", e);
         }
@@ -159,7 +159,7 @@ export class UserCommand extends Subcommand {
     modId = modId || int.options.getString("forge_id");
 
     if (!modId) return int.editReply("🫨 Failed to find modid in mcmod.info!");
-    if (!perms.all && (perms.mods ? perms.mods[modId] != "update" : false))
+    if (!(await hasPermission(member, "update", "mod", modId)))
       return int.editReply(
         `🫨 you aren't allowed to update \`${escapeMarkdown(modId)}\``,
       );
@@ -218,7 +218,7 @@ export class UserCommand extends Subcommand {
     const member = int.guild?.members.resolve(int.user);
     if (!member) return;
     const perms = await checkMember(member);
-    if (!perms.all && Object.keys(perms.packs).length == 0)
+    if (!perms.all)
       return int.reply({
         flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any packs`,
@@ -258,7 +258,7 @@ export class UserCommand extends Subcommand {
 
     const packId = int.options.getString("pack", true);
 
-    if (!perms.all && (perms.packs ? perms.packs[packId] != "update" : false))
+    if (!(await hasPermission(member, "update", "pack", packId)))
       return int.editReply(`🫨 you can't update that pack`);
 
     const data: PackUpdate = {

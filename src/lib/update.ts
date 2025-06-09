@@ -36,3 +36,20 @@ export async function checkMember(member: GuildMember): Promise<
     packs: data?.packs || {},
   };
 }
+
+export async function hasPermission(
+  member: GuildMember,
+  requires: Permission,
+  type: "mod" | "pack",
+  id: string,
+): Promise<boolean> {
+  const perms = await checkMember(member);
+  if (perms.all) return true;
+
+  const perms2 = perms[`${type}s`];
+  const perm = perms2[id];
+
+  if (perm == "update") return true;
+  if (perm == "approve") return requires == "approve";
+  return false;
+}

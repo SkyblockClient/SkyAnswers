@@ -64,7 +64,7 @@ export class UserCommand extends Command {
     if (!item) {
       const best = probableMatches(items, query)[0];
       let reply = "Pack not found.";
-      if (getDistance(best, query) <= 3)
+      if (best && getDistance(best, query) <= 3)
         reply += `\nDid you mean ${best.display}?`;
       return interaction.reply({
         flags: MessageFlags.Ephemeral,

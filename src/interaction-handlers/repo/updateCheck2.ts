@@ -22,8 +22,7 @@ import {
   type MessageEditOptions,
 } from "discord.js";
 import { format } from "prettier";
-import { checkMember } from "../../lib/update.js";
-import { Emojis } from "../../const.js";
+import { hasPermission } from "../../lib/update.js";
 import { notSkyClient } from "../../preconditions/notPublic.js";
 import {
   Mod,
@@ -45,6 +44,7 @@ import {
   type FileToCommit,
 } from "../../lib/GHAPI.ts";
 import dedent from "dedent";
+import { assert } from "@std/assert";
 
 const owner = "SkyBlockClient";
 const repo = "SkyblockClient-REPO";
@@ -55,52 +55,45 @@ const branch = "main";
 })
 export class ButtonHandler extends InteractionHandler {
   public async run(interaction: ButtonInteraction) {
-    if (!envParseString("GH_KEY", null))
-      return interaction.reply(`Missing GitHub API Key! ${Emojis.BlameWyvest}`);
+    assert(envParseString("GH_KEY", null), `Missing GitHub API Key`);
+
     if (notSkyClient(interaction.guildId)) return;
-
-    const data = PendingUpdatesDB.data[interaction.message.id];
-    if (!data)
-      return interaction.reply({
-        flags: MessageFlags.Ephemeral,
-        content: "Update not found. This shouldn't happen!",
-      });
-    if (data.approvers.map(({ id }) => id).includes(interaction.user.id))
-      return interaction.reply({
-        flags: MessageFlags.Ephemeral,
-        content: "You already approved this update",
-      });
-
+    const { channel, message } = interaction;
     const member = interaction.guild?.members.resolve(interaction.user);
-    if (!member) return;
-    const perms = await checkMember(member);
-    const approved =
-      perms.all ||
-      (data.type == "mod" && data.id in perms.mods) ||
-      (data.type == "pack" && data.id in perms.packs);
-    if (!approved)
+    const data = PendingUpdatesDB.data[message.id];
+    assert(member && data);
+
+    if (!(await hasPermission(member, "approve", data.type, data.id)))
       return interaction.reply({
         flags: MessageFlags.Ephemeral,
         content: "You can't approve this update",
       });
 
+    if (data.approvers.some(({ id }) => id == interaction.user.id))
+      return interaction.reply({
+        flags: MessageFlags.Ephemeral,
+        content: "You already approved this update",
+      });
+
     const approver = { name: member.user.tag, id: member.user.id };
-    await PendingUpdatesDB.update((db) => {
-      db[interaction.message.id].approvers.push(approver);
+    await PendingUpdatesDB.update((data) => {
+      const update = data[message.id];
+      assert(update);
+      update.approvers.push(approver);
     });
 
     await interaction.update(generateMessage(interaction, data));
     if (!isUpdateApproved(data)) return;
 
     if (data.pingMsg) {
-      const msg = await interaction.channel?.messages.fetch(data.pingMsg);
+      const msg = await channel?.messages.fetch(data.pingMsg);
       if (msg) await msg.delete();
     }
 
     const changes: FileToCommit[] = [];
 
     if (data.url.startsWith("https://cdn.discordapp.com/")) {
-      await interaction.message.edit(
+      await message.edit(
         generateMessage(
           interaction,
           data,
@@ -118,7 +111,7 @@ export class ButtonHandler extends InteractionHandler {
         fileData = await fileResp.arrayBuffer();
       } catch (e) {
         logger.error("Failed to download file", e);
-        await interaction.message.edit(
+        await message.edit(
           errorMessage(
             data,
             new TextDisplayBuilder().setContent("❌ Failed to download file"),
@@ -133,7 +126,7 @@ export class ButtonHandler extends InteractionHandler {
       data.url = `https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/${path}`;
     }
 
-    await interaction.message.edit(
+    await message.edit(
       generateMessage(
         interaction,
         data,
@@ -161,11 +154,11 @@ export class ButtonHandler extends InteractionHandler {
       );
 
       await PendingUpdatesDB.update((data) => {
-        delete data[interaction.message.id];
+        delete data[message.id];
       });
       invalidateTrackedData();
 
-      return await interaction.message.edit(
+      return await message.edit(
         generateMessage(
           interaction,
           data,
@@ -174,7 +167,7 @@ export class ButtonHandler extends InteractionHandler {
       );
     } catch (e) {
       logger.error("Failed to update", data, e);
-      return await interaction.message.edit(
+      return await message.edit(
         errorMessage(
           data,
           new TextDisplayBuilder().setContent("❌ Failed to push it out"),
@@ -191,7 +184,7 @@ export class ButtonHandler extends InteractionHandler {
 
 async function updateMod(data: ModUpdate, changes: FileToCommit[]) {
   let mods = JSON.parse(
-    await readGHContent(`${owner}/${repo}`, "files/mods.json"),
+    await readGHContent(owner, repo, "files/mods.json"),
   ) as Mod[];
   if (!isModList(mods)) throw new Error("failed to parse mods.json");
 
@@ -205,13 +198,13 @@ async function updateMod(data: ModUpdate, changes: FileToCommit[]) {
     retName = retName || mod.display;
     return mod;
   });
-  if (!retName) throw new Error("mod not found");
+  assert(retName, "mod not found");
 
   if (data.beta) {
     const betaMods = JSON.parse(
-      await readGHContent(`${owner}/${repo}`, "files/mods_beta.json"),
+      await readGHContent(owner, repo, "files/mods_beta.json"),
     ) as Mod[];
-    if (!isModList(betaMods)) throw new Error("failed to parse mods_beta.json");
+    assert(isModList(betaMods), "failed to parse mods_beta.json");
 
     const updated = mods.filter((mod) => mod.forge_id == data.id);
     for (const mod of updated) {
@@ -241,9 +234,9 @@ async function updateMod(data: ModUpdate, changes: FileToCommit[]) {
 
 async function updatePack(data: PackUpdate, changes: FileToCommit[]) {
   let packs = JSON.parse(
-    await readGHContent(`${owner}/${repo}`, "files/packs.json"),
+    await readGHContent(owner, repo, "files/packs.json"),
   ) as Pack[];
-  if (!isPackList(packs)) throw new Error("failed to parse packs.json");
+  assert(isPackList(packs), "failed to parse packs.json");
 
   let retName = "";
   packs = packs.map((pack) => {
@@ -255,7 +248,7 @@ async function updatePack(data: PackUpdate, changes: FileToCommit[]) {
     retName = retName || pack.display;
     return pack;
   });
-  if (!retName) throw new Error("pack not found");
+  assert(retName, "pack not found");
 
   changes.push({
     path: "files/packs.json",
@@ -318,7 +311,7 @@ export function generateApproversComponent(data: PartialUpdate) {
       new TextDisplayBuilder().setContent(
         approvers.length > 0
           ? unorderedList(approvers.map(({ id }) => userMention(id)))
-          : "None yet",
+          : "*(None yet)*",
       ),
     );
   return container;
@@ -356,10 +349,9 @@ export function generateMessage(
     components.push(
       new SectionBuilder()
         .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(dedent`
-            Double-check that this mod doesn't have a rat in it before approving!
-            **(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)**
-          `),
+          new TextDisplayBuilder().setContent(
+            "Double-check that this mod doesn't have a rat in it before approving!",
+          ),
         )
         .setButtonAccessory(
           new ButtonBuilder()
@@ -368,6 +360,9 @@ export function generateMessage(
             .setLabel("RatRater")
             .setURL(ratURL),
         ),
+      new TextDisplayBuilder().setContent(
+        "**(rat-to-peer may take a bit to boot up but it'll load within 15 seconds)**",
+      ),
     );
     if (!approvedOwn)
       components.push(

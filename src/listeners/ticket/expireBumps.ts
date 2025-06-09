@@ -3,6 +3,7 @@ import { Events, Listener } from "@sapphire/framework";
 import { Message, TextChannel } from "discord.js";
 import { isBumpMessage, isStaffPing, isTicket } from "../../lib/ticket.js";
 import { SupportTeams, Users } from "../../const.js";
+import { assert } from "@std/assert";
 
 /** Provides info and recommendations for crashes */
 @ApplyOptions<Listener.Options>({
@@ -31,6 +32,7 @@ export async function expireBumps(ticket: TextChannel) {
     for (const bump of bumps.values()) {
       if (lastMsg.id == bump.id) continue;
 
+      assert(bump.embeds[0]);
       await bump.edit({
         embeds: [bump.embeds[0]],
       });

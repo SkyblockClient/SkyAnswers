@@ -5,6 +5,7 @@ import { send } from "@sapphire/plugin-editable-commands";
 import { codeBlock, isThenable } from "@sapphire/utilities";
 import type { Message } from "discord.js";
 import { inspect } from "util";
+import logger from "../../lib/logger.ts";
 
 @ApplyOptions<Command.Options>({
   aliases: ["ev"],
@@ -24,22 +25,22 @@ export class UserCommand extends Command {
       showHidden: args.getFlags("hidden", "showHidden"),
     });
 
+    if (args.getFlags("silent", "s")) return;
+
     const output = success
       ? codeBlock("js", result)
       : `**ERROR**: ${codeBlock("bash", result)}`;
-    if (args.getFlags("silent", "s")) return null;
 
-    const typeFooter =
-      type == "unknown" ? "" : `\n**Type**: ${codeBlock("typescript", type)}`;
+    const typeFooter = `**Type**: ${codeBlock("typescript", type)}`;
 
     if (output.length > 2000) {
       return send(message, {
         content: `Output was too long... sent the result as a file.\n${typeFooter}`,
-        files: [{ attachment: Buffer.from(output), name: "output.js" }],
+        files: [{ attachment: Buffer.from(result), name: "output.js" }],
       });
     }
 
-    return send(message, output + typeFooter);
+    return send(message, `${output}\n${typeFooter}`);
   }
 
   private async eval(
@@ -60,7 +61,7 @@ export class UserCommand extends Command {
       ret = eval(code);
     } catch (error) {
       if (error && error instanceof Error && error.stack) {
-        this.container.client.logger.error(error);
+        logger.error(error);
       }
       ret = error;
       success = false;
@@ -70,13 +71,10 @@ export class UserCommand extends Command {
     // eslint-disable-next-line @typescript-eslint/await-thenable
     if (isThenable(ret)) ret = await ret;
 
-    const result =
-      typeof ret == "string"
-        ? ret
-        : inspect(ret, {
-            depth: flags.depth,
-            showHidden: flags.showHidden,
-          });
+    const result = inspect(ret, {
+      depth: flags.depth,
+      showHidden: flags.showHidden,
+    });
     return { result, success, type };
   }
 }

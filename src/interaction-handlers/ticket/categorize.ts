@@ -16,7 +16,7 @@ export class ButtonHandler extends InteractionHandler {
     const { channel } = interaction;
     if (!isTicket(channel)) return;
 
-    const ticketType = interaction.customId.split("|")[1];
+    const ticketType = interaction.customId.split("|")[1] || "";
     const ticketTypeName = {
       modsUpdating: "Mods aren't updating",
       crash: "Crashing",
