@@ -202,12 +202,12 @@ export async function getDownloadableMessage(
 
   const mods = await getMods();
   const downloads: string[] = [
-    hyperlink(downloadable.file, encodeURI(downloadable.download)),
+    hyperlink(downloadable.file, downloadable.download),
   ];
   if (isMod(downloadable) && downloadable.packages) {
     for (const pkgName of downloadable.packages) {
       const mod = mods.find((mod) => mod.id == pkgName);
-      if (mod) downloads.push(hyperlink(mod.file, encodeURI(mod.download)));
+      if (mod) downloads.push(hyperlink(mod.file, mod.download));
       else downloads.push(pkgName);
     }
   }

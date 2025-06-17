@@ -39,7 +39,7 @@ export class UserCommand extends Command {
       unorderedList(
         items
           .filter((item) => categorizeItem(item) == type)
-          .map((item) => hyperlink(item.file, encodeURI(item.download))),
+          .map((item) => hyperlink(item.file, item.download)),
       );
 
     const embeds: (APIEmbed & { description: string })[] = [];
