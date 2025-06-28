@@ -22,8 +22,8 @@ const header = dedent`
 `;
 
 const line1 = dedent`
-  **To prove you are a developer who wants to contribute to our projects, \
-  you have to answer the following:**
+  ## To prove you are a developer who wants to contribute to our projects, \
+  you have to answer the following:
 `;
 
 const question = "How many repositories are currently in the Polyfrost GitHub?";
