@@ -36,8 +36,8 @@ export class ModalHandler extends InteractionHandler {
 
     await member.roles.add(Polyfrost.roles.DevAccess);
     return await interaction.reply({
+      flags: MessageFlags.Ephemeral,
       content: "You should now have access to the Development channels.",
-      ephemeral: true,
     });
   }
 
