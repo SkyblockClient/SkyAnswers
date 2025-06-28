@@ -8,7 +8,7 @@ import { ChannelType, MessageFlags, userMention } from "discord.js";
   subcommands: [{ name: "ticket", chatInputRun: "ticketDebug" }],
 })
 export class UserCommand extends Subcommand {
-  registerApplicationCommands(registry: Subcommand.Registry) {
+  override registerApplicationCommands(registry: Subcommand.Registry) {
     registry.registerChatInputCommand((builder) =>
       builder
         .setName(this.name)
