@@ -4,7 +4,7 @@ import dedent from "dedent";
 import { MessageFlags, unorderedList } from "discord.js";
 
 @ApplyOptions<Command.Options>({
-  description: "See what servers SkyAnswers got into.",
+  description: "See what servers the bot got into",
 })
 export class UserCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {

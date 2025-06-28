@@ -13,7 +13,7 @@ import {
 import JSZip from "jszip";
 import { Mods, getJSON, getMods, getPacks } from "../../lib/data.js";
 import { checkMember, hasPermission } from "../../lib/update.js";
-import { SkyClient, Emojis } from "../../const.js";
+import { SkyClient, Emojis, repoURL } from "../../const.js";
 import { z } from "zod/v4-mini";
 import { basename } from "node:path/posix";
 import {
@@ -129,7 +129,7 @@ export class UserCommand extends Subcommand {
     await int.deferReply();
 
     const modResp = await fetch(url, {
-      headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
+      headers: { "User-Agent": repoURL },
     });
     if (!modResp.ok) {
       logger.error(
@@ -236,7 +236,7 @@ export class UserCommand extends Subcommand {
     await int.deferReply();
 
     const modResp = await fetch(url, {
-      headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
+      headers: { "User-Agent": repoURL },
     });
     if (!modResp.ok) {
       logger.error(

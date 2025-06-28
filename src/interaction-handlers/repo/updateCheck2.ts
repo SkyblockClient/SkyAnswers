@@ -45,6 +45,7 @@ import {
 } from "../../lib/GHAPI.ts";
 import dedent from "dedent";
 import { assert } from "@std/assert";
+import { repoURL } from "../../const.ts";
 
 const owner = "SkyBlockClient";
 const repo = "SkyblockClient-REPO";
@@ -104,7 +105,7 @@ export class ButtonHandler extends InteractionHandler {
       let fileData: ArrayBuffer;
       try {
         const fileResp = await fetch(data.url, {
-          headers: { "User-Agent": "github.com/SkyblockClient/SkyAnswers" },
+          headers: { "User-Agent": repoURL },
         });
         if (!fileResp.ok)
           throw new Error(`${fileResp.statusText} while fetching ${data.url}`);
