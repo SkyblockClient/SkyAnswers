@@ -42,9 +42,7 @@ export class UserCommand extends Command {
       flags: MessageFlags.IsComponentsV2,
       components: [
         new MediaGalleryBuilder().addItems(
-          new MediaGalleryItemBuilder()
-            .setURL(`${assetsBase}/header.png`)
-            .setDescription("SkyClient Logo"),
+          new MediaGalleryItemBuilder().setURL(`${assetsBase}/header.png`),
         ),
         new ContainerBuilder()
           .setAccentColor(0x00a4ef)
