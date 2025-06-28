@@ -50,6 +50,7 @@ export const Polyfrost = {
     NoGiveaways: "1182506496156766250",
     SupportTeam: "997376364460114001",
     Testers: "1262485117549412487",
+    DevAccess: "1388282908443148378",
   },
 };
 

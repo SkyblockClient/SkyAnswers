@@ -1,8 +1,11 @@
 import logger from "./logger.ts";
 import { Octokit } from "@octokit/rest";
+import { Time } from "@sapphire/time-utilities";
 import { envParseString } from "@skyra/env-utilities";
 import { assert } from "@std/assert";
+import ExpiryMap from "expiry-map";
 import pmap from "p-map";
+import pMemoize from "p-memoize";
 
 export const octokit = new Octokit({ auth: envParseString("GH_KEY", null) });
 export const committer = {
@@ -233,3 +236,20 @@ export async function commitFiles(
   logger.info("commitSha", commitSha);
   await updateReference(owner, repo, branch, commitSha);
 }
+
+async function _getRepoCount() {
+  let count = 0;
+  for await (const { data: page } of octokit.paginate.iterator(
+    octokit.rest.repos.listForOrg,
+    {
+      org: "Polyfrost",
+      type: "public",
+      per_page: 100,
+    },
+  ))
+    count += page.length;
+  return count;
+}
+export const getRepoCount = pMemoize(_getRepoCount, {
+  cache: new ExpiryMap(Time.Day),
+});

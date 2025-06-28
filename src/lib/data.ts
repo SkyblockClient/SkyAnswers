@@ -14,6 +14,7 @@ import {
 import { MessageBuilder } from "@sapphire/discord.js-utilities";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import logger from "./logger.ts";
+import { getRepoCount } from "./GHAPI.ts";
 
 async function _getTrackedJSON(url: string): Promise<unknown> {
   logger.info("refetching", url);
@@ -59,7 +60,10 @@ export async function getJSON(
   return await getTrackedData(`${repoFilesURL}/${filename}.json`, schema);
 }
 
-export const invalidateTrackedData = () => pMemoizeClear(getTrackedJSON);
+export function invalidateTrackedData() {
+  pMemoizeClear(getTrackedJSON);
+  pMemoizeClear(getRepoCount);
+}
 
 export const DataType = z.enum(["mods", "packs"]);
 export type DataType = z.infer<typeof DataType>;
