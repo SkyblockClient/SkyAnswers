@@ -14,7 +14,6 @@ import {
   TextInputStyle,
 } from "discord.js";
 import { Polyfrost } from "../../const.ts";
-import { question } from "../../commands/admin/dev-entry-embed.ts";
 import { isGuildMember } from "@sapphire/discord.js-utilities";
 import { MessageFlags } from "discord.js";
 
@@ -41,7 +40,7 @@ export class ButtonHandler extends InteractionHandler {
           new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
             new TextInputBuilder()
               .setCustomId("repo-count")
-              .setLabel(question)
+              .setLabel("How many repositories?")
               .setStyle(TextInputStyle.Short),
           ),
         ),

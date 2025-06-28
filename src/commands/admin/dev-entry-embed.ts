@@ -23,8 +23,7 @@ const header = dedent`
   to contribute to our projects, you have to answer the following:
 `;
 
-export const question =
-  "How many repositories are currently in the Polyfrost GitHub?";
+const question = "How many repositories are currently in the Polyfrost GitHub?";
 
 @ApplyOptions<Command.Options>({
   description: 'Generate "Dev Entry" embed',
