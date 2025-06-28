@@ -29,7 +29,7 @@ export class ModalHandler extends InteractionHandler {
     const answer = await getRepoCount();
 
     if (userAnswer != answer)
-      return await interaction.followUp({
+      return await interaction.reply({
         flags: MessageFlags.Ephemeral,
         content: "Your answer was incorrect. Try again.",
       });
