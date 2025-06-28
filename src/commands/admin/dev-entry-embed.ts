@@ -57,21 +57,20 @@ export class UserCommand extends Command {
       flags: MessageFlags.IsComponentsV2,
       components: [
         new TextDisplayBuilder().setContent(header),
-        new ContainerBuilder().addSectionComponents(
-          new SectionBuilder().addTextDisplayComponents(
-            new TextDisplayBuilder().setContent(line1),
+        new ContainerBuilder()
+          .addTextDisplayComponents(new TextDisplayBuilder().setContent(line1))
+          .addSectionComponents(
+            new SectionBuilder()
+              .addTextDisplayComponents(
+                new TextDisplayBuilder().setContent(question),
+              )
+              .setButtonAccessory(
+                new ButtonBuilder()
+                  .setStyle(ButtonStyle.Primary)
+                  .setLabel("Answer")
+                  .setCustomId("show-dev-entry"),
+              ),
           ),
-          new SectionBuilder()
-            .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(question),
-            )
-            .setButtonAccessory(
-              new ButtonBuilder()
-                .setStyle(ButtonStyle.Primary)
-                .setLabel("Answer")
-                .setCustomId("show-dev-entry"),
-            ),
-        ),
       ],
     });
     return interaction.reply({
