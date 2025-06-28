@@ -1,7 +1,6 @@
 import { ApplyOptions } from "@sapphire/decorators";
 import { Command } from "@sapphire/framework";
 import {
-  bold,
   ButtonBuilder,
   ButtonStyle,
   ContainerBuilder,
@@ -18,9 +17,13 @@ const header = dedent`
   It lets the community help us build the tools we all have grown to love, \
   so we welcome all to contribute their ideas.
 
-  These channels are here to make all communication regarding development at \
-  Polyfrost open for everyone to see. To prove you are a developer who wants \
-  to contribute to our projects, you have to answer the following:
+  These channels are here to make all communication \
+  regarding development at Polyfrost open for everyone to see.
+`;
+
+const line1 = dedent`
+  **To prove you are a developer who wants to contribute to our projects, \
+  you have to answer the following:**
 `;
 
 const question = "How many repositories are currently in the Polyfrost GitHub?";
@@ -55,9 +58,12 @@ export class UserCommand extends Command {
       components: [
         new TextDisplayBuilder().setContent(header),
         new ContainerBuilder().addSectionComponents(
+          new SectionBuilder().addTextDisplayComponents(
+            new TextDisplayBuilder().setContent(line1),
+          ),
           new SectionBuilder()
             .addTextDisplayComponents(
-              new TextDisplayBuilder().setContent(bold(question)),
+              new TextDisplayBuilder().setContent(question),
             )
             .setButtonAccessory(
               new ButtonBuilder()
