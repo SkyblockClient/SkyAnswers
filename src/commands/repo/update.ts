@@ -111,11 +111,12 @@ export class UserCommand extends Subcommand {
     const member = int.guild?.members.resolve(int.user);
     if (!member) return;
     const perms = await checkMember(member);
-    if (!perms.all)
+    if (!perms.all && !Object.keys(perms.mods).length) {
       return int.reply({
         flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any mods`,
       });
+    }
 
     if (channel.id != SkyClient.channels.ModUpdating)
       return int.reply({
@@ -218,7 +219,7 @@ export class UserCommand extends Subcommand {
     const member = int.guild?.members.resolve(int.user);
     if (!member) return;
     const perms = await checkMember(member);
-    if (!perms.all)
+    if (!perms.all && !Object.keys(perms.packs).length)
       return int.reply({
         flags: MessageFlags.Ephemeral,
         content: `${Emojis.YouWhat} you can't update any packs`,
