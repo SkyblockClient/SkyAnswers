@@ -1,16 +1,20 @@
+import { envParseString } from "@skyra/env-utilities";
 import { type Snowflake } from "discord.js";
 import * as fs from "fs/promises";
 import { JSONFilePreset } from "lowdb/node";
+import { join } from "path";
+
+const baseDir = envParseString("DB_DIR", "db");
 
 try {
-  await fs.mkdir("db");
+  await fs.mkdir(baseDir);
 } catch {
   // Directory already exists
 }
 
 type BoostersDB = Record<Snowflake, string>;
 export const BoostersDB = await JSONFilePreset<BoostersDB>(
-  "db/boosters.json",
+  join(baseDir, "boosters.json"),
   {},
 );
 
@@ -36,6 +40,6 @@ export type PackUpdate = PartialUpdate & { type: "pack" };
 export type PendingUpdate = ModUpdate | PackUpdate;
 type PendingUpdatesDB = Record<string, PendingUpdate>;
 export const PendingUpdatesDB = await JSONFilePreset<PendingUpdatesDB>(
-  "db/pendingUpdates.json",
+  join(baseDir, "pendingUpdates.json"),
   {},
 );
