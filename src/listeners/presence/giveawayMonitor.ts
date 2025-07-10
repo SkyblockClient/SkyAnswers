@@ -66,6 +66,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
 
     const words = content.match(/[\w'`´]+/g);
     const isShort = !words || words.length < 3;
+    if (!content) return;
     if (isShort) streak.push(content);
     else streak.length = 0;
 
@@ -73,6 +74,7 @@ export class MessageListener extends Listener<typeof Events.MessageCreate> {
 
     try {
       await member.roles.add(noGiveawaysRole);
+      delete streaks[author.id];
 
       const embed = new EmbedBuilder()
         .setColor("Red")
